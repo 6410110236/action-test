@@ -21,3 +21,8 @@ git push origin <branch>
 
 ===============================
 
+Check version tree
+
+git log --oneline --graph --all
+
+===============================
