@@ -1,12 +1,3 @@
-
-git checkout feature/<name>
-
-before creating a new feature
-
-git merge develop <feature/<name>>
-
-==============================
-
 git pull -> git commit -> git push
 
 git fetch origin
