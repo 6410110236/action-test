@@ -1,0 +1,77 @@
+{
+  "kind": "collectionType",
+  "collectionName": "garages",
+  "info": {
+    "singularName": "garage",
+    "pluralName": "garages",
+    "displayName": "Garage",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "SellersName": {
+      "type": "string",
+      "required": true
+    },
+    "Price": {
+      "type": "biginteger"
+    },
+    "VehicleRegistrationTypes": {
+      "type": "text"
+    },
+    "SecondaryKey": {
+      "type": "integer"
+    },
+    "Warranty": {
+      "type": "text"
+    },
+    "Color": {
+      "type": "text"
+    },
+    "RegisterDate": {
+      "type": "date"
+    },
+    "Distance": {
+      "type": "decimal"
+    },
+    "Picture": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "model": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::model.model",
+      "inversedBy": "garages"
+    },
+    "VehicleTaxExpirationDate": {
+      "type": "date"
+    },
+    "Manual": {
+      "type": "boolean"
+    },
+    "StatusBuying": {
+      "type": "boolean"
+    },
+    "CarID": {
+      "type": "uid",
+      "required": true
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "mappedBy": "garage"
+    }
+  }
+}

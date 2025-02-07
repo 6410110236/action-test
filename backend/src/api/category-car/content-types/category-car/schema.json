@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "category_cars",
+  "info": {
+    "singularName": "category-car",
+    "pluralName": "category-cars",
+    "displayName": "CategoryCar"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Category": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "models": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::model.model",
+      "mappedBy": "category_car"
+    }
+  }
+}
