@@ -1,33 +1,37 @@
-import React from 'react';
+import { React, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
-const user = {
-    name: 'donald trump',
-    email: 'trump@example.com',
-    imageUrl: 'https://static01.nyt.com/images/2017/11/02/fashion/01OTR/02OTR-videoSixteenByNineJumbo1600.jpg',
-};
-
-const navigation = [
-    { name: 'Home', href: '/', current: true },
-    { name: 'Buy', href: '/buy', current: false },
-    { name: 'About', href: '/about', current: false },
-    { name: 'Users', href: '/user', current: false },
-];
-
-const userNavigation = [
-    { name: 'Your Profile', href: '#' },
-    { name: 'Settings', href: '#' },
-    { name: 'Sign out', href: '#' },
-];
-
-function classNames(...classes) {
-    return classes.filter(Boolean).join(' ');
-}
-
-const Header = ({ isLoggedIn }) => {
+const Header = ({ isLoggedIn, setIsLoggedIn }) => {
     const location = useLocation();
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+    };
+
+    const user = {
+        name: 'donald trump',
+        email: 'trump@example.com',
+        imageUrl: 'https://static01.nyt.com/images/2017/11/02/fashion/01OTR/02OTR-videoSixteenByNineJumbo1600.jpg',
+    };
+
+    const navigation = [
+        { name: 'Home', href: '/', current: true },
+        { name: 'Buy', href: '/buy', current: false },
+        { name: 'About', href: '/about', current: false },
+        { name: 'Users', href: '/user', current: false },
+    ];
+
+    const userNavigation = [
+        { name: 'Your Profile', href: '#' },
+        { name: 'Settings', href: '#' },
+        { name: 'Sign out', href: '#', onClick: handleLogout },
+    ];
+
+    function classNames(...classes) {
+        return classes.filter(Boolean).join(' ');
+    }
 
     return (
         <Disclosure as="nav" className="bg-gray-800">
@@ -74,18 +78,18 @@ const Header = ({ isLoggedIn }) => {
                             {/* Profile dropdown */}
                             <Menu as="div" className="relative ml-3">
                                 <div>
-                                    <MenuButton 
+                                    <MenuButton
                                         className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none"
                                         onClick={(e) => e.currentTarget.blur()}
-                                        >
+                                    >
                                         <span className="sr-only">Open user menu</span>
-                                        <img 
-                                        className="h-8 w-8 rounded-full" src={user.imageUrl} alt=""s 
+                                        <img
+                                            className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" s
                                         />
                                     </MenuButton>
                                 </div>
-                                <MenuItems 
-                                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                <MenuItems
+                                    className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                                 >
                                     {userNavigation.map((item) => (
                                         <MenuItem key={item.name}>
@@ -93,6 +97,7 @@ const Header = ({ isLoggedIn }) => {
                                                 <a
                                                     href={item.href}
                                                     className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                                                    onClick={item.onClick}
                                                 >
                                                     {item.name}
                                                 </a>
@@ -168,6 +173,7 @@ const Header = ({ isLoggedIn }) => {
                                 as="a"
                                 href={item.href}
                                 className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                                onClick={item.onClick}
                             >
                                 {item.name}
                             </DisclosureButton>

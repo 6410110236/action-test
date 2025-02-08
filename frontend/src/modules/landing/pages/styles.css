@@ -1,0 +1,40 @@
+.banner img {
+    width: 100%;
+    height: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.sort,
+.filters {
+    display: flex;
+    align-items: center;
+}
+
+.filter {
+    margin-left: 20px;
+}
+
+.car-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.car-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.car-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
