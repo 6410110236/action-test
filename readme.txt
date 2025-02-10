@@ -1,3 +1,10 @@
+
+git tutorial by jackyzaza
+
+https://medium.com/@soravit.sukkarn/how-to-collaborate-effectively-in-github-organization-3a607105d339
+
+==============================
+
 git pull -> git commit -> git push
 
 git fetch origin
