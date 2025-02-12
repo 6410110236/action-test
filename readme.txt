@@ -1,9 +1,7 @@
 
-git checkout feature/<name>
+git tutorial by jackyzaza
 
-before creating a new feature
-
-git merge develop <feature/<name>>
+https://medium.com/@soravit.sukkarn/how-to-collaborate-effectively-in-github-organization-3a607105d339
 
 ==============================
 
@@ -24,5 +22,4 @@ git push origin <branch>
 Check version tree
 
 git log --oneline --graph --all
-
 ===============================
