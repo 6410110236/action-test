@@ -1,4 +1,5 @@
 import React from 'react';
+import AddCarForm from './AddCarForm';
 
 function Users() {
     return (
@@ -39,9 +40,7 @@ function Users() {
   
               {/* Repeat the above cart item div for each item */}
               
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md">
-                ADD
-              </button>
+              <AddCarForm />
             </div>
   
             {/* Profile Card */}
