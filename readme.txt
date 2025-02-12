@@ -15,7 +15,7 @@ git commit -am "commit message"
 
 commit message ideas: https://www.conventionalcommits.org/en/v1.0.0/
 
-git push origin <branch>
+git push origin
 
 ===============================
 
