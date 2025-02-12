@@ -10,7 +10,7 @@ function App() {
     <Router>
       <div className="App">
         <Header isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
-        <AppRoutes />
+        <AppRoutes isLoggedIn={isLoggedIn} />
       </div>
     </Router>
   );
