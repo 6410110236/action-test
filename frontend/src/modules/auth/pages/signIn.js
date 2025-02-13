@@ -1,14 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserIcon, LockClosedIcon } from "@heroicons/react/solid";
+import { AuthContext } from "../../../context/Auth.context"; // Import AuthContext
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false); // State for "Remember Me" checkbox
+  const [error, setError] = useState(null); // State to handle login errors
+  const { login } = useContext(AuthContext); // Get the login function from AuthContext
+  const navigate = useNavigate(); // Get the navigate function from react-router-dom
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Username:", username);
-    console.log("Password:", password);
+    try {
+      await login(username, password, rememberMe); // Call the login function with "Remember Me" option
+      console.log("Login successful");
+      navigate("/"); // Redirect to the home page after successful login
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError("Invalid username or password"); // Set error message
+    }
   };
 
   return (
@@ -38,6 +50,19 @@ const SignIn = () => {
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
+          <div className="mb-4 flex items-center">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="mr-2"
+            />
+            <label htmlFor="rememberMe" className="text-sm text-gray-600">
+              Remember Me
+            </label>
+          </div>
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>} {/* Display error message */}
           <div className="text-right mb-4">
             <a href="#" className="text-blue-500 text-sm hover:underline">
               Forgot password?

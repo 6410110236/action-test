@@ -1,7 +1,7 @@
 const conf = {
-    apiUrlPrefix: process.env.REACT_APP_API_URL || 'http://localhost:1337/api',
-    loginEndpoint: '/auth/local',
-    jwtUserEndpoint: '/users/me',
+    apiUrlPrefix: process.env.REACT_APP_API_URL,
+    loginEndpoint: '/api/auth/local',
+    jwtUserEndpoint: '/api/users/me',
     jwtSessionStorageKey: 'auth.jwt'
 };
 

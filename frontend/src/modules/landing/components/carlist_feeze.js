@@ -7,68 +7,52 @@ const LatestCarsSection = () => {
     const [latestCars, setLatestCars] = useState([]);
     const { state } = useContext(AuthContext); // Get the state from AuthContext
 
-    // Mock data for testing
-    const mockCars = [
-        {
-            id: 1,
-            modelName: 'Model S',
-            brandName: 'Tesla',
-            price: '80,000฿',
-            image: 'https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg?crop=0.465xw:0.466xh;0.285xw,0.361xh&resize=1200:*', // Example image URL
-            category: 'Electric Car',
-            gearType: 'Automatic'
-        },
-        {
-            id: 2,
-            modelName: 'Mustang',
-            brandName: 'Ford',
-            price: '55,000฿',
-            image: 'https://www.vdm.ford.com/content/dam/na/ford/en_us/images/mustang/2025/jellybeans/Ford_Mustang_2025_200A_PJS_883_89W_13B_COU_64F_99H_44U_EBST_YZTAC_DEFAULT_EXT_4.png', // Example image URL
-            category: 'Sport',
-            gearType: 'Manual'
-        },
-        {
-            id: 3,
-            modelName: 'Civic',
-            brandName: 'Honda',
-            price: '25,000฿',
-            image: 'https://media.ed.edmunds-media.com/honda/civic/2025/oem/2025_honda_civic_sedan_si_fq_oem_1_1600.jpg', // Example image URL
-            category: 'Sedan',
-            gearType: 'Automatic'
-        },
-        {
-            id: 4,
-            modelName: 'Corolla',
-            brandName: 'Toyota',
-            price: '20,000฿',
-            image: 'https://hips.hearstapps.com/hmg-prod/images/2025-toyota-corolla-fx-102-6674930515eb4.jpg?crop=0.482xw:0.483xh;0.205xw,0.250xh&resize=768:*', // Example image URL
-            category: 'Sedan',
-            gearType: 'Automatic'
-        },
-        {
-            id: 5,
-            modelName: 'Model 3',
-            brandName: 'Tesla',
-            price: '35,000฿',
-            image: 'https://hips.hearstapps.com/hmg-prod/images/2019-tesla-model3-lt-airporthero-low-101-1587061146.jpg', // Example image URL
-            category: 'Electric Car',
-            gearType: 'Automatic'
-        },
-        {
-            id: 6,
-            modelName: 'Camaro',
-            brandName: 'Chevrolet',
-            price: '40,000฿',
-            image: 'https://di-uploads-pod25.dealerinspire.com/rickhendrickcitychevy/uploads/2023/11/mlp-img-perf-2024-camaro.jpg', // Example image URL
-            category: 'Sport',
-            gearType: 'Manual'
+    const fetchCars = async () => {
+        try {
+            console.log('Fetching cars...');
+            const [modelsResponse, categoriesResponse, garagesResponse, brandsResponse] = await axios.all([
+                axios.get(`http://localhost:1337/api/models`),
+                axios.get(`http://localhost:1337/api/category-cars`),
+                axios.get(`http://localhost:1337/api/garages`),
+                axios.get(`http://localhost:1337/api/brands`)
+            ]);
+
+            console.log('Models response:', modelsResponse.data);
+            console.log('Categories response:', categoriesResponse.data);
+            console.log('Garages response:', garagesResponse.data);
+            console.log('Brands response:', brandsResponse.data);
+
+            const models = modelsResponse.data.data;
+            const categories = categoriesResponse.data.data;
+            const garages = garagesResponse.data.data;
+            const brands = brandsResponse.data.data;
+
+            const cars = garages.map(garage => {
+                const model = models.find(m => m.id === garage.CarID);
+                const category = categories.find(c => c.id === model?.categoryId);
+                const brand = brands.find(b => b.id === model?.brandId);
+
+                return {
+                    id: garage.id,
+                    modelName: model ? model.ModelName : 'Unknown',
+                    brandName: brand ? brand.BrandName : 'Unknown',
+                    price: garage.Price,
+                    image: garage.Picture && garage.Picture.length > 0 ? garage.Picture[0].url : '', // ตรวจสอบว่ามีภาพหรือไม่
+                    category: category ? category.Category : 'Unknown', // ตรวจสอบว่า category มีข้อมูลหรือไม่
+                    gearType: model ? model.GearType : 'Unknown'
+                };
+            });
+
+            console.log('Mapped car data:', cars);
+            setLatestCars(cars);
+        } catch (error) {
+            console.error('Error fetching cars:', error);
         }
-    ];
+    };
 
     useEffect(() => {
-        // Set mock data to state for testing
-        setLatestCars(mockCars);
-    }, []);
+        fetchCars(); // Fetch cars every time the component mounts
+    }, []); // Empty dependency array ensures this runs only once when the component mounts
 
     return (
         <section className="max-w-screen-xl mx-auto px-4 mb-12">

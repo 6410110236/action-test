@@ -10,35 +10,46 @@ const initialState = {
     user: null,
     isLoginPending: false,
     loginError: null,
-}
+    jwt: null, // Add jwt to the initial state
+};
 
-const updateJwt = (jwt) => {
-    axData.jwt = jwt
-    if(jwt){
-        sessionStorage.setItem(conf.jwtSessionStorageKey, jwt)
-    }else{
-        sessionStorage.removeItem(conf.jwtSessionStorageKey)
+const updateJwt = (jwt, rememberMe) => {
+    axData.jwt = jwt;
+    if (jwt) {
+        if (rememberMe) {
+            localStorage.setItem(conf.jwtSessionStorageKey, jwt);
+            console.log('JWT stored in localStorage');
+        } else {
+            sessionStorage.setItem(conf.jwtSessionStorageKey, jwt);
+            console.log('JWT stored in sessionStorage');
+        }
+    } else {
+        localStorage.removeItem(conf.jwtSessionStorageKey);
+        sessionStorage.removeItem(conf.jwtSessionStorageKey);
+        console.log('JWT removed from storage');
     }
-}
+};
 
 export const ContextProvider = props => {
     const [state, setState] = useSetState(initialState);
 
     const setLoginPending = (isLoginPending) => setState({ isLoginPending });
-    const setLoginSuccess = (isLoggedIn, user) => setState({ isLoggedIn, user });
+    const setLoginSuccess = (isLoggedIn, user, jwt) => setState({ isLoggedIn, user, jwt }); // Pass jwt to setLoginSuccess
     const setLoginError = (loginError) => setState({ loginError });
 
 
-    const handleLoginResult = (error, result) => {
+    const handleLoginResult = (error, result, rememberMe) => {
         setLoginPending(false);
 
         if (result && result.user) {
-        if (result.jwt) {
-            updateJwt(result.jwt)
-        }
-        setLoginSuccess(true, result.user);
+            if (result.jwt) {
+                updateJwt(result.jwt, rememberMe);
+                setLoginSuccess(true, result.user, result.jwt); // Pass jwt to setLoginSuccess
+            }
+            console.log('Login successful:', result.user);
         } else if (error) {
-        setLoginError(error);
+            setLoginError(error);
+            console.error('Login error:', error);
         }
     }
 
@@ -47,12 +58,12 @@ export const ContextProvider = props => {
         loadPersistedJwt(handleLoginResult)
     }, [])
 
-    const login = (username, password) => {
+    const login = (username, password, rememberMe) => {
         setLoginPending(true);
         setLoginSuccess(false);
         setLoginError(null);
 
-        fetchLogin(username, password, handleLoginResult)
+        fetchLogin(username, password, (error, result) => handleLoginResult(error, result, rememberMe))
     }
 
     const logout = () => {
@@ -60,6 +71,7 @@ export const ContextProvider = props => {
         updateJwt(null)
         setLoginSuccess(false);
         setLoginError(null);
+        console.log('Logged out');
     }
 
     return (
@@ -93,18 +105,18 @@ const fetchLogin = async (username, password, callback) => {
 
 const loadPersistedJwt = async (callback) => {
     try {
-        const persistedJwt = sessionStorage.getItem(conf.jwtSessionStorageKey)
+        const persistedJwt = sessionStorage.getItem(conf.jwtSessionStorageKey) || localStorage.getItem(conf.jwtSessionStorageKey);
         if (persistedJwt) {
-        axData.jwt = persistedJwt
-        const response = await ax.get(conf.jwtUserEndpoint)
-        if (response.data.id > 0) {
-            callback(null, {user: response.data})
-        } else {
-            callback(null)
-        }
+            axData.jwt = persistedJwt;
+            const response = await ax.get(conf.jwtUserEndpoint);
+            if (response.data.id > 0) {
+                callback(null, { user: response.data });
+            } else {
+                callback(null);
+            }
         }
     } catch (e) {
-        console.log(e)
-        callback(new Error('Fail to initiate auto login'))
+        console.log(e);
+        callback(new Error('Fail to initiate auto login'));
     }
-}
+};

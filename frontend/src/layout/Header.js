@@ -1,32 +1,30 @@
-import { React, useState } from 'react';
+import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { AuthContext } from '../context/Auth.context'; // Import AuthContext
 
-const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
+const Header = () => {
     const location = useLocation();
+    const { state, logout } = useContext(AuthContext); // Get the state and logout function from AuthContext
 
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-    };
-
-    const user = {
-        name: 'donald trump',
-        email: 'trump@example.com',
-        imageUrl: 'https://static01.nyt.com/images/2017/11/02/fashion/01OTR/02OTR-videoSixteenByNineJumbo1600.jpg',
+    const user = state.user || {
+        name: 'Guest',
+        email: 'guest@example.com',
+        imageUrl: 'https://via.placeholder.com/150',
     };
 
     const navigation = [
-        { name: 'Home', href: '/', current: true },
-        { name: 'Buy', href: '/buy', current: false },
-        { name: 'About', href: '/about', current: false },
-        { name: 'Users', href: '/user', current: false },
+        { name: 'Home', href: '/', current: location.pathname === '/' },
+        { name: 'Buy', href: '/buy', current: location.pathname === '/buy' },
+        { name: 'About', href: '/about', current: location.pathname === '/about' },
+        { name: 'Users', href: '/users', current: location.pathname === '/users' },
     ];
 
     const userNavigation = [
         { name: 'Your Profile', href: '#' },
         { name: 'Settings', href: '#' },
-        { name: 'Sign out', href: '#', onClick: handleLogout },
+        { name: 'Sign out', href: 'signin', onClick: logout },
     ];
 
     function classNames(...classes) {
@@ -47,9 +45,9 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        aria-current={location.pathname === item.href ? 'page' : undefined}
+                                        aria-current={item.current ? 'page' : undefined}
                                         className={classNames(
-                                            location.pathname === item.href
+                                            item.current
                                                 ? 'rounded-full py-1 px-3 text-sm font-semibold text-white bg-gray-900 focus:outline-none focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800'
                                                 : 'rounded-full py-1 px-3 text-sm font-semibold text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800'
                                         )}
@@ -61,7 +59,7 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                         </div>
                     </div>
 
-                    {/* search buttom */}
+                    {/* search button */}
                     <div className="hidden md:block">
                         <div className="ml-4 flex items-center md:ml-6">
                             <button
@@ -74,7 +72,6 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
                             </button>
-
                             {/* Profile dropdown */}
                             <Menu as="div" className="relative ml-3">
                                 <div>
@@ -84,7 +81,7 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                                     >
                                         <span className="sr-only">Open user menu</span>
                                         <img
-                                            className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" s
+                                            className="h-8 w-8 rounded-full" src={user.imageUrl} alt=""
                                         />
                                     </MenuButton>
                                 </div>
@@ -120,7 +117,6 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                 </div>
             </div>
 
-
             {/* Mobile menu drop down */}
             <DisclosurePanel className="md:hidden">
                 <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
@@ -129,9 +125,9 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                             key={item.name}
                             as="a"
                             href={item.href}
-                            aria-current={location.pathname === item.href ? 'page' : undefined}
+                            aria-current={item.current ? 'page' : undefined}
                             className={classNames(
-                                location.pathname === item.href ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                                 'block rounded-md px-3 py-2 text-base font-medium',
                             )}
                         >
@@ -165,7 +161,7 @@ const Header = ({ isLoggedIn = true, setIsLoggedIn }) => {
                         </button>
                     </div>
 
-                    {/* menu drop down profile,setting,sign out */}
+                    {/* menu drop down profile, setting, sign out */}
                     <div className="mt-3 space-y-1 px-2">
                         {userNavigation.map((item) => (
                             <DisclosureButton
