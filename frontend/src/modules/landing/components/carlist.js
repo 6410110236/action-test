@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Clock } from 'lucide-react';
-import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../../../context/Auth.context'; // Import AuthContext
 
 const LatestCarsSection = () => {
@@ -81,7 +81,7 @@ const LatestCarsSection = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {latestCars.map((car) => (
-                    <div key={car.id} className="group">
+                    <Link to={`/detail/${car.modelName}`} key={car.id} className="group">
                         <div className="relative overflow-hidden rounded-lg mb-3">
                             {car.image ? (
                                 <img
@@ -103,9 +103,8 @@ const LatestCarsSection = () => {
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">{car.category}</span>
-                            <span className="text-sm text-gray-500">{car.gearType}</span>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </section>

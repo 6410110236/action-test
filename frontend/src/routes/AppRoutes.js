@@ -6,6 +6,9 @@ import SignUp from '../modules/auth/pages/signUp';
 import Users from '../modules/transaction/components/SellUser';
 import Order from '../modules/transaction/order';
 import PrivateRoute from './PrivateRoutes'; // Import PrivateRoute
+import Detail from '../modules/detail/mock/detail';
+import CarCart from '../modules/search/pages/carcart';
+
 
 const AppRoutes = () => {
     return (
@@ -13,7 +16,9 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/user" element={<Users/>} />
+        <Route path="/buy" element={<CarCart/>} />
+        <Route path="/seller" element={<Users/>} />
+        <Route path="/detail" element={<Detail />} />
         <Route path="/order" element={<PrivateRoute><Order /></PrivateRoute>} />
         </Routes>
     );

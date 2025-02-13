@@ -11,14 +11,14 @@ const Header = () => {
     const user = state.user || {
         name: 'Guest',
         email: 'guest@example.com',
-        imageUrl: 'https://via.placeholder.com/150',
+        imageUrl: 'https://as1.ftcdn.net/jpg/03/46/83/96/1000_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg',
     };
 
     const navigation = [
         { name: 'Home', href: '/', current: location.pathname === '/' },
         { name: 'Buy', href: '/buy', current: location.pathname === '/buy' },
-        { name: 'About', href: '/about', current: location.pathname === '/about' },
-        { name: 'Users', href: '/users', current: location.pathname === '/users' },
+        { name: 'sell', href: '/seller', current: location.pathname === '/seller' },
+        // { name: 'About', href: '/about', current: location.pathname === '/about' },
     ];
 
     const userNavigation = [
