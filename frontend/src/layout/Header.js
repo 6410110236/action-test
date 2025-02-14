@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MenuIcon, XIcon } from '@heroicons/react/outline';
 import { AuthContext } from '../context/Auth.context'; // Import AuthContext
 
 const Header = () => {
@@ -110,8 +110,8 @@ const Header = () => {
                     <div className="-mr-2 flex md:hidden">
                         <DisclosureButton className="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                             <span className="sr-only">Open main menu</span>
-                            <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                            <XMarkIcon className="hidden h-6 w-6" aria-hidden="true" />
+                            <MenuIcon className="block h-6 w-6" aria-hidden="true" />
+                            <XIcon className="hidden h-6 w-6" aria-hidden="true" />
                         </DisclosureButton>
                     </div>
                 </div>
