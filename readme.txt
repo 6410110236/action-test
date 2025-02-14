@@ -19,7 +19,11 @@ git push origin
 
 ===============================
 
-Check version tree
+Random git commands
+
+git merge --ff-only develop
 
 git log --oneline --graph --all
+-Check version tree
+
 ===============================
