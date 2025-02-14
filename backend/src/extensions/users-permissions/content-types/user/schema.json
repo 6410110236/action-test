@@ -9,7 +9,7 @@
     "displayName": "User"
   },
   "options": {
-    "timestamps": true
+    "draftAndPublish": false
   },
   "attributes": {
     "username": {
@@ -65,10 +65,24 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "orders": {
+    "Picture": {
+      "allowedTypes": [
+        "images",
+        "files"
+      ],
+      "type": "media",
+      "multiple": false
+    },
+    "garages": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::order.order",
+      "target": "api::garage.garage",
+      "mappedBy": "users_permissions_user"
+    },
+    "queue": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::queue.queue",
       "mappedBy": "users_permissions_user"
     }
   }

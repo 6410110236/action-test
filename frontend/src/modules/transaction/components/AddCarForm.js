@@ -65,28 +65,13 @@ function AddCarForm() {
                                 <label className="block text-sm font-medium text-gray-700">Model</label>
                                 <input type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Category</label>
-                                <input type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">ประเภทเกียร์</label>
-                                <input type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
-                            </div>
+                            
                             <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-700">Price</label>
                                 <input type="number" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
                             </div>
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">จำนวนที่นั่ง</label>
-                                <input type="number" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
-                            </div>
-                            <div className="col-span-2">
                                 <label className="block text-sm font-medium text-gray-700">ประเภทการจดทะเบียน</label>
-                                <input type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
-                            </div>
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700">คุณสมบัติรถ</label>
                                 <input type="text" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
                             </div>
                             <div className="col-span-2 flex justify-end mt-4">

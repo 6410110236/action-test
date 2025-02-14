@@ -446,6 +446,7 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    Description: Schema.Attribute.Text & Schema.Attribute.DefaultTo<'None'>;
     Distance: Schema.Attribute.Decimal;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -455,7 +456,6 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     Manual: Schema.Attribute.Boolean;
     model: Schema.Attribute.Relation<'manyToOne', 'api::model.model'>;
-    order: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
     Picture: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',
       true
@@ -464,11 +464,14 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     RegisterDate: Schema.Attribute.Date;
     SecondaryKey: Schema.Attribute.Integer;
-    SellersName: Schema.Attribute.String & Schema.Attribute.Required;
     StatusBuying: Schema.Attribute.Boolean;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    users_permissions_user: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
     VehicleRegistrationTypes: Schema.Attribute.Text;
     VehicleTaxExpirationDate: Schema.Attribute.Date;
     Warranty: Schema.Attribute.Text;
@@ -512,13 +515,13 @@ export interface ApiModelModel extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
-  collectionName: 'orders';
+export interface ApiQueueQueue extends Struct.CollectionTypeSchema {
+  collectionName: 'queues';
   info: {
     description: '';
-    displayName: 'Order';
-    pluralName: 'orders';
-    singularName: 'order';
+    displayName: 'Queue';
+    pluralName: 'queues';
+    singularName: 'queue';
   };
   options: {
     draftAndPublish: true;
@@ -527,18 +530,16 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    garage: Schema.Attribute.Relation<'oneToOne', 'api::garage.garage'>;
+    Day: Schema.Attribute.DateTime & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::queue.queue'> &
       Schema.Attribute.Private;
-    OrderID: Schema.Attribute.UID & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    StatusOrdering: Schema.Attribute.Boolean;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     users_permissions_user: Schema.Attribute.Relation<
-      'manyToOne',
+      'oneToOne',
       'plugin::users-permissions.user'
     >;
   };
@@ -999,7 +1000,6 @@ export interface PluginUsersPermissionsUser
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -1013,20 +1013,22 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    garages: Schema.Attribute.Relation<'oneToMany', 'api::garage.garage'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
-    orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    Picture: Schema.Attribute.Media<'images' | 'files'>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    queue: Schema.Attribute.Relation<'oneToOne', 'api::queue.queue'>;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
@@ -1058,7 +1060,7 @@ declare module '@strapi/strapi' {
       'api::category-car.category-car': ApiCategoryCarCategoryCar;
       'api::garage.garage': ApiGarageGarage;
       'api::model.model': ApiModelModel;
-      'api::order.order': ApiOrderOrder;
+      'api::queue.queue': ApiQueueQueue;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
