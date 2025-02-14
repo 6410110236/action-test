@@ -1,5 +1,3 @@
-// SideBar.js
-
 import React, { useState, useEffect } from 'react';
 import { Select, Drawer, Button, Input, Checkbox, Tag } from 'antd';
 import { MenuOutlined } from '@ant-design/icons';
@@ -17,22 +15,18 @@ const SideBar = ({ cars, setCars }) => {
     const [minPrice, setMinPrice] = useState(null);
     const [maxPrice, setMaxPrice] = useState(null);
 
-    // Initialize originalCars only once
     useEffect(() => {
         setOriginalCars(cars);
-    }, []); // Run only once when component mounts
+    }, []);
 
-    // Open Drawer for mobile
     const showDrawer = () => {
         setVisible(true);
     };
 
-    // Close Drawer
     const onClose = () => {
         setVisible(false);
     };
 
-    // Sort cars
     const handleSort = (value) => {
         setSortOption(value);
         let sortedCars = [...cars];
@@ -68,25 +62,21 @@ const SideBar = ({ cars, setCars }) => {
         setCars(sortedCars);
     };
 
-    // Debounced search
     const handleSearch = debounce((value) => {
         setSearchTerm(value);
         filterCars(value, selectedCategories, selectedBrands, minPrice, maxPrice);
     }, 300);
 
-    // Handle category change
     const handleCategoryChange = (checkedValues) => {
         setSelectedCategories(checkedValues);
         filterCars(searchTerm, checkedValues, selectedBrands, minPrice, maxPrice);
     };
 
-    // Handle brand change
     const handleBrandChange = (checkedValues) => {
         setSelectedBrands(checkedValues);
         filterCars(searchTerm, selectedCategories, checkedValues, minPrice, maxPrice);
     };
 
-    // Comprehensive filter function
     const filterCars = (search, categories, brands, minPriceFilter, maxPriceFilter) => {
         let filteredCars = [...originalCars];
 
@@ -129,7 +119,6 @@ const SideBar = ({ cars, setCars }) => {
         setCars(filteredCars);
     };
 
-    // Available categories and brands
     const categoryOptions = [
         ...new Set(originalCars.map((car) => car.category)),
     ];
@@ -138,12 +127,10 @@ const SideBar = ({ cars, setCars }) => {
         ...new Set(originalCars.map((car) => car.brandName)),
     ];
 
-    // Filters component
     const Filters = (
         <div>
             <h3 className="text-xl font-semibold mb-4">ค้นหาและจัดเรียง</h3>
 
-            {/* Search Field */}
             <div className="mb-4">
                 <Input.Search
                     placeholder="ค้นหาตามรุ่นหรือยี่ห้อ"
@@ -156,7 +143,6 @@ const SideBar = ({ cars, setCars }) => {
                 />
             </div>
 
-            {/* Filter by Categories */}
             <div className="mb-4">
                 <h4 className="font-medium mb-2">หมวดหมู่</h4>
                 <Checkbox.Group
@@ -167,7 +153,6 @@ const SideBar = ({ cars, setCars }) => {
                 />
             </div>
 
-            {/* Filter by Brands */}
             <div className="mb-4">
                 <h4 className="font-medium mb-2">ยี่ห้อ</h4>
                 <Checkbox.Group
@@ -178,7 +163,6 @@ const SideBar = ({ cars, setCars }) => {
                 />
             </div>
 
-            {/* Filter by Price */}
             <div className="mb-4">
                 <h4 className="font-medium mb-2">กรองตามราคา</h4>
                 <Input
@@ -214,7 +198,6 @@ const SideBar = ({ cars, setCars }) => {
                 />
             </div>
 
-            {/* Display Selected Filters */}
             <div className="mb-4">
                 <h4 className="font-medium mb-2">ตัวกรองที่เลือก:</h4>
                 <div className="flex flex-wrap gap-2">
@@ -237,7 +220,6 @@ const SideBar = ({ cars, setCars }) => {
                 </div>
             </div>
 
-            {/* Sorting */}
             <div className="mb-4">
                 <h4 className="font-medium mb-2">จัดเรียงโดย</h4>
                 <Select
@@ -254,7 +236,6 @@ const SideBar = ({ cars, setCars }) => {
                 </Select>
             </div>
 
-            {/* Reset Filters Button */}
             <Button
                 onClick={() => {
                     setSearchTerm('');
@@ -274,7 +255,6 @@ const SideBar = ({ cars, setCars }) => {
 
     return (
         <>
-            {/* Drawer Toggle Button for Mobile */}
             <div className="md:hidden p-4">
                 <Button
                     type="primary"
@@ -285,12 +265,10 @@ const SideBar = ({ cars, setCars }) => {
                 </Button>
             </div>
 
-            {/* Sidebar for Desktop */}
             <div className="hidden md:block w-64 p-4 border-r">
                 {Filters}
             </div>
 
-            {/* Drawer for Mobile */}
             <Drawer
                 title="กรอง & จัดเรียง"
                 placement="left"
