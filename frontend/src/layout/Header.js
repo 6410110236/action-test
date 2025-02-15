@@ -22,7 +22,7 @@ const Header = () => {
     ];
 
     const userNavigation = [
-        { name: 'Your Profile', href: '#' },
+        { name: 'Your Profile', href: 'users' },
         { name: 'Settings', href: '#' },
         { name: 'Sign out', href: 'signin', onClick: logout },
     ];
