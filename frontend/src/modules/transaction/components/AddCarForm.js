@@ -1,104 +1,133 @@
-"use client"
+import { useState, useEffect } from "react";
+import { client, gql } from "./apolloClient";
 
-import { useState } from "react"
-import { Upload } from "lucide-react"
+const GET_BRANDS = gql`
+  query Query {
+    brands {
+      BrandName
+      documentId
+    }
+  }
+`;
 
-const Alert = ({ children }) => (
-  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-    {children}
-  </div>
-)
+const GET_MODELS_FROM_BRAND = gql`
+  query Brand($documentId: ID!) {
+    brand(documentId: $documentId) {
+      models_connection {
+        nodes {
+          ModelName
+          documentId
+        }
+      }
+    }
+  }
+`;
+
+const object_cars = {
+  brand: "",
+  model: "",
+  gear: "",
+  gasoline: "",
+  seats: "",
+  color: "",
+  description: "",
+  distance: "",
+  vehicleRegistrationType: "",
+  manual: "",
+  warranty: "",
+  registerDate: "",
+  secondaryKey: "",
+  vehicleTaxExpirationDate: "",
+  price: "",
+};
 
 function AddCarForm() {
-  const [isPopupVisible, setIsPopupVisible] = useState(false)
-  const [image, setImage] = useState(null)
-  const [showWarning, setShowWarning] = useState(false)
-  const [formData, setFormData] = useState({
-    brand: "",
-    model: "",
-    gear: "",
-    gasoline: "",
-    seats: "",
-    color: "",
-    description: "",
-    distance: "",
-    vehicleRegistrationType: "",
-    manual: "",
-    warranty: "",
-    registerDate: "",
-    secondaryKey: "",
-    vehicleTaxExpirationDate: "",
-  })
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
+  const [formData, setFormData] = useState(object_cars);
+  const [brands, setBrands] = useState([]);
+  const [models, setModels] = useState([]);
+  const [selectedBrandId, setSelectedBrandId] = useState("");
 
   const resetForm = () => {
-    setFormData({
-      brand: "",
-      model: "",
-      gear: "",
-      gasoline: "",
-      seats: "",
-      color: "",
-      description: "",
-      distance: "",
-      vehicleRegistrationType: "",
-      manual: "",
-      warranty: "",
-      registerDate: "",
-      secondaryKey: "",
-      vehicleTaxExpirationDate: "",
-    })
-    setImage(null)
-    setShowWarning(false)
-  }
+    setFormData(object_cars);
+    setShowWarning(false);
+  };
 
-  const handleButtonClick = () => {
-    setIsPopupVisible(true)
-  }
+  useEffect(() => {
+    client
+      .query({ query: GET_BRANDS })
+      .then((response) => {
+        setBrands(response.data.brands);
+      })
+      .catch((error) => {
+        console.error("Error fetching brands:", error);
+      });
+  }, []);
 
-  const handleClosePopup = () => {
-    resetForm()
-    setIsPopupVisible(false)
-  }
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = () => {
-        setImage(reader.result)
-      }
-      reader.readAsDataURL(file)
+  useEffect(() => {
+    if (selectedBrandId) {
+      client
+        .query({
+          query: GET_MODELS_FROM_BRAND,
+          variables: { documentId: selectedBrandId },
+        })
+        .then((response) => {
+          setModels(response.data.brand.models_connection.nodes);
+        })
+        .catch((error) => {
+          console.error("Error fetching models:", error);
+        });
     }
-    console.log(e.target.files[0])
-  }
+  }, [selectedBrandId]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
-    })
-    setShowWarning(false)
-  }
+    });
+    setShowWarning(false);
+  };
+
+  const handleBrandChange = (e) => {
+    const selectedBrandName = e.target.value;
+    const selectedBrand = brands.find(
+      (brand) => brand.BrandName === selectedBrandName
+    );
+
+    if (selectedBrand) {
+      setSelectedBrandId(selectedBrand.documentId);
+    }
+
+    setFormData({
+      ...formData,
+      brand: selectedBrandName,
+      model: "",
+    });
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Check if any field has data
-    const hasData = Object.values(formData).some((value) => value !== "") || image !== null
+    // ตรวจสอบเฉพาะฟิลด์ที่จำเป็น
+    const requiredFields = ["brand", "model", "price"];
+    const isFormEmpty = requiredFields.some((field) => !formData[field]);
 
-    if (!hasData) {
-      setShowWarning(true)
-    } else {
-      console.log("Form Data:", formData)
-      handleClosePopup()
+    if (isFormEmpty) {
+      setShowWarning(true);
+      return;
     }
-  }
+
+    console.log("Form Data:", formData);
+    setIsPopupVisible(false);
+    resetForm();
+  };
 
   return (
     <div>
       <button
-        onClick={handleButtonClick}
+        onClick={() => setIsPopupVisible(true)}
         className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg shadow-md hover:bg-blue-600"
       >
         ADD
@@ -107,67 +136,151 @@ function AddCarForm() {
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl text-blue-600 font-bold mb-6">Add New Vehicle</h2>
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              {showWarning && (
-                <Alert>
-                  <p>No data Alert</p>
-                </Alert>
-              )}
+            <h2 className="text-xl text-blue-600 font-bold mb-6">
+              Add New Vehicle
+            </h2>
 
-              <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-blue-50 relative">
-                {image ? (
-                  <img
-                    src={image || "/placeholder.svg"}
-                    alt="Uploaded"
-                    className="w-full h-32 object-cover rounded-md"
-                  />
-                ) : (
-                  <label htmlFor="imageUpload" className="flex flex-col items-center cursor-pointer">
-                    <Upload className="w-8 h-8 text-blue-500 mb-2" />
-                    <span className="text-blue-500">Click to upload image</span>
+            {showWarning && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                ⚠️ กรุณากรอกข้อมูลให้ครบถ้วนก่อนเพิ่มรถยนต์ (Brand, Model,
+                Price)
+              </div>
+            )}
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Brand
                   </label>
-                )}
-                <input id="imageUpload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <select
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleBrandChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Select a brand</option>
+                    {brands.map((brand) => (
+                      <option key={brand.documentId} value={brand.BrandName}>
+                        {brand.BrandName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Model
+                  </label>
+                  <select
+                    name="model"
+                    value={formData.model}
+                    onChange={(e) =>
+                      setFormData({ ...formData, model: e.target.value })
+                    }
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                    disabled={!selectedBrandId}
+                  >
+                    <option value="">Select a model</option>
+                    {models.map((model) => (
+                      <option key={model.documentId} value={model.ModelName}>
+                        {model.ModelName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  "brand",
-                  "model",
-                  "gear",
-                  "gasoline",
-                  "seats",
-                  "color",
-                  "description",
-                  "distance",
-                  "vehicleRegistrationType",
-                  "manual",
-                  "warranty",
-                  "registerDate",
-                  "secondaryKey",
-                  "vehicleTaxExpirationDate",
-                ].map((field, index) => (
-                  <div key={index}>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {field.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
-                    </label>
-                    <input
-                      type={field.includes("Date") ? "date" : "text"}
-                      name={field}
-                      value={formData[field]}
-                      onChange={handleChange}
-                      placeholder={`Enter ${field.toLowerCase()}`}
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                ))}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Gear
+                </label>
+                <input
+                  type="text"
+                  name="gear"
+                  value={formData.gear}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Gasoline
+                </label>
+                <input
+                  type="text"
+                  name="gasoline"
+                  value={formData.gasoline}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Seats
+                </label>
+                <input
+                  type="text"
+                  name="seats"
+                  value={formData.seats}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Color
+                </label>
+                <input
+                  type="text"
+                  name="color"
+                  value={formData.color}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Distance
+                </label>
+                <input
+                  type="text"
+                  name="distance"
+                  value={formData.distance}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Price
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
               </div>
 
               <div className="flex justify-end gap-2 mt-6">
                 <button
                   type="button"
-                  onClick={handleClosePopup}
+                  onClick={() => setIsPopupVisible(false)}
                   className="px-6 py-2 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50"
                 >
                   Cancel
@@ -184,8 +297,7 @@ function AddCarForm() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default AddCarForm
-
+export default AddCarForm;
