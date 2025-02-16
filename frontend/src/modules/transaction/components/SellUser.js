@@ -3,23 +3,33 @@ import { client, gql } from './apolloClient';
 import AddCarForm from './AddCarForm';
 
 const GET_CARS = gql`
-  query GetAllBrands {
-    garages_connection {
-      nodes {  
-        documentId
-        Price
-        Picture {
-          url
-        }
-        model {
-          ModelName
-          brand_car {
-            BrandName
-          }
-        }
+  query Query {
+  garages {
+    Color
+    Distance
+    Description
+    Manual
+    Picture {
+      url
+    }
+    Price
+    RegisterDate
+    SecondaryKey
+    StatusBuying
+    VehicleRegistrationTypes
+    VehicleTaxExpirationDate
+    Warranty
+    model {
+      ModelName
+      GearType
+      EnergySource
+      Seats
+      brand_car {
+        BrandName
       }
     }
   }
+}
 `;
 
 function SellUser() {
@@ -29,7 +39,7 @@ function SellUser() {
     client.query({ query: GET_CARS })
       .then(response => {
         console.log('🚀 Data from API:', response.data);
-        setCars(response.data.garages_connection.nodes); 
+        setCars(response.data.garages); 
       })
       .catch(error => console.error('❌ Error fetching data:', error));
   }, []);
@@ -52,7 +62,7 @@ function SellUser() {
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 relative overflow-hidden rounded-md">
                       <img
-                        src={car.Picture.length > 0 ? "http://localhost:1337"+car.Picture[0].url : "/placeholder.svg"}
+                        src={car.Picture.length > 0 ? process.env.REACT_APP_BASE_URL+car.Picture[0].url : "/placeholder.svg"}
                         alt={car.model.ModelName}
                         className="w-full h-full object-cover"
                       />
@@ -76,7 +86,7 @@ function SellUser() {
               <p className="text-gray-500">No cars available.</p>
             )}
 
-            <AddCarForm />
+            <AddCarForm item={cars}/>
           </div>
 
           {/* Profile Card */}
