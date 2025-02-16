@@ -441,7 +441,6 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    CarID: Schema.Attribute.UID & Schema.Attribute.Required;
     Color: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -454,7 +453,7 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
       'api::garage.garage'
     > &
       Schema.Attribute.Private;
-    Manual: Schema.Attribute.Boolean;
+    Manual: Schema.Attribute.Text & Schema.Attribute.DefaultTo<'Nope'>;
     model: Schema.Attribute.Relation<'manyToOne', 'api::model.model'>;
     Picture: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',
@@ -498,8 +497,8 @@ export interface ApiModelModel extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    EnergySource: Schema.Attribute.String;
     garages: Schema.Attribute.Relation<'oneToMany', 'api::garage.garage'>;
-    Gasoline: Schema.Attribute.String;
     GearType: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::model.model'> &

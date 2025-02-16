@@ -20,7 +20,7 @@
     "Seats": {
       "type": "integer"
     },
-    "Gasoline": {
+    "EnergySource": {
       "type": "string"
     },
     "brand_car": {

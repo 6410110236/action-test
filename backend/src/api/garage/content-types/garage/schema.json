@@ -53,15 +53,8 @@
     "VehicleTaxExpirationDate": {
       "type": "date"
     },
-    "Manual": {
-      "type": "boolean"
-    },
     "StatusBuying": {
       "type": "boolean"
-    },
-    "CarID": {
-      "type": "uid",
-      "required": true
     },
     "users_permissions_user": {
       "type": "relation",
@@ -72,6 +65,10 @@
     "Description": {
       "type": "text",
       "default": "None"
+    },
+    "Manual": {
+      "type": "text",
+      "default": "Nope"
     }
   }
 }
