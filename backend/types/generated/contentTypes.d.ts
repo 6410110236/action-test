@@ -463,7 +463,7 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     RegisterDate: Schema.Attribute.Date;
     SecondaryKey: Schema.Attribute.Integer;
-    StatusBuying: Schema.Attribute.Boolean;
+    StatusBuying: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

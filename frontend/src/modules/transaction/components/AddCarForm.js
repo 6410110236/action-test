@@ -23,12 +23,33 @@ const GET_MODELS_FROM_BRAND = gql`
   }
 `;
 
+const MUTATE_TO_GARAGE = gql`
+  mutation Mutation($data: GarageInput!, $status: PublicationStatus) {
+  createGarage(data: $data, status: $status) {
+    model {
+      ModelName
+      documentId
+    }
+    Color
+    Description
+    Distance
+    VehicleRegistrationTypes
+    Manual
+    Warranty
+    RegisterDate
+    SecondaryKey
+    VehicleTaxExpirationDate
+    Price
+    users_permissions_user {
+      documentId
+    }
+  }
+}
+`
+
 const object_cars = {
-  brand: "",
-  model: "",
-  gear: "",
-  gasoline: "",
-  seats: "",
+  brand: "", //
+  model: "", //
   color: "",
   description: "",
   distance: "",
@@ -103,26 +124,57 @@ function AddCarForm() {
     setFormData({
       ...formData,
       brand: selectedBrandName,
-      model: "",
+
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     // ตรวจสอบเฉพาะฟิลด์ที่จำเป็น
     const requiredFields = ["brand", "model", "price"];
     const isFormEmpty = requiredFields.some((field) => !formData[field]);
-
+  
     if (isFormEmpty) {
       setShowWarning(true);
       return;
     }
 
+    const selectedModel = models.find((model) => model.ModelName === formData.model);
+    if (!selectedModel) {
+      setShowWarning(true);
+      return;
+    }
+
+    console.log(selectedModel.documentId)
+
+    client.mutate({
+          mutation: MUTATE_TO_GARAGE,
+          variables: {
+            "data": {
+              "model": selectedModel.documentId,
+              "Color" : formData.color,
+              "Description" : formData.description,
+              "Distance" : parseInt(formData.distance, 10) || 0,
+              "VehicleRegistrationTypes" : formData.vehicleRegistrationType,
+              "Manual" : formData.manual,
+              "Warranty" : formData.warranty,
+              "RegisterDate" : formData.registerDate,
+              "SecondaryKey" : parseInt(formData.secondaryKey, 10) || 0,
+              "VehicleTaxExpirationDate" : formData.vehicleTaxExpirationDate,
+              "Price": parseInt(formData.price, 10) || 0,
+              "users_permissions_user": "cc08p5uh881dm5c7jfvlvm48"
+            },
+            "status": "PUBLISHED"
+          },
+        })
+  
     console.log("Form Data:", formData);
+  
     setIsPopupVisible(false);
     resetForm();
   };
+  
 
   return (
     <div>
@@ -135,7 +187,7 @@ function AddCarForm() {
 
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[1000px] max-h-[80vh] overflow-y-auto">
             <h2 className="text-xl text-blue-600 font-bold mb-6">
               Add New Vehicle
             </h2>
@@ -193,42 +245,6 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Gear
-                </label>
-                <input
-                  type="text"
-                  name="gear"
-                  value={formData.gear}
-                  onChange={handleChange}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Gasoline
-                </label>
-                <input
-                  type="text"
-                  name="gasoline"
-                  value={formData.gasoline}
-                  onChange={handleChange}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Seats
-                </label>
-                <input
-                  type="text"
-                  name="seats"
-                  value={formData.seats}
-                  onChange={handleChange}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
                   Color
                 </label>
                 <input
@@ -239,26 +255,106 @@ function AddCarForm() {
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Description
                 </label>
-                <input
-                  type="text"
+                <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  rows={4}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md resize-y"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Distance
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   name="distance"
                   value={formData.distance}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Vehicle Registration Type
+                </label>
+                <input
+                  type="text"
+                  name="vehicleRegistrationType"
+                  value={formData.vehicleRegistrationType}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Manual
+                </label>
+                <input
+                  type="text"
+                  name="manual"
+                  value={formData.manual}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Warranty
+                </label>
+                <input
+                  type="text"
+                  name="warranty"
+                  value={formData.warranty}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Register Date
+                </label>
+                <input
+                  type="date"
+                  name="registerDate"
+                  value={formData.registerDate}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Secondary Key
+                </label>
+                <input
+                  type="text"
+                  name="secondaryKey"
+                  value={formData.secondaryKey}
+                  onChange={handleChange}
+                  className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                Vehicle Tax Expiration Date
+                </label>
+                <input
+                  type="date"
+                  name="vehicleTaxExpirationDate"
+                  value={formData.vehicleTaxExpirationDate}
                   onChange={handleChange}
                   className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                 />

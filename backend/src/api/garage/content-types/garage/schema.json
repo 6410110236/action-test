@@ -54,7 +54,8 @@
       "type": "date"
     },
     "StatusBuying": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "users_permissions_user": {
       "type": "relation",
