@@ -48,6 +48,8 @@ function SellUser() {
     client.query({ query: GET_CARS })
       .then(response => {
         console.log('🚀 Data from API:', response.data);
+        console.log("Base URL:", process.env.REACT_APP_BASE_URL);
+        console.log("Image URL:", cars.Picture?.[0]?.url);
         setCars(response.data.garages); 
       })
       .catch(error => console.error('❌ Error fetching data:', error));
@@ -84,7 +86,7 @@ function SellUser() {
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 relative overflow-hidden rounded-md">
                       <img
-                        src={car.Picture.length > 0 ? process.env.REACT_APP_BASE_URL+car.Picture[0].url : "/placeholder.svg"}
+                        src={car.Picture?.[0]?.url ? `${process.env.REACT_APP_BASE_URL}${car.Picture[0].url}` : "/placeholder.svg"}
                         alt={car.model.ModelName}
                         className="w-full h-full object-cover"
                       />
