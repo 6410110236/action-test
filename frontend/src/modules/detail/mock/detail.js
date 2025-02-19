@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Carousel, Card, Modal } from 'antd';
+import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
 import {
   LikeOutlined,
   LikeFilled,
@@ -18,11 +18,13 @@ import {
 import 'antd/dist/reset.css';
 import 'tailwindcss/tailwind.css';
 
+const { TabPane } = Tabs;
+
 const mockData = {
   id: 1,
   modelName: 'Model S',
   brandName: 'Tesla',
-  price: '80,000฿', 
+  price: '100,000฿', 
   images: [
     'https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg',
     'https://www.tesla.com/sites/default/files/modelsx-new/social/model-s-hero-social.jpg',
@@ -30,9 +32,24 @@ const mockData = {
     'https://di-uploads-pod25.dealerinspire.com/rickhendrickcitychevy/uploads/2023/11/mlp-img-perf-2024-camaro.jpg',
     'https://www.vdm.ford.com/content/dam/na/ford/en_us/images/mustang/2025/jellybeans/Ford_Mustang_2025_200A_PJS_883_89W_13B_COU_64F_99H_44U_EBST_YZTAC_DEFAULT_EXT_4.png',
   ],
-
   category: 'Electric Car',
   gearType: 'Automatic',
+  details: {
+    fuelType: 'ไฟฟ้า',
+    seatCount: 4,
+    registrationType: 'รถยนต์ส่วนบุคคล',
+    spareKey: 'มี',
+    insurance: 'ไม่มี',
+    color: 'เทา',
+    registrationDate: 'มี.ค. 2021',
+    lastDistance: '97,563 กม.',
+    serviceGuide: 'ไม่มี',
+  },
+  inspection: {
+    lastInspection: 'ธ.ค. 2024',
+    nextInspection: 'ธ.ค. 2025',
+    status: 'ตรวจสอบเรียบร้อย',
+  },
 };
 
 const Detail = () => {
@@ -143,6 +160,49 @@ const Detail = () => {
             </Card>
           </div>
         </div>
+
+      {/* Tabs (car details and inspection) */}
+      <div className="mt-6">
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="รายละเอียดรถยนต์" key="1">
+            <Table
+              pagination={false}
+              showHeader={false}
+              dataSource={[
+                { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details.fuelType },
+                { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details.seatCount },
+                { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details.registrationType },
+                { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details.spareKey },
+                { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details.insurance },
+                { key: 'color', label: 'สี', value: mockData.details.color },
+                { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details.registrationDate },
+                { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details.lastDistance },
+                { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details.serviceGuide },
+              ]}
+              columns={[
+                { title: 'รายการ', dataIndex: 'label', key: 'label' },
+                { title: 'ข้อมูล', dataIndex: 'value', key: 'value' },
+              ]}
+            />
+          </TabPane>
+
+          <TabPane tab="การตรวจสภาพรถยนต์" key="2">
+            <Table
+              pagination={false}
+              showHeader={false}
+              dataSource={[
+                { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection.lastInspection },
+                { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection.nextInspection },
+                { key: 'status', label: 'สถานะ', value: mockData.inspection.status },
+              ]}
+              columns={[
+                { title: 'รายการ', dataIndex: 'label', key: 'label' },
+                { title: 'ข้อมูล', dataIndex: 'value', key: 'value' },
+              ]}
+            />
+          </TabPane>
+        </Tabs>
+      </div>
       </div>
 
 
@@ -168,7 +228,7 @@ const Detail = () => {
             Facebook
           </Button>
           <Button type="link" icon={<TwitterOutlined style={{ fontSize: '24px', color: '#1DA1F2' }} />} href="https://x.com/"> 
-            X (Twitter) {/* ไอคอนนี้มันน่ารักดีถ้าจะเปลี่ยนบอกได้นะครับ */}
+            X (Twitter) 
           </Button>
           <Button type="link" icon={<WhatsAppOutlined style={{ fontSize: '24px', color: '#25D366' }} />} href="https://www.whatsapp.com/"> 
             WhatsApp
