@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
 import {
   LikeOutlined,
@@ -15,86 +16,66 @@ import {
   WhatsAppOutlined,
   InstagramOutlined,
 } from '@ant-design/icons';
-import 'antd/dist/reset.css';
 import 'tailwindcss/tailwind.css';
+import 'antd/dist/reset.css';
+import mockData from '../../mock/mock';
 
 const { TabPane } = Tabs;
 
-const mockData = {
-  id: 1,
-  modelName: 'Model S',
-  brandName: 'Tesla',
-  price: '100,000฿', 
-  images: [
-    'https://hips.hearstapps.com/hmg-prod/images/2025-tesla-model-s-1-672d42e172407.jpg',
-    'https://www.tesla.com/sites/default/files/modelsx-new/social/model-s-hero-social.jpg',
-    'https://hips.hearstapps.com/hmg-prod/images/2019-tesla-model3-lt-airporthero-low-101-1587061146.jpg',
-    'https://di-uploads-pod25.dealerinspire.com/rickhendrickcitychevy/uploads/2023/11/mlp-img-perf-2024-camaro.jpg',
-    'https://www.vdm.ford.com/content/dam/na/ford/en_us/images/mustang/2025/jellybeans/Ford_Mustang_2025_200A_PJS_883_89W_13B_COU_64F_99H_44U_EBST_YZTAC_DEFAULT_EXT_4.png',
-  ],
-  category: 'Electric Car',
-  gearType: 'Automatic',
-  details: {
-    fuelType: 'ไฟฟ้า',
-    seatCount: 4,
-    registrationType: 'รถยนต์ส่วนบุคคล',
-    spareKey: 'มี',
-    insurance: 'ไม่มี',
-    color: 'เทา',
-    registrationDate: 'มี.ค. 2021',
-    lastDistance: '97,563 กม.',
-    serviceGuide: 'ไม่มี',
-  },
-  inspection: {
-    lastInspection: 'ธ.ค. 2024',
-    nextInspection: 'ธ.ค. 2025',
-    status: 'ตรวจสอบเรียบร้อย',
-  },
-};
-
 const Detail = () => {
+  const { id } = useParams();
+  const [carData, setCarData] = React.useState({});
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [isInstallmentModalVisible, setIsInstallmentModalVisible] = React.useState(false);
   const [installmentAmount, setInstallmentAmount] = React.useState(0);
   const [isLiked, setIsLiked] = React.useState(false);
   const [likeCount, setLikeCount] = React.useState(120);
-  const carouselRef = React.useRef(); 
+  const carouselRef = React.useRef(null);
+
+  const [isShareModalVisible, setIsShareModalVisible] = React.useState(false);
 
   const handleClick = (action) => {
     console.log(`${action} button clicked`);
     if (action === 'Interest') {
       setIsModalVisible(true);
     } else if (action === 'Calculate') {
-      calculateInstallment(); 
+      calculateInstallment();
       setIsInstallmentModalVisible(true);
     } else if (action === 'Share') {
       setIsShareModalVisible(true);
     }
   };
 
-  const [isShareModalVisible, setIsShareModalVisible] = React.useState(false);
-
   const handleLikeClick = () => {
     setIsLiked(!isLiked);
     setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
   };
-  
+
   const handleCancel = () => {
     setIsModalVisible(false);
     setIsInstallmentModalVisible(false);
     setIsShareModalVisible(false);
   };
 
-  const handleThumbnailClick = (index) => {
-    setSelectedImage(index);
-    carouselRef.current.goTo(index); 
+  const calculateInstallment = () => {
+    const priceNumber = selectedCar.price
+      ? parseInt(String(selectedCar.price).replace(/[^0-9]/g, ''), 10)
+      : 0;
+    const installment = priceNumber > 0 ? Math.ceil(priceNumber / 12) : 0;
+    setInstallmentAmount(installment.toLocaleString());
   };
 
-  const calculateInstallment = () => {
-    const priceNumber = parseInt(mockData.price.replace(/[^0-9]/g, ''), 10); 
-    const installment = Math.ceil(priceNumber / 24); 
-    setInstallmentAmount(installment.toLocaleString()); 
+  const selectedCar = mockData.find(car => car.id === parseInt(id, 10)) || {};
+
+  useEffect(() => {
+    const newCarData = mockData.find(car => car.id === parseInt(id, 10));
+    setCarData(newCarData || {});
+  }, [id]);
+
+  const handleThumbnailClick = (id) => {
+    const selectedCar = mockData.find(car => car.id === id);
+    setCarData(selectedCar || {});
   };
 
   return (
@@ -104,35 +85,19 @@ const Detail = () => {
           {/* Left Side */}
           <div className="w-full lg:w-2/3 p-4">
             <Carousel ref={carouselRef} autoplay={false} afterChange={(current) => setSelectedImage(current)}>
-              {mockData.images.map((image, index) => (
-                <div key={index}>
-                  <img src={image} alt={`${mockData.modelName} ${index + 1}`} className="w-full h-96 object-cover rounded-lg" />
-                </div>
-              ))}
+              <div>
+                <img src={carData.image} alt={carData.modelName} className="w-full h-96 object-cover rounded-lg" />
+              </div>
             </Carousel>
-            {/* Thumbnail Images */}
-            <div className="flex justify-center mt-4 flex-wrap gap-2">
-              {mockData.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`${mockData.modelName} Thumbnail ${index + 1}`}
-                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 ${
-                    selectedImage === index ? 'border-blue-500' : 'border-gray-300'
-                  }`}
-                  onClick={() => handleThumbnailClick(index)}
-                />
-              ))}
-            </div>
           </div>
           {/* Right Side */}
           <div className="w-full lg:w-1/3 p-4 flex flex-col justify-between">
             <Card className="flex-grow">
-              <h1 className="text-3xl font-bold mb-2">{mockData.modelName}</h1>
-              <h2 className="text-xl text-gray-600 mb-4">{mockData.brandName}</h2>
-              <p className="text-2xl text-red-600 font-semibold mb-4">{mockData.price}</p>
-              <p className="text-md text-gray-700 mb-2">ประเภท: {mockData.category}</p>
-              <p className="text-md text-gray-700 mb-4">ระบบเกียร์: {mockData.gearType}</p>
+              <h1 className="text-3xl font-bold mb-2">{selectedCar.modelName || 'ไม่พบข้อมูล'}</h1>
+              <h2 className="text-xl text-gray-600 mb-4">{selectedCar.brandName || 'ไม่พบข้อมูล'}</h2>
+              <p className="text-2xl text-red-600 font-semibold mb-4">{selectedCar.price || 'ไม่พบข้อมูล'}</p>
+              <p className="text-md text-gray-700 mb-2">ประเภท: {selectedCar.category || 'ไม่พบข้อมูล'}</p>
+              <p className="text-md text-gray-700 mb-4">ระบบเกียร์: {selectedCar.gearType || 'ไม่พบข้อมูล'}</p>
               <div className="grid grid-cols-2 gap-4">
                 <Button type="primary" icon={<CarOutlined />} onClick={() => handleClick('Interest')} className="w-full">
                   สนใจรถคันนี้
@@ -150,9 +115,8 @@ const Detail = () => {
                 <Button
                   icon={isLiked ? <LikeFilled /> : <LikeOutlined />}
                   onClick={handleLikeClick}
-                  className={`w-full col-span-2 flex items-center justify-center ${
-                    isLiked ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
-                  }`}
+                  className={`w-full col-span-2 flex items-center justify-center ${isLiked ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
+                    }`}
                 >
                   ถูกใจ <span className="ml-2">{likeCount}</span>
                 </Button>
@@ -161,53 +125,53 @@ const Detail = () => {
           </div>
         </div>
 
-      {/* Tabs (car details and inspection) */}
-      <div className="mt-6">
-        <Tabs defaultActiveKey="1">
-          <TabPane tab="รายละเอียดรถยนต์" key="1">
-            <Table
-              pagination={false}
-              showHeader={false}
-              dataSource={[
-                { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details.fuelType },
-                { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details.seatCount },
-                { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details.registrationType },
-                { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details.spareKey },
-                { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details.insurance },
-                { key: 'color', label: 'สี', value: mockData.details.color },
-                { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details.registrationDate },
-                { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details.lastDistance },
-                { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details.serviceGuide },
-              ]}
-              columns={[
-                { title: 'รายการ', dataIndex: 'label', key: 'label' },
-                { title: 'ข้อมูล', dataIndex: 'value', key: 'value' },
-              ]}
-            />
-          </TabPane>
+        {/* Tabs (car details and inspection) */}
+        <div className="mt-6">
+          <Tabs defaultActiveKey="1">
+            <TabPane tab="รายละเอียดรถยนต์" key="1">
+              <Table
+                pagination={false}
+                showHeader={false}
+                dataSource={[
+                  { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details?.fuelType || 'X' },
+                  { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details?.seatCount || 'X' },
+                  { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details?.registrationType || 'X' },
+                  { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details?.spareKey || 'X' },
+                  { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details?.insurance || 'X' },
+                  { key: 'color', label: 'สี', value: mockData.details?.color || 'X' },
+                  { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details?.registrationDate || 'X' },
+                  { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details?.lastDistance || 'X' },
+                  { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details?.serviceGuide || 'X' },
+                ]}
+                columns={[
+                  { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
+                  { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
+                ]}
+              />
+            </TabPane>
 
-          <TabPane tab="การตรวจสภาพรถยนต์" key="2">
-            <Table
-              pagination={false}
-              showHeader={false}
-              dataSource={[
-                { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection.lastInspection },
-                { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection.nextInspection },
-                { key: 'status', label: 'สถานะ', value: mockData.inspection.status },
-              ]}
-              columns={[
-                { title: 'รายการ', dataIndex: 'label', key: 'label' },
-                { title: 'ข้อมูล', dataIndex: 'value', key: 'value' },
-              ]}
-            />
-          </TabPane>
-        </Tabs>
-      </div>
+            <TabPane tab="การตรวจสภาพรถยนต์" key="2">
+              <Table
+                pagination={false}
+                showHeader={false}
+                dataSource={[
+                  { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection?.lastInspection || 'X' },
+                  { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection?.nextInspection || 'X' },
+                  { key: 'status', label: 'สถานะ', value: mockData.inspection?.status || 'X' },
+                ]}
+                columns={[
+                  { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
+                  { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
+                ]}
+              />
+            </TabPane>
+          </Tabs>
+        </div>
       </div>
 
 
       {/* Modal for Contact Info */}
-      <Modal visible={isModalVisible} onCancel={handleCancel} footer={null} title="ติดต่อผู้ขาย">
+      <Modal open={isModalVisible} onCancel={handleCancel} footer={null} title="ติดต่อผู้ขาย">
         <div className="flex flex-col items-center space-y-4">
           <Button type="link" icon={<PhoneOutlined style={{ fontSize: '24px' }} />} href="tel:0123456789">
             โทรศัพท์: 012-345-6789
@@ -222,15 +186,15 @@ const Detail = () => {
       </Modal>
 
       {/* Modal for Sharing */}
-      <Modal visible={isShareModalVisible} onCancel={handleCancel} footer={null} title="แชร์">
+      <Modal open={isShareModalVisible} onCancel={handleCancel} footer={null} title="แชร์">
         <div className="flex flex-col items-center space-y-4">
           <Button type="link" icon={<FacebookOutlined style={{ fontSize: '24px', color: '#1877F2' }} />} href="https://www.facebook.com/">
             Facebook
           </Button>
-          <Button type="link" icon={<TwitterOutlined style={{ fontSize: '24px', color: '#1DA1F2' }} />} href="https://x.com/"> 
-            X (Twitter) 
+          <Button type="link" icon={<TwitterOutlined style={{ fontSize: '24px', color: '#1DA1F2' }} />} href="https://x.com/">
+            X (Twitter)
           </Button>
-          <Button type="link" icon={<WhatsAppOutlined style={{ fontSize: '24px', color: '#25D366' }} />} href="https://www.whatsapp.com/"> 
+          <Button type="link" icon={<WhatsAppOutlined style={{ fontSize: '24px', color: '#25D366' }} />} href="https://www.whatsapp.com/">
             WhatsApp
           </Button>
           <Button type="link" icon={<InstagramOutlined style={{ fontSize: '24px', color: '#E4405F' }} />} href="https://www.instagram.com/">
@@ -240,10 +204,10 @@ const Detail = () => {
       </Modal>
 
       {/* Modal for Installment Calculation */}
-      <Modal visible={isInstallmentModalVisible} onCancel={handleCancel} footer={null} title="คำนวณค่างวด">
+      <Modal open={isInstallmentModalVisible} onCancel={handleCancel} footer={null} title="คำนวณค่างวด">
         <div className="flex flex-col items-center space-y-4">
           <p className="text-lg font-semibold text-gray-800">
-            ผ่อนสบายเพียงเดือนละ <span className="text-red-600">{installmentAmount}</span> บาท
+            ใน 1 ปี ผ่อนเพียงเดือนละ <span className="text-red-600">{installmentAmount}</span> บาท
           </p>
           <Button type="primary" icon={<CarOutlined />} className="w-full" onClick={handleCancel}>
             ยืนยัน
