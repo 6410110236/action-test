@@ -18,12 +18,17 @@ const SignIn = () => {
       return;
     }
     try {
-      await login(username, password, rememberMe); // Call the login function with "Remember Me" option
-      console.log("Login successful");
-      navigate("/"); // Redirect to the home page after successful login
+      const result = await login(username, password, rememberMe);
+      // Only navigate if login was successful
+      if (result && !result.error) {
+        console.log("Login successful");
+        navigate("/home");
+      } else {
+        setError(result?.error?.message || "Invalid username or password");
+      }
     } catch (err) {
       console.error("Login failed:", err);
-      setError("Invalid username or password"); // Set error message
+      setError(err.message || "Invalid username or password");
     }
   };
 
@@ -54,20 +59,24 @@ const SignIn = () => {
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <div className="mb-4 flex items-center">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="mr-2"
-            />
-            <label htmlFor="rememberMe" className="text-sm text-gray-600">
-              Remember Me
-            </label>
-            <a href="#" className="text-blue-500 text-sm hover:underline">
-              Forgot password?
-            </a>
+          <div className="mb-4 flex justify-between items-center">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="mr-2"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-gray-600">
+                Remember Me
+              </label>
+            </div>
+            <div>
+              <a href="#" className="text-blue-500 text-sm hover:underline">
+                Forgot password?
+              </a>
+            </div>
           </div>
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>} {/* Display error message */}
           <button
