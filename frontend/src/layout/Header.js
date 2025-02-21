@@ -14,12 +14,24 @@ const Header = () => {
         imageUrl: 'https://as1.ftcdn.net/jpg/03/46/83/96/1000_F_346839683_6nAPzbhpSkIpb8pmAwufkC7c5eD7wYws.jpg',
     };
 
+    // Update the navigation array with proper role check
     const navigation = [
         { name: 'Home', href: '/', current: location.pathname === '/' },
         { name: 'Buy', href: '/buy', current: location.pathname === '/buy' },
-        ...(state.isLoggedIn && state.role === 'seller' ? [{ name: 'Sell', href: '/seller', current: location.pathname === '/seller' }] : []), // Check if user is logged in and has seller role
+        ...(state.isLoggedIn && state.user?.role?.type === 'seller' 
+            ? [{ name: 'Sell', href: '/seller', current: location.pathname === '/seller' }] 
+            : []),
         { name: 'About', href: '/about', current: location.pathname === '/about' },
     ];
+
+    // Update debug logging to show more detail
+    console.log('Auth State:', {
+        isLoggedIn: state.isLoggedIn,
+        user: state.user,
+        userRole: state.user?.role,
+        roleType: state.user?.role?.type,
+        showSellerTab: state.isLoggedIn && state.user?.role?.type === 'seller'
+    });
 
     const userNavigation = [
         { name: 'Your Profile', href: 'users' },
