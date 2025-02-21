@@ -60,9 +60,15 @@ export const ContextProvider = props => {
         }
     
         if (result?.user && result?.jwt) {
-            updateJwt(result.jwt, result.user.role, rememberMe);
-            setLoginSuccess(true, result.user, result.jwt, result.user.role);
-            console.log('Login successful:', result.user);
+            const userRole = result.user.role;
+            console.log('Login successful, user role:', userRole);
+            updateJwt(result.jwt, userRole, rememberMe);
+            setState({
+                isLoggedIn: true,
+                user: { ...result.user, role: userRole },
+                jwt: result.jwt,
+                loginError: null
+            });
         } else {
             setLoginError(new Error('Invalid login response'));
             setState({
