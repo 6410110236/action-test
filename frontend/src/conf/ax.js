@@ -6,21 +6,21 @@ export const axData = {
 };
 
 const ax = axios.create({
-    baseURL: conf.apiUrlPrefix, // ใช้ค่า apiUrlPrefix จาก conf
-    withCredentials: true,
+    baseURL: conf.apiUrlPrefix,
+    withCredentials: false, // Change to false if CORS is an issue
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
-// Add request interceptor
+// Add request interceptor for debugging
 ax.interceptors.request.use(function (config) {
     if (axData.jwt && config.url !== conf.loginEndpoint) {
         config.headers['Authorization'] = `Bearer ${axData.jwt}`;
-        console.log('Adding Authorization header:', config.headers['Authorization'],'BaseURL is: ',ax);
     }
-    console.log('Sending request to:', config.url);
-    console.log('Request config:', config);
+    console.log('Request URL:', `${config.baseURL}${config.url}`);
     return config;
 }, function (error) {
-    console.error('Request error:', error);
     return Promise.reject(error);
 });
 

@@ -19,12 +19,11 @@ const SignIn = () => {
     }
     try {
       const result = await login(username, password, rememberMe);
-      // Only navigate if login was successful
-      if (result && !result.error) {
+      if (result.success) {
         console.log("Login successful");
         navigate("/home");
       } else {
-        setError(result?.error?.message || "Invalid username or password");
+        setError(result.error?.message || "Invalid username or password");
       }
     } catch (err) {
       console.error("Login failed:", err);

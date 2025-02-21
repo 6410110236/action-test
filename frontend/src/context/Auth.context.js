@@ -116,12 +116,21 @@ export const ContextProvider = props => {
     }, []);
 
     const login = (username, password, rememberMe) => {
-        setLoginPending(true);
-        setLoginSuccess(false);
-        setLoginError(null);
-
-        fetchLogin(username, password, (error, result) => handleLoginResult(error, result, rememberMe))
-    }
+        return new Promise((resolve) => {
+            setLoginPending(true);
+            setLoginSuccess(false);
+            setLoginError(null);
+    
+            fetchLogin(username, password, (error, result) => {
+                handleLoginResult(error, result, rememberMe);
+                if (error) {
+                    resolve({ error });
+                } else {
+                    resolve({ success: true });
+                }
+            });
+        });
+    };
 
     const logout = () => {
         setLoginPending(false);
@@ -146,20 +155,28 @@ export const ContextProvider = props => {
 
 const fetchLogin = async (username, password, callback) => {
     try {
+        console.log('Attempting login to:', `${conf.apiUrlPrefix}${conf.loginEndpoint}`);
         const response = await ax.post(conf.loginEndpoint, {
             identifier: username,
             password
-        })
+        });
         if (response.data?.jwt && response.data?.user?.id > 0) {
-            callback(null, response.data)
+            callback(null, response.data);
         } else {
-            callback(new Error('Invalid response format'))
+            callback(new Error('Invalid response format'));
         }
     } catch (e) {
-        if (e.response?.status === 400) {
-            callback(new Error('Invalid username or password'))
+        console.error('Login error details:', {
+            status: e.response?.status,
+            message: e.message,
+            endpoint: `${conf.apiUrlPrefix}${conf.loginEndpoint}`
+        });
+        if (e.response?.status === 404) {
+            callback(new Error('Login service not found. Please check API configuration'));
+        } else if (e.response?.status === 400) {
+            callback(new Error('Invalid username or password'));
         } else {
-            callback(new Error('Login failed: ' + (e.message || 'Unknown error')))
+            callback(new Error(`Login failed: ${e.message}`));
         }
     }
-}
+};
