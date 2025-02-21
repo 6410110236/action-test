@@ -17,13 +17,12 @@ const Header = () => {
     const navigation = [
         { name: 'Home', href: '/', current: location.pathname === '/' },
         { name: 'Buy', href: '/buy', current: location.pathname === '/buy' },
-        { name: 'sell', href: '/seller', current: location.pathname === '/seller' },
-        // { name: 'About', href: '/about', current: location.pathname === '/about' },
+        ...(state.isLoggedIn && state.role === 'seller' ? [{ name: 'Sell', href: '/seller', current: location.pathname === '/seller' }] : []), // Check if user is logged in and has seller role
+        { name: 'About', href: '/about', current: location.pathname === '/about' },
     ];
 
     const userNavigation = [
         { name: 'Your Profile', href: 'users' },
-        { name: 'Settings', href: '#' },
         { name: 'Sign out', href: 'signin', onClick: logout },
     ];
 
@@ -73,36 +72,53 @@ const Header = () => {
                                 </svg>
                             </button>
                             {/* Profile dropdown */}
-                            <Menu as="div" className="relative ml-3">
-                                <div>
-                                    <MenuButton
-                                        className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none"
-                                        onClick={(e) => e.currentTarget.blur()}
+                            {state.isLoggedIn ? (
+                                <Menu as="div" className="relative ml-3">
+                                    <div>
+                                        <MenuButton
+                                            className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none"
+                                            onClick={(e) => e.currentTarget.blur()}
+                                        >
+                                            <span className="sr-only">Open user menu</span>
+                                            <img
+                                                className="h-8 w-8 rounded-full" src={user.imageUrl} alt=""
+                                            />
+                                        </MenuButton>
+                                    </div>
+                                    <MenuItems
+                                        className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                                     >
-                                        <span className="sr-only">Open user menu</span>
-                                        <img
-                                            className="h-8 w-8 rounded-full" src={user.imageUrl} alt=""
-                                        />
-                                    </MenuButton>
+                                        {userNavigation.map((item) => (
+                                            <MenuItem key={item.name}>
+                                                {({ active }) => (
+                                                    <a
+                                                        href={item.href}
+                                                        className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                                                        onClick={item.onClick}
+                                                    >
+                                                        {item.name}
+                                                    </a>
+                                                )}
+                                            </MenuItem>
+                                        ))}
+                                    </MenuItems>
+                                </Menu>
+                            ) : (
+                                <div className="flex space-x-4">
+                                    <Link
+                                        to="/signin"
+                                        className="rounded-full py-1 px-3 text-sm font-semibold text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                                    >
+                                        Sign In
+                                    </Link>
+                                    <Link
+                                        to="/signup"
+                                        className="rounded-full py-1 px-3 text-sm font-semibold text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                                    >
+                                        Sign Up
+                                    </Link>
                                 </div>
-                                <MenuItems
-                                    className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                >
-                                    {userNavigation.map((item) => (
-                                        <MenuItem key={item.name}>
-                                            {({ active }) => (
-                                                <a
-                                                    href={item.href}
-                                                    className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                                                    onClick={item.onClick}
-                                                >
-                                                    {item.name}
-                                                </a>
-                                            )}
-                                        </MenuItem>
-                                    ))}
-                                </MenuItems>
-                            </Menu>
+                            )}
                         </div>
                     </div>
 
@@ -163,17 +179,36 @@ const Header = () => {
 
                     {/* menu drop down profile, setting, sign out */}
                     <div className="mt-3 space-y-1 px-2">
-                        {userNavigation.map((item) => (
-                            <DisclosureButton
-                                key={item.name}
-                                as="a"
-                                href={item.href}
-                                className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                                onClick={item.onClick}
-                            >
-                                {item.name}
-                            </DisclosureButton>
-                        ))}
+                        {state.isLoggedIn ? (
+                            userNavigation.map((item) => (
+                                <DisclosureButton
+                                    key={item.name}
+                                    as="a"
+                                    href={item.href}
+                                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                                    onClick={item.onClick}
+                                >
+                                    {item.name}
+                                </DisclosureButton>
+                            ))
+                        ) : (
+                            <>
+                                <DisclosureButton
+                                    as="a"
+                                    href="/signin"
+                                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                                >
+                                    Sign In
+                                </DisclosureButton>
+                                <DisclosureButton
+                                    as="a"
+                                    href="/signup"
+                                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                                >
+                                    Sign Up
+                                </DisclosureButton>
+                            </>
+                        )}
                     </div>
                 </div>
             </DisclosurePanel>

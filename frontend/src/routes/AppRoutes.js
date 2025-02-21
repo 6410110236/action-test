@@ -5,9 +5,9 @@ import SignIn from '../modules/auth/pages/signIn';
 import SignUp from '../modules/auth/pages/signUp';
 import SellUser from '../modules/transaction/components/SellUser';
 import Order from '../modules/transaction/order';
-import PrivateRoute from './PrivateRoutes'; // Import PrivateRoute
+import PrivateRoute from './PrivateRoutes'; 
 import Detail from '../modules/detail/mock/detail';
-import CarCart from '../modules/search/pages/carcart';
+import CarCart from '../modules/search/pages/CarCart';
 import Users from '../modules/transaction/components/Users';
 
 

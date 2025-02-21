@@ -12,7 +12,7 @@ function App() {
 
   return (
     <div className="App">
-      {shouldShowHeader && <Header isLoggedIn={state.isLoggedIn} />}
+      <Header isLoggedIn={state.isLoggedIn} />
       <AppRoutes isLoggedIn={state.isLoggedIn} />
     </div>
   );

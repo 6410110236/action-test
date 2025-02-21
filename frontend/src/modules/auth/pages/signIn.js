@@ -13,6 +13,10 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!username || !password) {
+      setError("Username and password are required"); // Set error message if username or password is empty
+      return;
+    }
     try {
       await login(username, password, rememberMe); // Call the login function with "Remember Me" option
       console.log("Login successful");
@@ -61,13 +65,11 @@ const SignIn = () => {
             <label htmlFor="rememberMe" className="text-sm text-gray-600">
               Remember Me
             </label>
-          </div>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>} {/* Display error message */}
-          <div className="text-right mb-4">
             <a href="#" className="text-blue-500 text-sm hover:underline">
               Forgot password?
             </a>
           </div>
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>} {/* Display error message */}
           <button
             type="submit"
             className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
@@ -77,7 +79,7 @@ const SignIn = () => {
         </form>
         <p className="text-center text-sm mt-4">
           Not a member?{" "}
-          <a href="#" className="text-blue-500 hover:underline">
+          <a href="/signup" className="text-blue-500 hover:underline">
             Sign up now.
           </a>
         </p>

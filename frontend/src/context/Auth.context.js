@@ -10,23 +10,28 @@ const initialState = {
     user: null,
     isLoginPending: false,
     loginError: null,
-    jwt: null, // Add jwt to the initial state
+    jwt: null,
+    role: null, // Add role to the initial state
 };
 
-const updateJwt = (jwt, rememberMe) => {
+const updateJwt = (jwt, role, rememberMe) => {
     axData.jwt = jwt;
     if (jwt) {
         if (rememberMe) {
             localStorage.setItem(conf.jwtSessionStorageKey, jwt);
-            console.log('JWT stored in localStorage');
+            localStorage.setItem(conf.roleSessionStorageKey, role); // Store role in localStorage
+            console.log('JWT and role stored in localStorage');
         } else {
             sessionStorage.setItem(conf.jwtSessionStorageKey, jwt);
-            console.log('JWT stored in sessionStorage');
+            sessionStorage.setItem(conf.roleSessionStorageKey, role); // Store role in sessionStorage
+            console.log('JWT and role stored in sessionStorage');
         }
     } else {
         localStorage.removeItem(conf.jwtSessionStorageKey);
+        localStorage.removeItem(conf.roleSessionStorageKey); // Remove role from localStorage
         sessionStorage.removeItem(conf.jwtSessionStorageKey);
-        console.log('JWT removed from storage');
+        sessionStorage.removeItem(conf.roleSessionStorageKey); // Remove role from sessionStorage
+        console.log('JWT and role removed from storage');
     }
 };
 
@@ -34,17 +39,16 @@ export const ContextProvider = props => {
     const [state, setState] = useSetState(initialState);
 
     const setLoginPending = (isLoginPending) => setState({ isLoginPending });
-    const setLoginSuccess = (isLoggedIn, user, jwt) => setState({ isLoggedIn, user, jwt }); // Pass jwt to setLoginSuccess
+    const setLoginSuccess = (isLoggedIn, user, jwt, role) => setState({ isLoggedIn, user, jwt, role }); // Pass role to setLoginSuccess
     const setLoginError = (loginError) => setState({ loginError });
-
 
     const handleLoginResult = (error, result, rememberMe) => {
         setLoginPending(false);
-
+    
         if (result && result.user) {
             if (result.jwt) {
-                updateJwt(result.jwt, rememberMe);
-                setLoginSuccess(true, result.user, result.jwt); // Pass jwt to setLoginSuccess
+                updateJwt(result.jwt, result.user.role, rememberMe); // Pass role to updateJwt
+                setLoginSuccess(true, result.user, result.jwt, result.user.role); // Pass role to setLoginSuccess
             }
             console.log('Login successful:', result.user);
         } else if (error) {
@@ -106,14 +110,25 @@ const fetchLogin = async (username, password, callback) => {
 const loadPersistedJwt = async (callback) => {
     try {
         const persistedJwt = sessionStorage.getItem(conf.jwtSessionStorageKey) || localStorage.getItem(conf.jwtSessionStorageKey);
+        const persistedRole = sessionStorage.getItem(conf.roleSessionStorageKey) || localStorage.getItem(conf.roleSessionStorageKey); // Load role from storage
         if (persistedJwt) {
             axData.jwt = persistedJwt;
-            const response = await ax.get(conf.jwtUserEndpoint);
-            if (response.data.id > 0) {
-                callback(null, { user: response.data });
-            } else {
-                callback(null);
+            try {
+                const response = await ax.get(conf.jwtUserEndpoint);
+                console.log('Response from /api/users/me:', response); // Log the response
+                if (response.data.id > 0) {
+                    const userRole = response.data.role ? response.data.role.type : persistedRole;
+                    callback(null, { user: response.data, jwt: persistedJwt, role: userRole }); // Pass role to callback
+                    console.log('Auto login successful:', response.data);
+                } else {
+                    callback(null);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                callback(new Error('Fail to fetch user data'));
             }
+        } else {
+            callback(null);
         }
     } catch (e) {
         console.log(e);

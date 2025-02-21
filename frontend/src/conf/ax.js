@@ -14,7 +14,7 @@ const ax = axios.create({
 ax.interceptors.request.use(function (config) {
     if (axData.jwt && config.url !== conf.loginEndpoint) {
         config.headers['Authorization'] = `Bearer ${axData.jwt}`;
-        console.log('Adding Authorization header:', config.headers['Authorization']);
+        console.log('Adding Authorization header:', config.headers['Authorization'],'BaseURL is: ',ax);
     }
     console.log('Sending request to:', config.url);
     console.log('Request config:', config);

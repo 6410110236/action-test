@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import mockData from '../../mock/mock';
-import SideBar from '../components/siderbar';
+import SideBar from '../components/SideBar';
 import { Pagination } from 'antd';
 
 const CarCart = () => {

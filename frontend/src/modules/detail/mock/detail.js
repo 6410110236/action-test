@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
+import { Button, Carousel, Card, Modal, Tabs, Table, Drawer } from 'antd';
 import {
   LikeOutlined,
   LikeFilled,
@@ -19,8 +19,6 @@ import {
 import 'tailwindcss/tailwind.css';
 import 'antd/dist/reset.css';
 import mockData from '../../mock/mock';
-
-const { TabPane } = Tabs;
 
 const Detail = () => {
   const { id } = useParams();
@@ -78,6 +76,53 @@ const Detail = () => {
     setCarData(selectedCar || {});
   };
 
+  const tabItems = [
+    {
+      key: '1',
+      label: 'รายละเอียดรถยนต์',
+      children: (
+        <Table
+          pagination={false}
+          showHeader={false}
+          dataSource={[
+            { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details?.fuelType || 'X' },
+            { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details?.seatCount || 'X' },
+            { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details?.registrationType || 'X' },
+            { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details?.spareKey || 'X' },
+            { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details?.insurance || 'X' },
+            { key: 'color', label: 'สี', value: mockData.details?.color || 'X' },
+            { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details?.registrationDate || 'X' },
+            { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details?.lastDistance || 'X' },
+            { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details?.serviceGuide || 'X' },
+          ]}
+          columns={[
+            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
+            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
+          ]}
+        />
+      ),
+    },
+    {
+      key: '2',
+      label: 'การตรวจสภาพรถยนต์',
+      children: (
+        <Table
+          pagination={false}
+          showHeader={false}
+          dataSource={[
+            { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection?.lastInspection || 'X' },
+            { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection?.nextInspection || 'X' },
+            { key: 'status', label: 'สถานะ', value: mockData.inspection?.status || 'X' },
+          ]}
+          columns={[
+            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
+            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
+          ]}
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="bg-white p-6">
       <div className="max-w-screen-lg mx-auto">
@@ -127,48 +172,9 @@ const Detail = () => {
 
         {/* Tabs (car details and inspection) */}
         <div className="mt-6">
-          <Tabs defaultActiveKey="1">
-            <TabPane tab="รายละเอียดรถยนต์" key="1">
-              <Table
-                pagination={false}
-                showHeader={false}
-                dataSource={[
-                  { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details?.fuelType || 'X' },
-                  { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details?.seatCount || 'X' },
-                  { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details?.registrationType || 'X' },
-                  { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details?.spareKey || 'X' },
-                  { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details?.insurance || 'X' },
-                  { key: 'color', label: 'สี', value: mockData.details?.color || 'X' },
-                  { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details?.registrationDate || 'X' },
-                  { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details?.lastDistance || 'X' },
-                  { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details?.serviceGuide || 'X' },
-                ]}
-                columns={[
-                  { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
-                  { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
-                ]}
-              />
-            </TabPane>
-
-            <TabPane tab="การตรวจสภาพรถยนต์" key="2">
-              <Table
-                pagination={false}
-                showHeader={false}
-                dataSource={[
-                  { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection?.lastInspection || 'X' },
-                  { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection?.nextInspection || 'X' },
-                  { key: 'status', label: 'สถานะ', value: mockData.inspection?.status || 'X' },
-                ]}
-                columns={[
-                  { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
-                  { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
-                ]}
-              />
-            </TabPane>
-          </Tabs>
+          <Tabs defaultActiveKey="1" items={tabItems} />
         </div>
       </div>
-
 
       {/* Modal for Contact Info */}
       <Modal open={isModalVisible} onCancel={handleCancel} footer={null} title="ติดต่อผู้ขาย">
