@@ -1,10 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-    Disclosure, 
-    Menu 
-} from '@headlessui/react';
-import { MenuIcon, XIcon } from '@heroicons/react/outline';
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { MenuIcon, XIcon, SearchIcon } from '@heroicons/react/outline';
 import { AuthContext } from '../context/Auth.context';
 
 const DEFAULT_USER = {
@@ -16,6 +13,7 @@ const DEFAULT_USER = {
 const Header = () => {
     const location = useLocation();
     const { state, logout } = useContext(AuthContext);
+    const [showSearch, setShowSearch] = useState(false);
 
     const user = state.user || DEFAULT_USER;
 
@@ -29,25 +27,77 @@ const Header = () => {
     ];
 
     const userNavigation = [
-        { name: 'Your Profile', href: 'users' },
-        { name: 'Sign out', href: 'signin', onClick: logout },
+        { 
+            name: 'Your Profile', 
+            href: '/users',
+            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        },
+        { 
+            name: 'Sign out', 
+            href: '/signin', 
+            onClick: logout,
+            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        },
     ];
 
-    const classNames = (...classes) => {
-        return classes.filter(Boolean).join(' ');
-    };
+    const classNames = (...classes) => classes.filter(Boolean).join(' ');
 
     const renderUserMenu = () => (
         state.isLoggedIn ? (
             <Menu as="div" className="relative ml-3">
-                {/* ...existing user menu code... */}
+                <Transition
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                >
+                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <div className="px-4 py-2 text-xs text-gray-500">
+                            {state.user?.role?.type || 'User'}
+                        </div>
+                        {userNavigation.map((item) => (
+                            <Menu.Item key={item.name}>
+                                {({ active }) => (
+                                    <Link
+                                        to={item.href}
+                                        onClick={item.onClick}
+                                        className={classNames(
+                                            active ? 'bg-gray-100' : '',
+                                            'flex px-4 py-2 text-sm text-gray-700 items-center'
+                                        )}
+                                    >
+                                        <svg className="mr-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            {item.icon}
+                                        </svg>
+                                        {item.name}
+                                    </Link>
+                                )}
+                            </Menu.Item>
+                        ))}
+                    </Menu.Items>
+                </Transition>
+                <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                    <img
+                        className="h-8 w-8 rounded-full object-cover"
+                        src={user.imageUrl}
+                        alt=""
+                    />
+                </Menu.Button>
             </Menu>
         ) : (
             <div className="flex space-x-4">
-                <Link to="/signin" className="rounded-full py-1 px-3 text-sm font-semibold text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                <Link
+                    to="/signin"
+                    className="rounded-full bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+                >
                     Sign In
                 </Link>
-                <Link to="/signup" className="rounded-full py-1 px-3 text-sm font-semibold text-gray-300 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+                <Link
+                    to="/signup"
+                    className="rounded-full bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 transition-colors"
+                >
                     Sign Up
                 </Link>
             </div>

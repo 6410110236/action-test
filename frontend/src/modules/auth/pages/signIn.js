@@ -1,33 +1,76 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserIcon, LockClosedIcon } from "@heroicons/react/solid";
-import { AuthContext } from "../../../context/Auth.context"; // Import AuthContext
+import { UserIcon, LockClosedIcon, EyeIcon, EyeOffIcon } from "@heroicons/react/solid";
+import { AuthContext } from "../../../context/Auth.context";
 
 const SignIn = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false); // State for "Remember Me" checkbox
-  const [error, setError] = useState(null); // State to handle login errors
-  const { login } = useContext(AuthContext); // Get the login function from AuthContext
-  const navigate = useNavigate(); // Get the navigate function from react-router-dom
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    rememberMe: false,
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const validateForm = () => {
+    if (!formData.username.trim()) {
+      setError("Username is required");
+      return false;
+    }
+    if (!formData.password) {
+      setError("Password is required");
+      return false;
+    }
+    if (formData.username.trim().length < 3) {
+      setError("Username must be at least 3 characters");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+    return true;
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    setError(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      setError("Username and password are required"); // Set error message if username or password is empty
-      return;
-    }
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const result = await login(username, password, rememberMe);
+      const result = await login(
+        formData.username.trim(),
+        formData.password,
+        formData.rememberMe
+      );
+
       if (result.success) {
         console.log("Login successful");
         navigate("/home");
       } else {
         setError(result.error?.message || "Invalid username or password");
+        setFormData(prev => ({ ...prev, password: "" }));
       }
     } catch (err) {
       console.error("Login failed:", err);
-      setError(err.message || "Invalid username or password");
+      setError(err.message || "An error occurred during login");
+      setFormData(prev => ({ ...prev, password: "" }));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,60 +78,87 @@ const SignIn = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Sign In</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4 relative">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="relative">
             <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
+              name="username"
               placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
+              value={formData.username}
+              onChange={handleChange}
+              disabled={isLoading}
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              autoComplete="username"
             />
           </div>
-          <div className="mb-4 relative">
+          
+          <div className="relative">
             <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
+              name="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={isLoading}
+              className="w-full pl-10 pr-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              autoComplete="current-password"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            >
+              {showPassword ? (
+                <EyeOffIcon className="w-5 h-5 text-gray-400" />
+              ) : (
+                <EyeIcon className="w-5 h-5 text-gray-400" />
+              )}
+            </button>
           </div>
-          <div className="mb-4 flex justify-between items-center">
+
+          <div className="flex justify-between items-center">
             <div className="flex items-center">
               <input
                 type="checkbox"
                 id="rememberMe"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
                 className="mr-2"
               />
               <label htmlFor="rememberMe" className="text-sm text-gray-600">
                 Remember Me
               </label>
             </div>
-            <div>
-              <a href="#" className="text-blue-500 text-sm hover:underline">
-                Forgot password?
-              </a>
-            </div>
+            <a href="#" className="text-blue-500 text-sm hover:underline">
+              Forgot password?
+            </a>
           </div>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>} {/* Display error message */}
+
+          {error && (
+            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition"
+            disabled={isLoading}
+            className={`w-full p-2 rounded-lg text-white transition
+              ${isLoading 
+                ? 'bg-blue-400 cursor-not-allowed' 
+                : 'bg-blue-500 hover:bg-blue-600'}`}
           >
-            Sign In
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
         <p className="text-center text-sm mt-4">
           Not a member?{" "}
           <a href="/signup" className="text-blue-500 hover:underline">
-            Sign up now.
+            Sign up now
           </a>
         </p>
       </div>
