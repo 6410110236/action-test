@@ -1,45 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { client, gql } from '../../../utils/apolloClient';
 import AddCarForm from './AddCarForm';
-
-const GET_CARS = gql`
-  query Query {
-  garages {
-    Color
-    Distance
-    Description
-    Manual
-    Picture {
-      url
-    }
-    Price
-    RegisterDate
-    SecondaryKey
-    StatusBuying
-    VehicleRegistrationTypes
-    VehicleTaxExpirationDate
-    Warranty
-    model {
-      ModelName
-      GearType
-      EnergySource
-      Seats
-      brand_car {
-        BrandName
-      }
-    }
-    documentId
-  }
-}
-`;
-
-const DELETE_CAR = gql`
-  mutation DeleteGarage($documentId: ID!) {
-    deleteGarage(documentId: $documentId) {
-      documentId
-    }
-  }
-`;
+import { GET_CARS, DELETE_CAR } from '../../../conf/main';
 
 function SellUser() {
   const [cars, setCars] = useState([]);

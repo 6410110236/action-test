@@ -1,16 +1,38 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
 import useAuthStore from "../store/authStore";
+import useCarStore from "../store/carStore"; // นำเข้า useCarStore
+import { client, gql } from '../utils/apolloClient'; // นำเข้า client และ gql
+import {GET_GARAGES} from "../conf/main";
 
 const Header = () => {
   const location = useLocation();
   const { isLoggedIn, user, role, logout } = useAuthStore();
+  const [searchQuery, setSearchQuery] = useState(""); // สถานะสำหรับเก็บค่าการค้นหา
+  const navigate = useNavigate(); // ใช้ navigate เพื่อเปลี่ยนเส้นทางไปยังหน้า /buy
+  const { setCars } = useCarStore(); // ดึง setCars จาก store เพื่อให้สามารถตั้งค่าข้อมูลที่ค้นหา
+
+  // สถานะใหม่สำหรับการแสดงช่องค้นหา
+  const [isSearchOpen, setIsSearchOpen] = useState(false); // กำหนดสถานะในการเปิดปิดช่องค้นหา
 
   // ถ้าไม่ได้ล็อกอินหรือ user เป็น null จะถือว่าไม่มีข้อมูล
   const currentUser = isLoggedIn && user ? user : null;
   const userRole = isLoggedIn && role ? role : null;
+
+  const handleSearch = () => {
+    // ค้นหาข้อมูลและเก็บข้อมูลใน store
+    if (searchQuery.trim()) {
+      navigate('/buy'); // เปลี่ยนเส้นทางไปหน้า /buy
+      setCars([]); // เคลียร์ข้อมูลรถเก่าใน store
+      client.query({ query: GET_GARAGES, variables: { search: searchQuery } })
+        .then(response => {
+          setCars(response.data.garages); // ตั้งค่าผลลัพธ์ที่ได้จากการค้นหา
+        })
+        .catch(error => console.error('❌ Error fetching data:', error));
+    }
+  };
 
   const navigation = [
     { name: "Home", href: "/", current: location.pathname === "/" },
@@ -55,6 +77,13 @@ const Header = () => {
     },
   ];
 
+    // ฟังก์ชัน handle เมื่อกด Enter
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+  
   const classNames = (...classes) => classes.filter(Boolean).join(" ");
 
   const renderUserMenu = () =>
@@ -103,7 +132,7 @@ const Header = () => {
             className="h-8 w-8 rounded-full object-cover"
             src={
               currentUser.imageUrl ||
-              "https://img.freepik.com/premium-vector/user-profile-icon-flat-style-member-avatar-vector-illustration-isolated-background-human-permission-sign-business-concept_157943-15752.jpg"
+              "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
             }
             alt={currentUser.name}
           />
@@ -161,14 +190,15 @@ const Header = () => {
               {/* Search button and profile dropdown */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
+                  {/* ปุ่มค้นหาที่จะปรากฏ */}
                   <button
                     type="button"
-                    className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                    onClick={(e) => e.currentTarget.blur()}
+                    className="relative rounded-full bg-gray-800 text-white py-1.5 px-4 flex items-center mr-4"
+                    onClick={() => setIsSearchOpen(!isSearchOpen)} // สลับการแสดงผลของช่องค้นหา
                   >
                     <span className="sr-only">Search</span>
                     <svg
-                      className="h-6 w-6"
+                      className="h-6 w-6 mr-2"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -180,7 +210,36 @@ const Header = () => {
                         d="M21 21l-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
                       ></path>
                     </svg>
+                    Search
                   </button>
+
+                  {/* คอนเทนเนอร์ของช่องค้นหาที่จะมีการแสดง/ซ่อน */}
+                  <Transition
+                    show={isSearchOpen}
+                    enter="transition-all duration-500 ease-out"
+                    enterFrom="transform opacity-0 translate-x-12"
+                    enterTo="transform opacity-100 translate-x-0"
+                    leave="transition-all duration-500 ease-in"
+                    leaveFrom="transform opacity-100 translate-x-0"
+                    leaveTo="transform opacity-0 translate-x-12"
+                  >
+                    <div className="ml-4 flex items-center">
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        onChange={(e) => setSearchQuery(e.target.value)} // เปลี่ยนแปลงการค้นหาตาม input
+                        onKeyDown={handleKeyDown} // เพิ่มการรองรับ Enter
+                        className="rounded-lg bg-gray-600 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                      />
+                      <button
+                        onClick={handleSearch} // เมื่อกดปุ่มค้นหา
+                        className="ml-2 rounded-full bg-gray-700 text-white px-4 py-2"
+                      >
+                        Go
+                      </button>
+                    </div>
+                  </Transition>
+
                   {renderUserMenu()}
                 </div>
               </div>
@@ -223,7 +282,10 @@ const Header = () => {
                   <div className="shrink-0">
                     <img
                       className="h-10 w-10 rounded-full"
-                      src={currentUser.imageUrl}
+                      src={
+                        currentUser.imageUrl ||
+                        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // รูปดีฟอลต์ในมือถือ
+                      }
                       alt={currentUser.name}
                     />
                   </div>

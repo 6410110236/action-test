@@ -1,51 +1,7 @@
 import { useState, useEffect } from "react";
 import { client, gql } from "../../../utils/apolloClient";
+import { GET_BRANDS, GET_MODELS_FROM_BRAND, MUTATE_TO_GARAGE } from "../../../conf/main";
 
-const GET_BRANDS = gql`
-  query Query {
-    brands {
-      BrandName
-      documentId
-    }
-  }
-`;
-
-const GET_MODELS_FROM_BRAND = gql`
-  query Brand($documentId: ID!) {
-    brand(documentId: $documentId) {
-      models_connection {
-        nodes {
-          ModelName
-          documentId
-        }
-      }
-    }
-  }
-`;
-
-const MUTATE_TO_GARAGE = gql`
-  mutation Mutation($data: GarageInput!, $status: PublicationStatus) {
-  createGarage(data: $data, status: $status) {
-    model {
-      ModelName
-      documentId
-    }
-    Color
-    Description
-    Distance
-    VehicleRegistrationTypes
-    Manual
-    Warranty
-    RegisterDate
-    SecondaryKey
-    VehicleTaxExpirationDate
-    Price
-    users_permissions_user {
-      documentId
-    }
-  }
-}
-`
 
 const object_cars = {
   brand: "", //
