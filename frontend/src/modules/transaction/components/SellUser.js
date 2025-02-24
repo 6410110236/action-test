@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { client, gql } from './apolloClient';
+import { client, gql } from '../../../utils/apolloClient';
 import AddCarForm from './AddCarForm';
 
 const GET_CARS = gql`

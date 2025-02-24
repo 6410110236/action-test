@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../../../context/Auth.context'; // Import AuthContext
+import useAuthStore from '../../../store/useStore'; 
 
 const LatestCarsSection = () => {
     const [latestCars, setLatestCars] = useState([]);
-    const { state } = useContext(AuthContext); // Get the state from AuthContext
+    const { isLoggedIn, user } = useAuthStore(); // ดึงค่าจาก Zustand
 
     // Mock data for testing
     const mockCars = [
@@ -110,5 +110,6 @@ const LatestCarsSection = () => {
         </section>
     );
 };
+
 
 export default LatestCarsSection;

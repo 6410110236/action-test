@@ -1,36 +1,52 @@
 import axios from "axios";
-import conf from './main';
+import conf from "./main";
+import useAuthStore from "../store/authStore"; // เปลี่ยนจาก useStore เป็น authStore โดยตรง
 
-export const axData = {
-    jwt: localStorage.getItem('jwt') || ""
-};
-
+// สร้างอินสแตนซ์ axios พร้อมการตั้งค่าเริ่มต้น
 const ax = axios.create({
     baseURL: conf.apiUrlPrefix,
-    withCredentials: false, // Change to false if CORS is an issue
+    withCredentials: true, // ถ้า API ต้องการ credentials
     headers: {
-        'Content-Type': 'application/json'
-    }
+        "Content-Type": "application/json",
+    },
 });
 
-// Add request interceptor for debugging
-ax.interceptors.request.use(function (config) {
-    if (axData.jwt && config.url !== conf.loginEndpoint) {
-        config.headers['Authorization'] = `Bearer ${axData.jwt}`;
+// เพิ่ม request interceptor
+ax.interceptors.request.use(
+    (config) => {
+        try {
+            const jwt = useAuthStore.getState()?.jwt; // ตรวจสอบก่อนดึงค่า jwt
+            if (jwt && config.url !== conf.loginEndpoint) {
+                config.headers.Authorization = `Bearer ${jwt}`;
+            }
+            console.log("🔹 Request URL:", `${config.baseURL}${config.url}`);
+        } catch (error) {
+            console.error("❌ Axios Interceptor Error (Request):", error);
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
-    console.log('Request URL:', `${config.baseURL}${config.url}`);
-    return config;
-}, function (error) {
-    return Promise.reject(error);
-});
+);
 
-// Add response interceptor
-ax.interceptors.response.use(function (response) {
-    console.log('Received response:', response);
-    return response;
-}, function (error) {
-    console.error('Response error:', error);
-    return Promise.reject(error);
-});
+// เพิ่ม response interceptor
+ax.interceptors.response.use(
+    (response) => {
+        console.log("✅ Received response:", response);
+        return response;
+    },
+    (error) => {
+        console.error("❌ Response error:", error);
+
+        // ถ้า Token หมดอายุ ให้ทำการ Logout
+        if (error.response?.status === 401) {
+            console.warn("🔄 JWT Expired, Logging out...");
+            useAuthStore.getState()?.logout(); // ใช้ logout จาก Zustand
+        }
+
+        return Promise.reject(error);
+    }
+);
 
 export default ax;

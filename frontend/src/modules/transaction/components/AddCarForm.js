@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { client, gql } from "./apolloClient";
+import { client, gql } from "../../../utils/apolloClient";
 
 const GET_BRANDS = gql`
   query Query {
