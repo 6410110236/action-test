@@ -1,11 +1,11 @@
 import { gql } from '@apollo/client';
 
 const conf = {
-    apiUrlPrefix: process.env.REACT_APP_API_URL || 'http://localhost:1337', // Add default API URL
-    loginEndpoint: '/api/auth/local', // Verify this endpoint matches your backend
-    jwtUserEndpoint: '/api/users/me?populate=*',
-    jwtSessionStorageKey: 'auth.jwt',
-    roleSessionStorageKey: 'auth.role'
+  apiUrlPrefix: process.env.REACT_APP_API_URL || 'http://localhost:1337', // Add default API URL
+  loginEndpoint: '/api/auth/local', // Verify this endpoint matches your backend
+  jwtUserEndpoint: '/api/users/me?populate=*',
+  jwtSessionStorageKey: 'auth.jwt',
+  roleSessionStorageKey: 'auth.role'
 };
 
 // GraphQL query สำหรับดึงข้อมูล garages
@@ -125,18 +125,14 @@ export const DELETE_CAR = gql`
 `;
 
 export const GET_USER = gql`
-  query UsersPermissionsUser {
-  usersPermissionsUser(documentId:"s5zlmm3u7a6bgopyrd846aoy") {
-    ContactNumber
-    documentId
+  query UsersPermissionsUser($documentId: ID!) {
+  usersPermissionsUser(documentId: $documentId) {
     username
     email
-    Picture {
-      url
-    }
     role {
       name
     }
+    ContactNumber
   }
 }
 `;
