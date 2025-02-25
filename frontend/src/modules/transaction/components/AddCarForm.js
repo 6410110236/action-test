@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { client, gql } from "../../../utils/apolloClient";
+import { client } from "../../../utils/apolloClient";
 import { GET_BRANDS, GET_MODELS_FROM_BRAND, MUTATE_TO_GARAGE } from "../../../conf/main";
+import useAuthStore from "../../../store/authStore";
 
 
 const object_cars = {
@@ -25,6 +26,7 @@ function AddCarForm() {
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState("");
+  const jwtSell = useAuthStore((state) => state.user.documentId);
 
   const resetForm = () => {
     setFormData(object_cars);
@@ -119,7 +121,7 @@ function AddCarForm() {
               "SecondaryKey" : parseInt(formData.secondaryKey, 10) || 0,
               "VehicleTaxExpirationDate" : formData.vehicleTaxExpirationDate,
               "Price": parseInt(formData.price, 10) || 0,
-              "users_permissions_user": "cc08p5uh881dm5c7jfvlvm48"
+              "users_permissions_user": jwtSell
             },
             "status": "PUBLISHED"
           },

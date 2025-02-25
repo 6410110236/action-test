@@ -86,8 +86,8 @@ export const MUTATE_TO_GARAGE = gql`
 }
 `
 export const GET_CARS = gql`
-  query Query {
-  garages {
+  query Query($filters: GarageFiltersInput) {
+  garages(filters: $filters) {
     Color
     Distance
     Description
