@@ -1,55 +1,15 @@
 import { useState, useEffect } from "react";
-import { client, gql } from "./apolloClient";
-
-const GET_BRANDS = gql`
-  query Query {
-    brands {
-      BrandName
-      documentId
-    }
-  }
-`;
-
-const GET_MODELS_FROM_BRAND = gql`
-  query Brand($documentId: ID!) {
-    brand(documentId: $documentId) {
-      models_connection {
-        nodes {
-          ModelName
-          documentId
-        }
-      }
-    }
-  }
-`;
-
-const MUTATE_TO_GARAGE = gql`
-  mutation Mutation($data: GarageInput!, $status: PublicationStatus) {
-  createGarage(data: $data, status: $status) {
-    model {
-      ModelName
-      documentId
-    }
-    Color
-    Description
-    Distance
-    VehicleRegistrationTypes
-    Manual
-    Warranty
-    RegisterDate
-    SecondaryKey
-    VehicleTaxExpirationDate
-    Price
-    users_permissions_user {
-      documentId
-    }
-  }
-}
-`
+import { client } from "../../../utils/apolloClient";
+import {
+  GET_BRANDS,
+  GET_MODELS_FROM_BRAND,
+  MUTATE_TO_GARAGE,
+} from "../../../conf/main";
+import useAuthStore from "../../../store/authStore";
 
 const object_cars = {
-  brand: "", //
-  model: "", //
+  brand: "",
+  model: "",
   color: "",
   description: "",
   distance: "",
@@ -69,10 +29,42 @@ function AddCarForm() {
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState("");
+  const jwtSell = useAuthStore((state) => state.user.documentId);
+  const [image, setImage] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+    }
+    console.log("handleChange :",file)
+  };
 
   const resetForm = () => {
     setFormData(object_cars);
     setShowWarning(false);
+  };
+
+  const uploadImage = async () => {
+    const formData = new FormData();
+    formData.append("files", image);
+    formData.append("ref", "api:garage.picture");
+    formData.append("field", "Picture");
+
+    try {
+      console.log("upload image : ",formData)
+      const response = await fetch(process.env.REACT_APP_BASE_URL + "/api/upload", {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+      const data = await response.json();
+      return data[0].url; // คืน URL ของไฟล์ที่อัปโหลดสำเร็จ
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
   };
 
   useEffect(() => {
@@ -124,57 +116,64 @@ function AddCarForm() {
     setFormData({
       ...formData,
       brand: selectedBrandName,
-
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     // ตรวจสอบเฉพาะฟิลด์ที่จำเป็น
     const requiredFields = ["brand", "model", "price"];
     const isFormEmpty = requiredFields.some((field) => !formData[field]);
-  
+
     if (isFormEmpty) {
       setShowWarning(true);
       return;
     }
 
-    const selectedModel = models.find((model) => model.ModelName === formData.model);
+    const selectedModel = models.find(
+      (model) => model.ModelName === formData.model
+    );
     if (!selectedModel) {
       setShowWarning(true);
       return;
     }
 
-    console.log(selectedModel.documentId)
+    console.log(selectedModel.documentId);
+
+    let imageUrl = "";
+    if (image) {
+      imageUrl = await uploadImage();
+    }
+    console.log("Image URL : ",image)
 
     client.mutate({
-          mutation: MUTATE_TO_GARAGE,
-          variables: {
-            "data": {
-              "model": selectedModel.documentId,
-              "Color" : formData.color,
-              "Description" : formData.description,
-              "Distance" : parseInt(formData.distance, 10) || 0,
-              "VehicleRegistrationTypes" : formData.vehicleRegistrationType,
-              "Manual" : formData.manual,
-              "Warranty" : formData.warranty,
-              "RegisterDate" : formData.registerDate,
-              "SecondaryKey" : parseInt(formData.secondaryKey, 10) || 0,
-              "VehicleTaxExpirationDate" : formData.vehicleTaxExpirationDate,
-              "Price": parseInt(formData.price, 10) || 0,
-              "users_permissions_user": "cc08p5uh881dm5c7jfvlvm48"
-            },
-            "status": "PUBLISHED"
-          },
-        })
-  
+      mutation: MUTATE_TO_GARAGE,
+      variables: {
+        data: {
+          model: selectedModel.documentId,
+          Color: formData.color,
+          Description: formData.description,
+          Distance: parseInt(formData.distance, 10) || 0,
+          VehicleRegistrationTypes: formData.vehicleRegistrationType,
+          Manual: formData.manual,
+          Warranty: formData.warranty,
+          RegisterDate: formData.registerDate,
+          SecondaryKey: parseInt(formData.secondaryKey, 10) || 0,
+          VehicleTaxExpirationDate: formData.vehicleTaxExpirationDate,
+          Price: parseInt(formData.price, 10) || 0,
+          users_permissions_user: jwtSell,
+          // ImageUrl: imageUrl,
+        },
+        status: "PUBLISHED",
+      },
+    });
+
     console.log("Form Data:", formData);
-  
+
     setIsPopupVisible(false);
     resetForm();
   };
-  
 
   return (
     <div>
@@ -187,7 +186,13 @@ function AddCarForm() {
 
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[1000px] max-h-[80vh] overflow-y-auto">
+          <div className="relative bg-white rounded-lg shadow-lg p-6 w-[1000px] max-h-[80vh] overflow-y-auto">
+            <button
+              onClick={() => setIsPopupVisible(false)}
+              className="absolute top-4 right-4 bg-red-500 text-white text-xl font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-md hover:bg-red-600 transition-all duration-300"
+            >
+              &times;
+            </button>
             <h2 className="text-xl text-blue-600 font-bold mb-6">
               Add New Vehicle
             </h2>
@@ -201,6 +206,17 @@ function AddCarForm() {
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Upload Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Brand
@@ -284,7 +300,7 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Vehicle Registration Type
+                  Vehicle Registration Type
                 </label>
                 <input
                   type="text"
@@ -297,7 +313,7 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Manual
+                  Manual
                 </label>
                 <input
                   type="text"
@@ -310,7 +326,7 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Warranty
+                  Warranty
                 </label>
                 <input
                   type="text"
@@ -323,7 +339,7 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Register Date
+                  Register Date
                 </label>
                 <input
                   type="date"
@@ -336,7 +352,7 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Secondary Key
+                  Secondary Key
                 </label>
                 <input
                   type="text"
@@ -349,7 +365,7 @@ function AddCarForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Vehicle Tax Expiration Date
+                  Vehicle Tax Expiration Date
                 </label>
                 <input
                   type="date"

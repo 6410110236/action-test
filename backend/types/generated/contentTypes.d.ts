@@ -455,10 +455,7 @@ export interface ApiGarageGarage extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     Manual: Schema.Attribute.Text & Schema.Attribute.DefaultTo<'Nope'>;
     model: Schema.Attribute.Relation<'manyToOne', 'api::model.model'>;
-    Picture: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios',
-      true
-    >;
+    Picture: Schema.Attribute.Media<'images' | 'files', true>;
     Price: Schema.Attribute.BigInteger;
     publishedAt: Schema.Attribute.DateTime;
     RegisterDate: Schema.Attribute.Date;

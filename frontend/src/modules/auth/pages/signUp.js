@@ -1,30 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserIcon, MailIcon, LockClosedIcon, EyeIcon, EyeOffIcon } from "@heroicons/react/solid";
-import ax from "../../../conf/ax";
+import useAuthStore from "../../../store/useStore";
 
 const SignUp = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    password: ""
+    password: "",
+    rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { register, isLoginPending, loginError } = useAuthStore();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     if (!formData.username.trim()) {
       setError("Username is required");
       return false;
     }
-    if (formData.username.trim().length < 3) {
-      setError("Username must be at least 3 characters");
+    if (!formData.email.trim()) {
+      setError("Email is required");
       return false;
     }
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      setError("Please enter a valid email address");
+    if (!formData.password) {
+      setError("Password is required");
+      return false;
+    }
+    if (formData.username.trim().length < 3) {
+      setError("Username must be at least 3 characters");
       return false;
     }
     if (formData.password.length < 6) {
@@ -35,10 +40,10 @@ const SignUp = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: type === "checkbox" ? checked : value,
     }));
     setError(null);
   };
@@ -46,24 +51,18 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
-    setIsLoading(true);
     setError(null);
-
-    try {
-      const response = await ax.post("/auth/local/register", {
-        username: formData.username.trim(),
-        email: formData.email.trim(),
-        password: formData.password
-      });
-
-      if (response.data?.user) {
-        navigate("/signin");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
-    } finally {
-      setIsLoading(false);
+    const result = await register(
+      formData.username.trim(),
+      formData.email.trim(),
+      formData.password,
+      formData.rememberMe
+    );
+    if (result.success) {
+      navigate("/home");
+    } else {
+      setError(result.error?.message || "Registration failed");
+      setFormData((prev) => ({ ...prev, password: "" }));
     }
   };
 
@@ -80,12 +79,11 @@ const SignUp = () => {
               placeholder="Username"
               value={formData.username}
               onChange={handleChange}
-              disabled={isLoading}
+              disabled={isLoginPending}
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="username"
             />
           </div>
-
           <div className="relative">
             <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -94,12 +92,11 @@ const SignUp = () => {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              disabled={isLoading}
+              disabled={isLoginPending}
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="email"
             />
           </div>
-
           <div className="relative">
             <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -108,7 +105,7 @@ const SignUp = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              disabled={isLoading}
+              disabled={isLoginPending}
               className="w-full pl-10 pr-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="new-password"
             />
@@ -124,25 +121,21 @@ const SignUp = () => {
               )}
             </button>
           </div>
-
-          {error && (
+          {(error || loginError) && (
             <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
-              {error}
+              {error || loginError?.message}
             </div>
           )}
-
           <button
             type="submit"
-            disabled={isLoading}
-            className={`w-full p-2 rounded-lg text-white transition
-              ${isLoading 
-                ? 'bg-blue-400 cursor-not-allowed' 
-                : 'bg-blue-500 hover:bg-blue-600'}`}
+            disabled={isLoginPending}
+            className={`w-full p-2 rounded-lg text-white transition ${
+              isLoginPending ? "bg-blue-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            }`}
           >
-            {isLoading ? "Creating account..." : "Sign Up"}
+            {isLoginPending ? "Signing up..." : "Sign Up"}
           </button>
         </form>
-
         <p className="text-center text-sm mt-4">
           Already have an account?{" "}
           <a href="/signin" className="text-blue-500 hover:underline">

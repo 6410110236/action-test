@@ -5,7 +5,7 @@ import { debounce } from 'lodash';
 
 const { Option } = Select;
 
-const SideBar = ({ cars, setCars }) => {
+const SideBar = ({ cars = [], setCars }) => {
     const [visible, setVisible] = useState(false);
     const [sortOption, setSortOption] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +17,7 @@ const SideBar = ({ cars, setCars }) => {
 
     useEffect(() => {
         setOriginalCars(cars);
-    }, []);
+    }, [cars]);
 
     const showDrawer = () => {
         setVisible(true);
@@ -120,11 +120,11 @@ const SideBar = ({ cars, setCars }) => {
     };
 
     const categoryOptions = [
-        ...new Set(originalCars.map((car) => car.category)),
+        ...new Set(originalCars.map((car) => car.category || '')),
     ];
 
     const brandOptions = [
-        ...new Set(originalCars.map((car) => car.brandName)),
+        ...new Set(originalCars.map((car) => car.brandName || '')),
     ];
 
     const Filters = (

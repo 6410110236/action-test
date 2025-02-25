@@ -1,22 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { client, gql } from './apolloClient';
-
-const GET_USER = gql`
-  query UsersPermissionsUser {
-  usersPermissionsUser(documentId:"s5zlmm3u7a6bgopyrd846aoy") {
-    ContactNumber
-    documentId
-    username
-    email
-    Picture {
-      url
-    }
-    role {
-      name
-    }
-  }
-}
-`;
+import { client, gql } from '../../../utils/apolloClient';
+import { GET_USER } from '../../../conf/main';
 
 function Users() {
   const [user, setUser] = useState(null);
