@@ -145,7 +145,13 @@ function AddCarForm() {
 
       {isPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[1000px] max-h-[80vh] overflow-y-auto">
+          <div className="relative bg-white rounded-lg shadow-lg p-6 w-[1000px] max-h-[80vh] overflow-y-auto">
+          <button
+        onClick={() => setIsPopupVisible(false)}
+        className="absolute top-4 right-4 bg-red-500 text-white text-xl font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-md hover:bg-red-600 transition-all duration-300"
+      >
+        &times;
+      </button>
             <h2 className="text-xl text-blue-600 font-bold mb-6">
               Add New Vehicle
             </h2>
