@@ -3,7 +3,7 @@ import { client } from "../../../utils/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
-  MUTATE_TO_GARAGE,
+  uploadAtEntryCreationAction,
 } from "../../../conf/main";
 import useAuthStore from "../../../store/authStore";
 
@@ -121,16 +121,16 @@ function AddCarForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // ตรวจสอบเฉพาะฟิลด์ที่จำเป็น
+  
+    // Validate required fields
     const requiredFields = ["brand", "model", "price"];
     const isFormEmpty = requiredFields.some((field) => !formData[field]);
-
+  
     if (isFormEmpty) {
       setShowWarning(true);
       return;
     }
-
+  
     const selectedModel = models.find(
       (model) => model.ModelName === formData.model
     );
@@ -138,41 +138,22 @@ function AddCarForm() {
       setShowWarning(true);
       return;
     }
-
-    console.log(selectedModel.documentId);
-
-    let imageUrl = "";
-    if (image) {
-      imageUrl = await uploadImage();
+  
+    const { success, error } = await uploadAtEntryCreationAction(
+      formData,
+      image,
+      selectedModel.documentId,
+      jwtSell
+    );
+  
+    if (error) {
+      console.error("Error:", error);
+      setShowWarning(true);
+    } else {
+      console.log(success);
+      setIsPopupVisible(false);
+      resetForm();
     }
-    console.log("Image URL : ",image)
-
-    client.mutate({
-      mutation: MUTATE_TO_GARAGE,
-      variables: {
-        data: {
-          model: selectedModel.documentId,
-          Color: formData.color,
-          Description: formData.description,
-          Distance: parseInt(formData.distance, 10) || 0,
-          VehicleRegistrationTypes: formData.vehicleRegistrationType,
-          Manual: formData.manual,
-          Warranty: formData.warranty,
-          RegisterDate: formData.registerDate,
-          SecondaryKey: parseInt(formData.secondaryKey, 10) || 0,
-          VehicleTaxExpirationDate: formData.vehicleTaxExpirationDate,
-          Price: parseInt(formData.price, 10) || 0,
-          users_permissions_user: jwtSell,
-          // ImageUrl: imageUrl,
-        },
-        status: "PUBLISHED",
-      },
-    });
-
-    console.log("Form Data:", formData);
-
-    setIsPopupVisible(false);
-    resetForm();
   };
 
   return (
