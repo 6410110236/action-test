@@ -2,34 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { Select, Drawer, Button, Input, Checkbox, Tag } from 'antd';
 import { MenuOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
+import useCarStore from '../../../store/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
 
 const { Option } = Select;
 
-const SideBar = ({ cars = [], setCars }) => {
+const SideBar = () => {
+    // สถานะสำหรับการแสดง Drawer
     const [visible, setVisible] = useState(false);
+    // สถานะสำหรับตัวเลือกการจัดเรียง
     const [sortOption, setSortOption] = useState(null);
+    // สถานะสำหรับคำค้นหา
     const [searchTerm, setSearchTerm] = useState('');
+    // สถานะสำหรับหมวดหมู่ที่เลือก
     const [selectedCategories, setSelectedCategories] = useState([]);
+    // สถานะสำหรับยี่ห้อที่เลือก
     const [selectedBrands, setSelectedBrands] = useState([]);
-    const [originalCars, setOriginalCars] = useState([]);
+    // สถานะสำหรับราคาขั้นต่ำ
     const [minPrice, setMinPrice] = useState(null);
+    // สถานะสำหรับราคาขั้นสูง
     const [maxPrice, setMaxPrice] = useState(null);
 
-    useEffect(() => {
-        setOriginalCars(cars);
-    }, [cars]);
+    // ดึงข้อมูลจาก useCarStore
+    const { cars: carData, setCars } = useCarStore();
 
+    // สถานะสำหรับเก็บข้อมูลรถที่กรองแล้ว
+    const [filteredCars, setFilteredCars] = useState([]);
+
+    useEffect(() => {
+        // จัดเก็บข้อมูลดั้งเดิมไว้
+        setFilteredCars(carData);
+    }, [carData]);
+
+    // ฟังก์ชันสำหรับแสดง Drawer
     const showDrawer = () => {
         setVisible(true);
     };
 
+    // ฟังก์ชันสำหรับปิด Drawer
     const onClose = () => {
         setVisible(false);
     };
 
+    // ฟังก์ชันสำหรับจัดเรียงข้อมูล
     const handleSort = (value) => {
         setSortOption(value);
-        let sortedCars = [...cars];
+        let sortedCars = [...filteredCars];
 
         switch (value) {
             case 'price-asc':
@@ -59,74 +76,86 @@ const SideBar = ({ cars = [], setCars }) => {
                 break;
         }
 
-        setCars(sortedCars);
+        setFilteredCars(sortedCars);
     };
 
+    // กรองข้อมูลตามคำค้นหา (Debounced)
     const handleSearch = debounce((value) => {
         setSearchTerm(value);
         filterCars(value, selectedCategories, selectedBrands, minPrice, maxPrice);
     }, 300);
 
+    // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงหมวดหมู่ที่เลือก
     const handleCategoryChange = (checkedValues) => {
         setSelectedCategories(checkedValues);
         filterCars(searchTerm, checkedValues, selectedBrands, minPrice, maxPrice);
     };
 
+    // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงยี่ห้อที่เลือก
     const handleBrandChange = (checkedValues) => {
         setSelectedBrands(checkedValues);
         filterCars(searchTerm, selectedCategories, checkedValues, minPrice, maxPrice);
     };
 
+    // ฟังก์ชันสำหรับกรองข้อมูลรถยนต์
     const filterCars = (search, categories, brands, minPriceFilter, maxPriceFilter) => {
-        let filteredCars = [...originalCars];
+    let filteredCars = [...carData];
 
-        if (search) {
-            filteredCars = filteredCars.filter(
-                (car) =>
-                    car.modelName.toLowerCase().includes(search.toLowerCase()) ||
-                    car.brandName.toLowerCase().includes(search.toLowerCase())
-            );
-        }
+    // การค้นหาตามคำค้นหาของผู้ใช้
+    if (search) {
+        filteredCars = filteredCars.filter(
+            (car) =>
+                (car.modelName && car.modelName.toLowerCase().includes(search.toLowerCase())) ||
+                (car.brandName && car.brandName.toLowerCase().includes(search.toLowerCase()))
+        );
+    }
 
-        if (categories.length > 0) {
-            filteredCars = filteredCars.filter((car) =>
-                categories.includes(car.category)
-            );
-        }
+    // การกรองหมวดหมู่
+    if (categories.length > 0) {
+        filteredCars = filteredCars.filter((car) =>
+            categories.includes(car.category)
+        );
+    }
 
-        if (brands.length > 0) {
-            filteredCars = filteredCars.filter((car) =>
-                brands.includes(car.brandName)
-            );
-        }
+    // การกรองยี่ห้อ
+    if (brands.length > 0) {
+        filteredCars = filteredCars.filter((car) =>
+            brands.includes(car.brandName)
+        );
+    }
 
-        if (minPriceFilter) {
-            filteredCars = filteredCars.filter(
-                (car) =>
-                    parseInt(car.price.replace(/[^0-9]/g, '')) >=
-                    parseInt(minPriceFilter)
-            );
-        }
+    // การกรองตามราคาขั้นต่ำ
+    if (minPriceFilter) {
+        filteredCars = filteredCars.filter(
+            (car) =>
+                parseInt(car.price.replace(/[^0-9]/g, '')) >=
+                parseInt(minPriceFilter)
+        );
+    }
 
-        if (maxPriceFilter) {
-            filteredCars = filteredCars.filter(
-                (car) =>
-                    parseInt(car.price.replace(/[^0-9]/g, '')) <=
-                    parseInt(maxPriceFilter)
-            );
-        }
+    // การกรองตามราคาขั้นสูง
+    if (maxPriceFilter) {
+        filteredCars = filteredCars.filter(
+            (car) =>
+                parseInt(car.price.replace(/[^0-9]/g, '')) <=
+                parseInt(maxPriceFilter)
+        );
+    }
 
-        setCars(filteredCars);
-    };
+    setFilteredCars(filteredCars);
+};
 
+    // ตัวเลือกหมวดหมู่
     const categoryOptions = [
-        ...new Set(originalCars.map((car) => car.category || '')),
+        ...new Set(carData.map((car) => car.category || '')),
     ];
 
+    // ตัวเลือกยี่ห้อ
     const brandOptions = [
-        ...new Set(originalCars.map((car) => car.brandName || '')),
+        ...new Set(carData.map((car) => car.brandName || '')),
     ];
 
+    // ส่วนของฟิลเตอร์
     const Filters = (
         <div>
             <h3 className="text-xl font-semibold mb-4">ค้นหาและจัดเรียง</h3>
@@ -244,7 +273,7 @@ const SideBar = ({ cars = [], setCars }) => {
                     setMinPrice(null);
                     setMaxPrice(null);
                     setSortOption(null);
-                    setCars(originalCars);
+                    setFilteredCars(carData);
                 }}
                 style={{ width: '100%' }}
             >
