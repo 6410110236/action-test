@@ -1,59 +1,34 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
-import axios from 'axios';
-import { AuthContext } from '../../../context/Auth.context'; // Import AuthContext
+import { useCarStore } from '../../../store/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
 
 const LatestCarsSection = () => {
-    const [latestCars, setLatestCars] = useState([]);
-    const { state } = useContext(AuthContext); // Get the state from AuthContext
+    const [latestCars, setLatestCars] = useState([]); // สำหรับเก็บข้อมูลรถที่ดึงมาจาก store
+    const { cars, setCars } = useCarStore(); // ดึงข้อมูล cars จาก Zustand store
 
-    const fetchCars = async () => {
-        try {
-            console.log('Fetching cars...');
-            const [modelsResponse, categoriesResponse, garagesResponse, brandsResponse] = await axios.all([
-                axios.get(`http://localhost:1337/api/models`),
-                axios.get(`http://localhost:1337/api/category-cars`),
-                axios.get(`http://localhost:1337/api/garages`),
-                axios.get(`http://localhost:1337/api/brands`)
-            ]);
-
-            console.log('Models response:', modelsResponse.data);
-            console.log('Categories response:', categoriesResponse.data);
-            console.log('Garages response:', garagesResponse.data);
-            console.log('Brands response:', brandsResponse.data);
-
-            const models = modelsResponse.data.data;
-            const categories = categoriesResponse.data.data;
-            const garages = garagesResponse.data.data;
-            const brands = brandsResponse.data.data;
-
-            const cars = garages.map(garage => {
-                const model = models.find(m => m.id === garage.CarID);
-                const category = categories.find(c => c.id === model?.categoryId);
-                const brand = brands.find(b => b.id === model?.brandId);
+    useEffect(() => {
+        // ตรวจสอบว่าข้อมูลใน store ยังไม่มี หรือยังไม่ได้ตั้งค่า
+        if (cars.length > 0) {
+            // Map ข้อมูลจาก store (cars) ให้อยู่ในรูปแบบที่ต้องการแสดง
+            const carsMapped = cars.map((garage) => {
+                const model = garage.model || {};
+                const brand = model.brand_car || {};
 
                 return {
-                    id: garage.id,
-                    modelName: model ? model.ModelName : 'Unknown',
-                    brandName: brand ? brand.BrandName : 'Unknown',
-                    price: garage.Price,
-                    image: garage.Picture && garage.Picture.length > 0 ? garage.Picture[0].url : '', // ตรวจสอบว่ามีภาพหรือไม่
-                    category: category ? category.Category : 'Unknown', // ตรวจสอบว่า category มีข้อมูลหรือไม่
-                    gearType: model ? model.GearType : 'Unknown'
+                    id: garage.documentId, // ใช้ documentId ของแต่ละรถ
+                    modelName: model.ModelName || 'Unknown', // ชื่อรุ่นรถ
+                    brandName: brand.BrandName || 'Unknown', // ชื่อแบรนด์รถ
+                    price: garage.Price, // ราคา
+                    image: garage.Picture && garage.Picture.length > 0 ? garage.Picture[0].url : '', // รูปภาพ
+                    category: garage.VehicleRegistrationTypes || 'Unknown', // หมวดหมู่
+                    gearType: model.GearType || 'Unknown' // ประเภทเกียร์
                 };
             });
 
-            console.log('Mapped car data:', cars);
-            setLatestCars(cars);
-        } catch (error) {
-            console.error('Error fetching cars:', error);
+            setLatestCars(carsMapped); // อัพเดต state latestCars
         }
-    };
-
-    useEffect(() => {
-        fetchCars(); // Fetch cars every time the component mounts
-    }, []); // Empty dependency array ensures this runs only once when the component mounts
-
+    }, [cars]);
+    
     return (
         <section className="max-w-screen-xl mx-auto px-4 mb-12">
             <div className="flex items-center justify-between mb-6">
