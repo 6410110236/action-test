@@ -48,9 +48,9 @@ function SellUser() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 p-6">
-      <div className="mx-auto max-w-4xl">
-        <div className="grid gap-6 md:grid-cols-3">
+    <div className="min-h-screen bg-blue-50 p-6 flex justify-center items-center">
+      <div className="w-full max-w-7xl bg-white p-6 items-center justify-center rounded-lg shadow-md">
+        <div className="gap-6 md:grid-cols-3">
           {/* Cart Section */}
           <div className="md:col-span-2 space-y-4">
             <div>
@@ -65,7 +65,7 @@ function SellUser() {
               cars.map((car) => (
                 <div
                   key={car.documentId}
-                  className="bg-white rounded-lg shadow p-4"
+                  className="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-4">
                     <div className="h-16 w-16 relative overflow-hidden rounded-md">
@@ -85,26 +85,26 @@ function SellUser() {
                         {car.model.brand_car.BrandName}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="font-semibold">
-                        ${car.Price.toLocaleString()}
-                      </span>
-                      <button
-                        onClick={() => handleDelete(car.documentId)} // เรียกใช้ handleDelete เมื่อคลิก
-                        className="p-2 hover:bg-gray-100 rounded-full"
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="font-semibold">
+                      ${car.Price.toLocaleString()}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(car.documentId)} // เรียกใช้ handleDelete เมื่อคลิก
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-gray-500"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-gray-500"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                        </svg>
-                      </button>
-                    </div>
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               ))
@@ -121,5 +121,7 @@ function SellUser() {
     </div>
   );
 }
+
+
 
 export default SellUser;

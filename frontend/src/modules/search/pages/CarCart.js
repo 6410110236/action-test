@@ -40,11 +40,9 @@ const CarCart = () => {
 
     useEffect(() => {
         // หากข้อมูลยังไม่มีใน store ให้ดึงจาก API
-        if (cars.length === 0) {
             fetchCars();
             console.log('useEffect: Fetching data from API...');
-        }
-    }, [cars, setCars]); // ตรวจสอบเมื่อ `cars` ใน store ยังไม่มีข้อมูล
+    }, [setCars]); // ตรวจสอบเมื่อ `cars` ใน store ยังไม่มีข้อมูล
 
     // ฟังก์ชันคำนวณการแบ่งหน้า
     const indexOfLastCar = currentPage * carsPerPage;
