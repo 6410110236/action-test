@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd backend
+ิีืbun install
 bun run develop &
 
 sleep 3
