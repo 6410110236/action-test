@@ -3,6 +3,7 @@ import { client } from "../../../utils/apolloClient";
 import AddCarForm from "./AddCarForm";
 import { GET_CARS, DELETE_CAR } from "../../../conf/main";
 import useAuthStore from "../../../store/authStore";
+import EditCarForm from "./EditCarForm";
 
 function SellUser() {
   const [cars, setCars] = useState([]);
@@ -46,6 +47,7 @@ function SellUser() {
       })
       .catch((error) => console.error("❌ Error deleting car:", error));
   };
+  
 
   return (
     <div className="min-h-screen bg-blue-50 p-6 flex justify-center items-center">
@@ -65,9 +67,10 @@ function SellUser() {
               cars.map((car) => (
                 <div
                   key={car.documentId}
-                  className="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center"
-                >
+                  className="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center hover:shadow-lg hover:bg-gray-100"
+                >         
                   <div className="flex items-center gap-4">
+
                     <div className="h-16 w-16 relative overflow-hidden rounded-md">
                       <img
                         src={
@@ -90,6 +93,9 @@ function SellUser() {
                     <span className="font-semibold">
                       ${car.Price.toLocaleString()}
                     </span>
+
+                    <EditCarForm item={car} />
+
                     <button
                       onClick={() => handleDelete(car.documentId)} // เรียกใช้ handleDelete เมื่อคลิก
                       className="p-2 hover:bg-gray-100 rounded-full"

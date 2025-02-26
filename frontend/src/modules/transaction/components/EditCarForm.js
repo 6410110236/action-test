@@ -3,9 +3,8 @@ import { client } from "../../../utils/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
-  uploadAtEntryCreationAction,
+  updateAtEntryCreationAction,
 } from "../../../conf/main";
-import useAuthStore from "../../../store/authStore";
 
 const object_cars = {
   brand: "",
@@ -22,24 +21,21 @@ const object_cars = {
   price: "",
 };
 
-function AddCarForm() {
+function EditCarForm(props) {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   const [formData, setFormData] = useState(object_cars);
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState("");
-  const jwtSell = useAuthStore((state) => state.user.documentId);
   const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
-      setImagePreview(URL.createObjectURL(file));
     }
-    console.log("handleChange :", file);
+    console.log("handleImageChange :", file);
   };
 
   const resetForm = () => {
@@ -56,6 +52,22 @@ function AddCarForm() {
       .catch((error) => {
         console.error("Error fetching brands:", error);
       });
+
+    setFormData({
+        brand : props.item.model.brand_car.BrandName,
+        model : props.item.model.ModelName,
+        price : props.item.Price,
+        color : props.item.Color,
+        description : props.item.Description,
+        distance : props.item.Distance,
+        vehicleRegistrationType : props.item.VehicleRegistrationTypes,
+        manual : props.item.Manual,
+        warranty : props.item.Warranty,
+        registerDate : props.item.RegisterDate,
+        secondaryKey : props.item.SecondaryKey,
+        vehicleTaxExpirationDate : props.item.VehicleTaxExpirationDate,
+    })
+    
   }, []);
 
   useEffect(() => {
@@ -84,6 +96,7 @@ function AddCarForm() {
   };
 
   const handleBrandChange = (e) => {
+    console.log("props : ",props.item)
     const selectedBrandName = e.target.value;
     const selectedBrand = brands.find(
       (brand) => brand.BrandName === selectedBrandName
@@ -119,11 +132,13 @@ function AddCarForm() {
       return;
     }
 
-    const { success, error } = await uploadAtEntryCreationAction(
+    console.log("Form Data : ", formData);
+
+    const { success, error } = await updateAtEntryCreationAction(
       formData,
       image,
       selectedModel.documentId,
-      jwtSell
+      props.item.documentId
     );
 
     if (error) {
@@ -139,10 +154,24 @@ function AddCarForm() {
   return (
     <div>
       <button
-        onClick={() => setIsPopupVisible(true)}
-        className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg shadow-md hover:bg-blue-600"
+        onClick={() => {setIsPopupVisible(true)
+            console.log("formData :",formData)
+        }}
+        className="p-2 hover:bg-gray-100 rounded-full"
       >
-        ADD
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M12 20h9" fill="black" />
+          <path
+            d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"
+            fill="black"
+          />
+        </svg>
       </button>
 
       {isPopupVisible && (
@@ -155,7 +184,7 @@ function AddCarForm() {
               &times;
             </button>
             <h2 className="text-xl text-blue-600 font-bold mb-6">
-              Add New Vehicle
+              Edit Vehicle
             </h2>
 
             {showWarning && (
@@ -177,15 +206,6 @@ function AddCarForm() {
                     onChange={handleImageChange}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                   />
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-40 h-40 object-cover rounded-lg border border-gray-300"
-                      />
-                    </div>
-                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -382,4 +402,4 @@ function AddCarForm() {
   );
 }
 
-export default AddCarForm;
+export default EditCarForm;
