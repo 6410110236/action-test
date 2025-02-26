@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   UserIcon,
   LockClosedIcon,
   EyeIcon,
   EyeOffIcon,
 } from "@heroicons/react/solid";
-import useAuthStore from "../../../store/authStore"; // ควรใช้ authStore ตรง ๆ
+import useAuthStore from "../../../store/authStore";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -17,12 +17,9 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
 
-  // ตรวจสอบว่าฟังก์ชัน login ถูกนำเข้ามาถูกต้อง
   const login = useAuthStore((state) => state.login);
   const isLoginPending = useAuthStore((state) => state.isLoginPending);
   const loginError = useAuthStore((state) => state.loginError);
-
-  console.log("🔹 login function in SignIn.js:", login);
 
   const navigate = useNavigate();
 
@@ -33,6 +30,14 @@ const SignIn = () => {
     }
     if (!formData.password) {
       setError("Password is required");
+      return false;
+    }
+    if (formData.username.trim().length < 3) {
+      setError("Username must be at least 3 characters");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
       return false;
     }
     return true;
@@ -50,17 +55,22 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    setError(null);
-    const result = await login(
-      formData.username.trim(),
-      formData.password,
-      formData.rememberMe
-    );
-    if (result.success) {
-      navigate("/home"); // เมื่อล็อกอินสำเร็จจะพาไปหน้า Home หรือหน้าอื่นๆ
-    } else {
-      setError(result.error || "Invalid username or password");
-      setFormData((prev) => ({ ...prev, password: "" }));
+    
+    try {
+      setError(null);
+      const result = await login(
+        formData.username.trim(),
+        formData.password
+      );
+
+      if (result.success) {
+        navigate("/home");
+      } else {
+        throw new Error(result.error?.message || "Invalid username or password");
+      }
+    } catch (err) {
+      setError(err.message);
+      setFormData(prev => ({...prev, password: ""}));
     }
   };
 
@@ -68,7 +78,7 @@ const SignIn = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Sign In</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="relative">
             <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -80,6 +90,7 @@ const SignIn = () => {
               disabled={isLoginPending}
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="username"
+              aria-label="Username"
             />
           </div>
           <div className="relative">
@@ -93,11 +104,13 @@ const SignIn = () => {
               disabled={isLoginPending}
               className="w-full pl-10 pr-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="current-password"
+              aria-label="Password"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
                 <EyeOffIcon className="w-5 h-5 text-gray-400" />
@@ -115,20 +128,21 @@ const SignIn = () => {
                 checked={formData.rememberMe}
                 onChange={handleChange}
                 className="mr-2"
+                aria-label="Remember me"
               />
               <label htmlFor="rememberMe" className="text-sm text-gray-600">
                 Remember Me
               </label>
             </div>
-            <a href="#" className="text-blue-500 text-sm hover:underline">
+            <Link to="/forgot-password" className="text-blue-500 text-sm hover:underline">
               Forgot password?
-            </a>
+            </Link>
           </div>
           {(error || loginError) && (
-            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+            <div role="alert" className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
               {typeof (error || loginError) === "string"
                 ? error || loginError
-                : error?.message || loginError?.message || "An error occurred."}
+                : error?.message || loginError?.message || "An error occurred"}
             </div>
           )}
           <button
@@ -145,9 +159,9 @@ const SignIn = () => {
         </form>
         <p className="text-center text-sm mt-4">
           Not a member?{" "}
-          <a href="/signup" className="text-blue-500 hover:underline">
+          <Link to="/signup" className="text-blue-500 hover:underline">
             Sign up now
-          </a>
+          </Link>
         </p>
       </div>
     </div>

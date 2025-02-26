@@ -1,51 +1,79 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { MenuIcon, XIcon, CreditCardIcon } from "@heroicons/react/outline";
+import { MenuIcon, XIcon, CreditCardIcon, SearchIcon } from "@heroicons/react/outline";
 import useAuthStore from "../store/authStore";
-import useCarStore from "../store/carStore"; // นำเข้า useCarStore
-import { client, gql } from '../utils/apolloClient'; // นำเข้า client และ gql
-import {GET_GARAGES} from "../conf/main";
+import useCarStore from "../store/carStore";
+import { client } from '../utils/apolloClient';
+import { GET_GARAGES } from "../conf/main";
+import debounce from 'lodash/debounce';
 
 const Header = () => {
   const location = useLocation();
   const { isLoggedIn, user, role, logout } = useAuthStore();
-  const [searchQuery, setSearchQuery] = useState(""); // สถานะสำหรับเก็บค่าการค้นหา
-  const navigate = useNavigate(); // ใช้ navigate เพื่อเปลี่ยนเส้นทางไปยังหน้า /buy
-  const { setCars } = useCarStore(); // ดึง setCars จาก store เพื่อให้สามารถตั้งค่าข้อมูลที่ค้นหา
+  const navigate = useNavigate();
+  const { setCars } = useCarStore();
 
-  // สถานะใหม่สำหรับการแสดงช่องค้นหา
-  const [isSearchOpen, setIsSearchOpen] = useState(false); // กำหนดสถานะในการเปิดปิดช่องค้นหา
+  const [searchState, setSearchState] = useState({
+    query: "",
+    isOpen: false,
+    isLoading: false,
+    error: null
+  });
 
-  // ถ้าไม่ได้ล็อกอินหรือ user เป็น null จะถือว่าไม่มีข้อมูล
   const currentUser = isLoggedIn && user ? user : null;
-  const userRole = isLoggedIn && role ? role : null;
 
-  const handleSearch = () => {
-    // ค้นหาข้อมูลและเก็บข้อมูลใน store
-    if (searchQuery.trim()) {
-      navigate('/buy'); // เปลี่ยนเส้นทางไปหน้า /buy
-      setCars([]); // เคลียร์ข้อมูลรถเก่าใน store
-      client.query({ query: GET_GARAGES, variables: { search: searchQuery } })
-        .then(response => {
-          setCars(response.data.garages); // ตั้งค่าผลลัพธ์ที่ได้จากการค้นหา
-        })
-        .catch(error => console.error('❌ Error fetching data:', error));
-    }
+  const debouncedSearch = useCallback(
+    debounce(async (searchTerm) => {
+      if (!searchTerm.trim()) return;
+
+      setSearchState(prev => ({ ...prev, isLoading: true, error: null }));
+
+      try {
+        navigate('/buy');
+        setCars([]);
+        const response = await client.query({
+          query: GET_GARAGES,
+          variables: { search: searchTerm.trim() }
+        });
+        setCars(response.data.garages);
+        setSearchState(prev => ({
+          ...prev,
+          isOpen: false,
+          query: "",
+          isLoading: false
+        }));
+      } catch (error) {
+        setSearchState(prev => ({
+          ...prev,
+          error: 'Failed to fetch results',
+          isLoading: false
+        }));
+        console.error('Search error:', error);
+      }
+    }, 500),
+    [navigate, setCars]
+  );
+
+  const handleSearchChange = (e) => {
+    const newQuery = e.target.value;
+    setSearchState(prev => ({ ...prev, query: newQuery }));
+    debouncedSearch(newQuery);
+  };
+
+  const toggleSearch = () => {
+    setSearchState(prev => ({ 
+      ...prev, 
+      isOpen: !prev.isOpen,
+      error: null
+    }));
   };
 
   const navigation = [
     { name: "Home", href: "/", current: location.pathname === "/" },
     { name: "Buy", href: "/buy", current: location.pathname === "/buy" },
-    { name: "Payment", href: "/payment", current: location.pathname === "/payment" },
     ...(isLoggedIn && role === "Seller"
-      ? [
-          {
-            name: "Sell",
-            href: "/seller",
-            current: location.pathname === "/seller",
-          },
-        ]
+      ? [{ name: "Sell", href: "/seller", current: location.pathname === "/seller" }]
       : []),
     { name: "About", href: "/about", current: location.pathname === "/about" },
   ];
@@ -78,10 +106,9 @@ const Header = () => {
     },
   ];
 
-    // ฟังก์ชัน handle เมื่อกด Enter
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      handleSearch();
+      debouncedSearch(searchState.query);
     }
   };
   
@@ -111,8 +138,7 @@ const Header = () => {
                     className={classNames(
                       active ? "bg-gray-100" : "",
                       "flex px-4 py-2 text-sm text-gray-700 items-center"
-                    )}
-                  >
+                    )}>
                     <svg
                       className="mr-3 h-5 w-5 text-gray-400"
                       fill="none"
@@ -204,28 +230,16 @@ const Header = () => {
                   <button
                     type="button"
                     className="relative rounded-full bg-gray-800 text-white py-1.5 px-4 flex items-center mr-4"
-                    onClick={() => setIsSearchOpen(!isSearchOpen)}
+                    onClick={toggleSearch}
                   >
                     <span className="sr-only">Search</span>
-                    <svg
-                      className="h-6 w-6 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M21 21l-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
-                      ></path>
-                    </svg>
+                    <SearchIcon className="h-6 w-6 mr-2" />
                     Search
                   </button>
 
                   {/* คอนเทนเนอร์ของช่องค้นหาที่จะมีการแสดง/ซ่อน */}
                   <Transition
-                    show={isSearchOpen}
+                    show={searchState.isOpen}
                     enter="transition-all duration-500 ease-out"
                     enterFrom="transform opacity-0 translate-x-12"
                     enterTo="transform opacity-100 translate-x-0"
@@ -237,15 +251,16 @@ const Header = () => {
                       <input
                         type="text"
                         placeholder="Search..."
-                        onChange={(e) => setSearchQuery(e.target.value)} // เปลี่ยนแปลงการค้นหาตาม input
+                        value={searchState.query}
+                        onChange={handleSearchChange} // เปลี่ยนแปลงการค้นหาตาม input
                         onKeyDown={handleKeyDown} // เพิ่มการรองรับ Enter
                         className="rounded-lg bg-gray-600 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                       />
                       <button
-                        onClick={handleSearch} // เมื่อกดปุ่มค้นหา
+                        onClick={() => debouncedSearch(searchState.query)} // เมื่อกดปุ่มค้นหา
                         className="ml-2 rounded-full bg-gray-700 text-white px-4 py-2"
                       >
-                        Go
+                        Search
                       </button>
                     </div>
                   </Transition>
@@ -268,11 +283,9 @@ const Header = () => {
           <Disclosure.Panel className="md:hidden">
             <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
               {navigation.map((item) => (
-                <Disclosure.Button
+                <Link
                   key={item.name}
-                  as="a"
-                  href={item.href}
-                  aria-current={item.current ? "page" : undefined}
+                  to={item.href}
                   className={classNames(
                     item.current
                       ? "bg-gray-900 text-white"
@@ -281,7 +294,7 @@ const Header = () => {
                   )}
                 >
                   {item.name}
-                </Disclosure.Button>
+                </Link>
               ))}
             </div>
 
@@ -312,32 +325,29 @@ const Header = () => {
               <div className="mt-3 space-y-1 px-2">
                 {isLoggedIn ? (
                   userNavigation.map((item) => (
-                    <Disclosure.Button
+                    <Link
                       key={item.name}
-                      as="a"
-                      href={item.href}
+                      to={item.href}
                       className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                       onClick={item.onClick}
                     >
                       {item.name}
-                    </Disclosure.Button>
+                    </Link>
                   ))
                 ) : (
                   <>
-                    <Disclosure.Button
-                      as="a"
-                      href="/signin"
+                    <Link
+                      to="/signin"
                       className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                     >
                       Sign In
-                    </Disclosure.Button>
-                    <Disclosure.Button
-                      as="a"
-                      href="/signup"
+                    </Link>
+                    <Link
+                      to="/signup"
                       className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                     >
                       Sign Up
-                    </Disclosure.Button>
+                    </Link>
                   </>
                 )}
               </div>

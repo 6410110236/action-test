@@ -53,10 +53,12 @@ class ErrorBoundary extends React.Component {
 const ProtectedRoute = ({ children, allowedRoles = [], isLoggedIn, userRole }) => {
   const location = useLocation();
 
+  // Add proper authentication check
   if (!isLoggedIn) {
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
+  // Strictly check role permissions
   if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
     return <Navigate 
       to="/home" 
