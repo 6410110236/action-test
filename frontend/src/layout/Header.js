@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { MenuIcon, XIcon } from "@heroicons/react/outline";
+import { MenuIcon, XIcon, CreditCardIcon } from "@heroicons/react/outline";
 import useAuthStore from "../store/authStore";
 import useCarStore from "../store/carStore"; // นำเข้า useCarStore
 import { client, gql } from '../utils/apolloClient'; // นำเข้า client และ gql
@@ -37,6 +37,7 @@ const Header = () => {
   const navigation = [
     { name: "Home", href: "/", current: location.pathname === "/" },
     { name: "Buy", href: "/buy", current: location.pathname === "/buy" },
+    { name: "Payment", href: "/payment", current: location.pathname === "/payment" },
     ...(isLoggedIn && role === "Seller"
       ? [
           {
@@ -190,11 +191,20 @@ const Header = () => {
               {/* Search button and profile dropdown */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
-                  {/* ปุ่มค้นหาที่จะปรากฏ */}
+                  {/* Payment button */}
+                  <Link
+                    to="/payment"
+                    className="relative rounded-full bg-green-600 text-white py-1.5 px-4 flex items-center mr-4 hover:bg-green-700 transition-colors"
+                  >
+                    <CreditCardIcon className="h-5 w-5 mr-2" />
+                    <span>Payment</span>
+                  </Link>
+
+                  {/* Existing search button */}
                   <button
                     type="button"
                     className="relative rounded-full bg-gray-800 text-white py-1.5 px-4 flex items-center mr-4"
-                    onClick={() => setIsSearchOpen(!isSearchOpen)} // สลับการแสดงผลของช่องค้นหา
+                    onClick={() => setIsSearchOpen(!isSearchOpen)}
                   >
                     <span className="sr-only">Search</span>
                     <svg
