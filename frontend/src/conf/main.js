@@ -128,7 +128,7 @@ export async function updateAtEntryCreationAction(
     );
 
     const result = await response.json();
-    if (response.status !== 201 || result.error) {
+    if (response.status !== 200 || result.error) {
       console.log("New Entry:", newEntry);
       throw new Error(result.error?.message || "Failed to create entry.");
     }
