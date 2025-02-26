@@ -9,36 +9,36 @@ const LatestCarsSection = () => {
     const { cars, setCars } = useCarStore(); // ดึงข้อมูล cars จาก Zustand store
 
     useEffect(() => {
-        // หากข้อมูลยังไม่มีใน store ให้ดึงจาก API
-        if (cars.length === 0) {
-            client.query({ query: GET_GARAGES })
-                .then(response => {
-                    console.log('🚀 Data from API:', response.data);
-                    setCars(response.data.garages); // ตั้งค่าข้อมูลใน store
-                })
-                .catch(error => console.error('❌ Error fetching data:', error));
-        } else {
-            // Map ข้อมูลจาก store (cars) ให้อยู่ในรูปแบบที่ต้องการแสดง
-            const carsMapped = cars.map((garage) => {
-                const model = garage.model || {};
-                const brand = model.brand_car || {};
+        // เรียก API ทุกครั้งที่รีเฟรชหน้า
+        client.query({ query: GET_GARAGES })
+            .then(response => {
+                console.log('🚀 Data from API:', response.data);
+                // เก็บข้อมูลใน Zustand store
+                setCars(response.data.garages);
 
-                return {
-                    id: garage.documentId, // ใช้ documentId ของแต่ละรถ
-                    modelName: model.ModelName || 'Unknown', // ชื่อรุ่นรถ
-                    brandName: brand.BrandName || 'Unknown', // ชื่อแบรนด์รถ
-                    price: garage.Price, // ราคา
-                    image: garage.Picture && garage.Picture.length > 0 ? garage.Picture[0].url : '', // รูปภาพ
-                    category: garage.VehicleRegistrationTypes || 'Unknown', // หมวดหมู่
-                    color: garage.Color || 'Unknown', // สี
-                    gearType: model.GearType || 'Unknown' // ประเภทเกียร์
-                };
-            });
-            ;
-            setLatestCars(carsMapped); // อัพเดต state latestCars
-            console.log('🚀 Mapped cars:', carsMapped)
-        }
-    }, [cars, setCars]);
+                // แปลงข้อมูลจาก API ให้อยู่ในรูปแบบที่ต้องการ
+                const carsMapped = response.data.garages.map((garage) => {
+                    const model = garage.model || {};
+                    const brand = model.brand_car || {};
+
+                    return {
+                        id: garage.documentId, // ใช้ documentId ของแต่ละรถ
+                        modelName: model.ModelName || 'Unknown', // ชื่อรุ่นรถ
+                        brandName: brand.BrandName || 'Unknown', // ชื่อแบรนด์รถ
+                        price: garage.Price, // ราคา
+                        image: garage.Picture && garage.Picture.length > 0 ? garage.Picture[0].url : '', // รูปภาพ
+                        category: garage.VehicleRegistrationTypes || 'Unknown', // หมวดหมู่
+                        color: garage.Color || 'Unknown', // สี
+                        gearType: model.GearType || 'Unknown' // ประเภทเกียร์
+                    };
+                });
+
+                // อัพเดต state latestCars
+                setLatestCars(carsMapped);
+                console.log('🚀 Mapped cars:', carsMapped);
+            })
+            .catch(error => console.error('❌ Error fetching data:', error));
+    }, [setCars]); // เรียกใช้ useEffect ทุกครั้งที่คอมโพเนนต์ถูก mount
     
     
     return (
