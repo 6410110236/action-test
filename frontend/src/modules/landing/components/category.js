@@ -26,14 +26,14 @@ const CarCategoryScroll = () => {
         { id: 12, name: "Sport", icon: <IoCarSportSharp />, description: "High-performance vehicle" }
     ];
 
-    const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            const scrollAmount = direction === "left" ? -300 : 300;
-            scrollContainerRef.current.scrollBy({
-                left: scrollAmount,
-                behavior: "smooth"
-            });
-        }
+    const handleScroll = (direction) => {
+        if (!scrollContainerRef.current) return;
+        
+        const scrollAmount = direction === 'left' ? -800 : 800;
+        scrollContainerRef.current.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
     };
 
     const handleCategoryClick = (category) => {
@@ -46,39 +46,43 @@ const CarCategoryScroll = () => {
     };
 
     useEffect(() => {
-        const handleScroll = () => {
-            if (scrollContainerRef.current) {
-                const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-                setIsAtStart(scrollLeft === 0);
-                setIsAtEnd(scrollLeft + clientWidth >= scrollWidth);
-            }
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const checkScroll = () => {
+            const { scrollLeft, scrollWidth, clientWidth } = container;
+            setIsAtStart(scrollLeft === 0);
+            setIsAtEnd(scrollLeft + clientWidth >= scrollWidth - 1);
         };
 
-        if (scrollContainerRef.current) {
-            scrollContainerRef.current.addEventListener("scroll", handleScroll);
-            handleScroll(); // Initial check
-        }
+        const debouncedCheckScroll = debounce(checkScroll, 100);
+
+        container.addEventListener("scroll", debouncedCheckScroll);
+        checkScroll(); // Initial check
 
         return () => {
-            if (scrollContainerRef.current) {
-                scrollContainerRef.current.removeEventListener("scroll", handleScroll);
-            }
+            container.removeEventListener("scroll", debouncedCheckScroll);
         };
     }, []);
+
+    const debounce = (fn, delay) => {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => fn(...args), delay);
+        };
+    };
 
     return (
         <div className="relative w-full py-8 bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-2xl font-bold text-foreground mb-6">Car Categories</h2>
-
                 <div className="relative group">
                     {!isAtStart && (
                         <button
-                        onClick={() => {
-                            const scrollAmount = -800; 
-                            scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                        }}
+                            onClick={() => handleScroll('left')}
                             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-opacity duration-300 hidden md:block"
+                            aria-label="Scroll left"
                         >
                             <FaChevronLeft className="text-primary w-6 h-6" />
                         </button>
@@ -87,7 +91,8 @@ const CarCategoryScroll = () => {
                     <div
                         ref={scrollContainerRef}
                         className="flex overflow-x-auto gap-4 py-4 px-2 scroll-smooth"
-                        style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch", msOverflowStyle: "none" }}
+                        style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+                        role="list"
                     >
                         {categories.map((category) => (
                             <div
@@ -95,16 +100,37 @@ const CarCategoryScroll = () => {
                                 onMouseDown={() => handleCategoryClick(category)}
                                 onMouseUp={handleMouseUp}
                                 onMouseLeave={handleMouseUp}
-                                className={`flex-shrink-0 w-64 p-4 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer ${
-                                    isPressed && activeCategory === category.id ? "bg-black text-white" : "bg-card hover:bg-secondary"
-                                }`}
+                                className={`
+                                    flex-shrink-0 w-64 p-4 rounded-lg 
+                                    transition-all duration-300 transform 
+                                    hover:scale-105 cursor-pointer
+                                    hover:shadow-lg hover:shadow-primary/20
+                                    ${isPressed && activeCategory === category.id 
+                                        ? "bg-primary text-white" 
+                                        : "bg-card hover:bg-primary/10"}
+                                `}
+                                role="listitem"
                             >
                                 <div className="flex flex-col items-center space-y-3">
-                                    <div className={`text-4xl ${isPressed && activeCategory === category.id ? "text-white" : "text-primary"}`}>
+                                    <div className={`
+                                        text-4xl transition-colors duration-300
+                                        ${isPressed && activeCategory === category.id 
+                                            ? "text-white" 
+                                            : "text-primary group-hover:text-primary"}
+                                    `}>
                                         {category.icon}
                                     </div>
-                                    <h3 className="font-semibold text-lg">{category.name}</h3>
-                                    <p className="text-sm text-center opacity-80">{category.description}</p>
+                                    <h3 className="font-semibold text-lg transition-colors duration-300">
+                                        {category.name}
+                                    </h3>
+                                    <p className={`
+                                        text-sm text-center transition-colors duration-300
+                                        ${isPressed && activeCategory === category.id 
+                                            ? "opacity-90" 
+                                            : "opacity-80"}
+                                    `}>
+                                        {category.description}
+                                    </p>
                                 </div>
                             </div>
                         ))}
@@ -112,11 +138,9 @@ const CarCategoryScroll = () => {
 
                     {!isAtEnd && (
                         <button
-                        onClick={() => {
-                            const scrollAmount = 800; 
-                            scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                        }}
+                            onClick={() => handleScroll('right')}
                             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-opacity duration-300 hidden md:block"
+                            aria-label="Scroll right"
                         >
                             <FaChevronRight className="text-primary w-6 h-6" />
                         </button>

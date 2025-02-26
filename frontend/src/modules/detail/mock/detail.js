@@ -85,19 +85,19 @@ const Detail = () => {
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details?.fuelType || 'X' },
-            { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details?.seatCount || 'X' },
-            { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details?.registrationType || 'X' },
-            { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details?.spareKey || 'X' },
-            { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details?.insurance || 'X' },
-            { key: 'color', label: 'สี', value: mockData.details?.color || 'X' },
-            { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details?.registrationDate || 'X' },
-            { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details?.lastDistance || 'X' },
-            { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details?.serviceGuide || 'X' },
+            { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details?.fuelType || 'None' },
+            { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details?.seatCount || 'None' },
+            { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details?.registrationType || 'None' },
+            { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details?.spareKey || 'None' },
+            { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details?.insurance || 'None' },
+            { key: 'color', label: 'สี', value: mockData.details?.color || 'None' },
+            { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details?.registrationDate || 'None' },
+            { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details?.lastDistance || 'None' },
+            { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details?.serviceGuide || 'None' },
           ]}
           columns={[
-            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
-            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
+            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'None' },
+            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'None' },
           ]}
         />
       ),
@@ -110,13 +110,13 @@ const Detail = () => {
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection?.lastInspection || 'X' },
-            { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection?.nextInspection || 'X' },
-            { key: 'status', label: 'สถานะ', value: mockData.inspection?.status || 'X' },
+            { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection?.lastInspection || 'None' },
+            { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection?.nextInspection || 'None' },
+            { key: 'status', label: 'สถานะ', value: mockData.inspection?.status || 'None' },
           ]}
           columns={[
-            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'X' },
-            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'X' },
+            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'None' },
+            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'None' },
           ]}
         />
       ),
