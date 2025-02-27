@@ -49,6 +49,33 @@ export const GET_BRANDS = gql`
   }
 `;
 
+export const GET_ALL_BRANDS = gql`
+  query Brands_connection {
+    brands_connection(pagination: { limit: -1 }) {
+      nodes {
+        documentId
+        BrandName
+      }
+    }
+  }
+`;
+
+export const CREATE_NEW_BRAND = gql`
+  mutation Mutation($data: BrandInput!) {
+    createBrand(data: $data) {
+      BrandName
+    }
+  }
+`;
+
+export const DELETE_BRAND = gql`
+  mutation Mutation($documentId: ID!) {
+    deleteBrand(documentId: $documentId) {
+      documentId
+    }
+  }
+`;
+
 export const GET_MODELS_FROM_BRAND = gql`
   query Brand($documentId: ID!) {
     brand(documentId: $documentId) {
@@ -80,7 +107,7 @@ export async function updateAtEntryCreationAction(
       const uploadResponse = await fetch(
         `${process.env.REACT_APP_BASE_URL}/api/upload`,
         {
-          method: "POST", 
+          method: "POST",
           body: imageData,
         }
       );
@@ -112,8 +139,8 @@ export async function updateAtEntryCreationAction(
       status: "PUBLISHED",
     };
 
-    console.log("newEntry : ",newEntry)
-    console.log(`${process.env.REACT_APP_BASE_URL}/api/garages/` + selectCarId)
+    console.log("newEntry : ", newEntry);
+    console.log(`${process.env.REACT_APP_BASE_URL}/api/garages/` + selectCarId);
 
     // Create entry request
     const response = await fetch(

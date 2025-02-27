@@ -9,7 +9,10 @@ import CarCart from '../modules/search/pages/CarCart';  // ส่วนของ
 import Users from '../modules/transaction/components/Users';  // สำหรับ Seller
 import Detail from '../modules/detail/mock/detail';
 import useAuthStore from '../store/authStore';  // นำเข้า useAuthStore จาก zustand store
-import ConfigGarage from '../modules/transaction/components/ConfigGarage';  // ส่วนของ Seller
+import ConfigGarage from '../modules/transaction/components/ConfigGarage';  
+import ConfigBrand from '../modules/transaction/components/ConfigGarageComponents/ConfigBrand';
+import ConfigModel from '../modules/transaction/components/ConfigGarageComponents/ConfigModel';
+import ConfigCategoryCar from '../modules/transaction/components/ConfigGarageComponents/ConfigCategoryCar';
 
 const AppRoutes = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
@@ -27,10 +30,16 @@ const AppRoutes = () => {
       
       {/* ส่วนสำหรับ Seller */}
       <Route path="/seller" element={isLoggedIn && role === 'Seller' ? <SellUser /> : <Navigate to="/signin" replace />} />
-      <Route path="/cofigg" element={isLoggedIn && role === 'Seller' ? <ConfigGarage /> : <Navigate to="/signin" replace />} />
+
+      <Route path="/cofigg" element={isLoggedIn && role === 'Seller' ? <ConfigGarage /> : <Navigate to="/signin" replace />} >
+      <Route path="brand" element={<ConfigBrand />} />
+      <Route path="model" element={<ConfigModel />} />
+      <Route path="categorycar" element={<ConfigCategoryCar />} />
+      </Route>
+
       <Route path="/users" element={isLoggedIn && role === 'Seller' ? <Users /> : <Navigate to="/signin" replace />} />
       <Route path="/order" element={isLoggedIn && role === 'Seller' ? <Order /> : <Navigate to="/signin" replace />} />
-
+      
       {/* หน้าแสดงรายละเอียด */}
       <Route path="/detail/:id" element={<Detail />} />
       
