@@ -73,7 +73,18 @@ const Header = () => {
     { name: "Home", href: "/", current: location.pathname === "/" },
     { name: "Buy", href: "/buy", current: location.pathname === "/buy" },
     ...(isLoggedIn && role === "Seller"
-      ? [{ name: "Sell", href: "/seller", current: location.pathname === "/seller" }]
+      ? [
+          {
+            name: "Sell",
+            href: "/seller",
+            current: location.pathname === "/seller",
+          },
+          {
+            name: "Config Garage",
+            href: "/cofigg",
+            current: location.pathname === "/configg",
+          }
+        ]
       : []),
     { name: "About", href: "/about", current: location.pathname === "/about" },
   ];

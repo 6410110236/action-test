@@ -1,97 +1,35 @@
-import React, { Suspense } from 'react';
-import { Route, Routes, Navigate, useLocation, Link } from 'react-router-dom';
-import useAuthStore from '../store/authStore';
-
-// Role constants
-const ROLES = {
-  BUYER: 'Buyer',
-  SELLER: 'Seller'
-};
-
-// Lazy load components
-const Home = React.lazy(() => import('../modules/landing/pages/Home'));
-const SignIn = React.lazy(() => import('../modules/auth/pages/signIn'));
-const SignUp = React.lazy(() => import('../modules/auth/pages/signUp'));
-const SellUser = React.lazy(() => import('../modules/transaction/components/SellUser'));
-const Order = React.lazy(() => import('../modules/transaction/order'));
-const CarCart = React.lazy(() => import('../modules/search/pages/CarCart'));
-const Users = React.lazy(() => import('../modules/transaction/components/Users'));
-const Detail = React.lazy(() => import('../modules/detail/mock/detail'));
-const PaymentSuccess = React.lazy(() => import('../pages/PaymentSuccess'));
-const PaymentCancel = React.lazy(() => import('../pages/PaymentCancel'));
-const Payment = React.lazy(() => import('../pages/Payment'));
-
-// Error Boundary Component
-class ErrorBoundary extends React.Component {
-  state = { hasError: false };
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h1 className="text-xl font-semibold text-red-600">Something went wrong</h1>
-            <button
-              className="mt-4 text-blue-600 hover:text-blue-800"
-              onClick={() => window.location.reload()}
-            >
-              Reload page
-            </button>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-// Protected Route Component
-const ProtectedRoute = ({ children, allowedRoles = [], isLoggedIn, userRole }) => {
-  const location = useLocation();
-
-  // Add proper authentication check
-  if (!isLoggedIn) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
-  }
-
-  // Strictly check role permissions
-  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-    return <Navigate 
-      to="/home" 
-      state={{ 
-        error: `Access denied. Required role: ${allowedRoles.join(' or ')}` 
-      }} 
-      replace 
-    />;
-  }
-
-  return children;
-};
-
-// Loading Component
-const LoadingSpinner = () => (
-  <div className="flex items-center justify-center h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-  </div>
-);
+import React from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import Home from '../modules/landing/pages/Home';
+import SignIn from '../modules/auth/pages/signIn';
+import SignUp from '../modules/auth/pages/signUp';
+import SellUser from '../modules/transaction/components/SellUser';  // ส่วนของ Seller
+import Order from '../modules/transaction/order';  // ส่วนของ Seller
+import CarCart from '../modules/search/pages/CarCart';  // ส่วนของ Buyer
+import Users from '../modules/transaction/components/Users';  // สำหรับ Seller
+import Detail from '../modules/detail/mock/detail';
+import useAuthStore from '../store/authStore';  // นำเข้า useAuthStore จาก zustand store
+import ConfigGarage from '../modules/transaction/components/ConfigGarage';  // ส่วนของ Seller
 
 const AppRoutes = () => {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const role = useAuthStore((state) => state.role);
 
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+    <Routes>
+      <Route path="/" element={<Navigate to="/home" replace />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      
+      {/* ส่วนสำหรับ Buyer */}
+      <Route path="/buy" element={<CarCart />} />
+      
+      {/* ส่วนสำหรับ Seller */}
+      <Route path="/seller" element={isLoggedIn && role === 'Seller' ? <SellUser /> : <Navigate to="/signin" replace />} />
+      <Route path="/cofigg" element={isLoggedIn && role === 'Seller' ? <ConfigGarage /> : <Navigate to="/signin" replace />} />
+      <Route path="/users" element={isLoggedIn && role === 'Seller' ? <Users /> : <Navigate to="/signin" replace />} />
+      <Route path="/order" element={isLoggedIn && role === 'Seller' ? <Order /> : <Navigate to="/signin" replace />} />
 
           {/* Protected Routes */}
           <Route 
@@ -180,8 +118,6 @@ const AppRoutes = () => {
             }
           />
         </Routes>
-      </Suspense>
-    </ErrorBoundary>
   );
 };
 
