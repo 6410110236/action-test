@@ -1,37 +1,64 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Carousel, Card, Modal, Tabs, Table, Drawer } from 'antd';
+import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
 import {
-  LikeOutlined,
-  LikeFilled,
-  ShareAltOutlined,
-  CalculatorOutlined,
-  CarOutlined,
-  SwapOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  MessageOutlined,
-  FacebookOutlined,
-  TwitterOutlined,
-  WhatsAppOutlined,
-  InstagramOutlined,
+  LikeOutlined, LikeFilled, ShareAltOutlined, CalculatorOutlined, CarOutlined,
+  SwapOutlined, PhoneOutlined, MailOutlined, MessageOutlined,
+  FacebookOutlined, TwitterOutlined, WhatsAppOutlined, InstagramOutlined
 } from '@ant-design/icons';
 import 'tailwindcss/tailwind.css';
 import 'antd/dist/reset.css';
-import mockData from '../../mock/mock';
+
+import { client } from '../../../utils/apolloClient';
+import useCarStore from '../../../store/carStore';
+import { GET_GARAGES } from '../../../conf/main';
 
 const Detail = () => {
   const { id } = useParams();
-  const [carData, setCarData] = React.useState({});
-  const [selectedImage, setSelectedImage] = React.useState(0);
-  const [isModalVisible, setIsModalVisible] = React.useState(false);
-  const [isInstallmentModalVisible, setIsInstallmentModalVisible] = React.useState(false);
-  const [installmentAmount, setInstallmentAmount] = React.useState(0);
-  const [isLiked, setIsLiked] = React.useState(false);
-  const [likeCount, setLikeCount] = React.useState(120);
+  const { cars, setCars } = useCarStore();
+  const [selectedCar, setSelectedCar] = useState({});
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isInstallmentModalVisible, setIsInstallmentModalVisible] = useState(false);
+  const [installmentAmount, setInstallmentAmount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(120);
+  const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const carouselRef = React.useRef(null);
 
-  const [isShareModalVisible, setIsShareModalVisible] = React.useState(false);
+  const fetchCarData = async () => {
+    try {
+      const response = await client.query({ query: GET_GARAGES });
+      console.log('🚀 API Response:', response.data);
+
+      const formattedCars = response.data.garages.map((garage) => ({
+        id: garage.documentId,
+        modelName: garage.model?.ModelName || 'Unknown',
+        brandName: garage.model?.brand_car?.BrandName || 'Unknown',
+        price: garage.Price,
+        image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
+        category: garage.VehicleRegistrationTypes || 'Unknown',
+        color: garage.Color || 'Unknown',
+        gearType: garage.model?.GearType || 'Unknown',
+        details: garage.details || {},  // รายละเอียดเพิ่มเติม
+        inspection: garage.inspection || {},  // การตรวจสภาพรถ
+      }));
+
+      setCars(formattedCars);
+      const car = formattedCars.find(car => car.id === id);
+      setSelectedCar(car || {});
+    } catch (error) {
+      console.error('❌ Error fetching car data:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!cars.length) {
+      fetchCarData();
+    } else {
+      const car = cars.find(car => car.id === id);
+      setSelectedCar(car || {});
+    }
+  }, [id, cars]);
 
   const handleClick = (action) => {
     console.log(`${action} button clicked`);
@@ -64,18 +91,6 @@ const Detail = () => {
     setInstallmentAmount(installment.toLocaleString());
   };
 
-  const selectedCar = mockData.find(car => car.id === parseInt(id, 10)) || {};
-
-  useEffect(() => {
-    const newCarData = mockData.find(car => car.id === parseInt(id, 10));
-    setCarData(newCarData || {});
-  }, [id]);
-
-  const handleThumbnailClick = (id) => {
-    const selectedCar = mockData.find(car => car.id === id);
-    setCarData(selectedCar || {});
-  };
-
   const tabItems = [
     {
       key: '1',
@@ -85,15 +100,14 @@ const Detail = () => {
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: mockData.details?.fuelType || 'None' },
-            { key: 'seat', label: 'จำนวนที่นั่ง', value: mockData.details?.seatCount || 'None' },
-            { key: 'regType', label: 'ประเภทการจดทะเบียน', value: mockData.details?.registrationType || 'None' },
-            { key: 'spareKey', label: 'กุญแจสำรอง', value: mockData.details?.spareKey || 'None' },
-            { key: 'insurance', label: 'การรับประกันหลัก', value: mockData.details?.insurance || 'None' },
-            { key: 'color', label: 'สี', value: mockData.details?.color || 'None' },
-            { key: 'regDate', label: 'วันจดทะเบียน', value: mockData.details?.registrationDate || 'None' },
-            { key: 'lastDist', label: 'ระยะทางล่าสุด', value: mockData.details?.lastDistance || 'None' },
-            { key: 'serviceGuide', label: 'สมุดคู่มือการเข้าศูนย์บริการ', value: mockData.details?.serviceGuide || 'None' },
+            { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: selectedCar.details?.fuelType || 'None' },
+            { key: 'seat', label: 'จำนวนที่นั่ง', value: selectedCar.details?.seatCount || 'None' },
+            { key: 'regType', label: 'ประเภทการจดทะเบียน', value: selectedCar.details?.registrationType || 'None' },
+            { key: 'spareKey', label: 'กุญแจสำรอง', value: selectedCar.details?.spareKey || 'None' },
+            { key: 'insurance', label: 'การรับประกันหลัก', value: selectedCar.details?.insurance || 'None' },
+            { key: 'color', label: 'สี', value: selectedCar.details?.color || 'None' },
+            { key: 'regDate', label: 'วันจดทะเบียน', value: selectedCar.details?.registrationDate || 'None' },
+            { key: 'lastDist', label: 'ระยะทางล่าสุด', value: selectedCar.details?.lastDistance || 'None' },
           ]}
           columns={[
             { title: 'รายการ', dataIndex: 'label', key: 'label' || 'None' },
@@ -110,9 +124,9 @@ const Detail = () => {
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: mockData.inspection?.lastInspection || 'None' },
-            { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: mockData.inspection?.nextInspection || 'None' },
-            { key: 'status', label: 'สถานะ', value: mockData.inspection?.status || 'None' },
+            { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: selectedCar.inspection?.lastInspection || 'None' },
+            { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: selectedCar.inspection?.nextInspection || 'None' },
+            { key: 'status', label: 'สถานะ', value: selectedCar.inspection?.status || 'None' },
           ]}
           columns={[
             { title: 'รายการ', dataIndex: 'label', key: 'label' || 'None' },
@@ -128,19 +142,26 @@ const Detail = () => {
       <div className="max-w-screen-lg mx-auto">
         <div className="flex flex-col lg:flex-row">
           {/* Left Side */}
-          <div className="w-full lg:w-2/3 p-4">
-            <Carousel ref={carouselRef} autoplay={false} afterChange={(current) => setSelectedImage(current)}>
-              <div>
-                <img src={carData.image} alt={carData.modelName} className="w-full h-96 object-cover rounded-lg" />
-              </div>
-            </Carousel>
-          </div>
+          {selectedCar.image ? (
+            <img
+              src={`${process.env.REACT_APP_BASE_URL}${selectedCar.image}`}
+              alt={selectedCar.modelName}
+              className="w-full max-w-[700px] h-64 max-h-64 object-cover transition-transform duration-300 group-hover:scale-120"
+            />
+          ) : (
+            <div className="w-full h-64 flex items-center justify-center bg-gray-200 text-gray-500">
+              No Image
+            </div>
+          )}
           {/* Right Side */}
           <div className="w-full lg:w-1/3 p-4 flex flex-col justify-between">
             <Card className="flex-grow">
               <h1 className="text-3xl font-bold mb-2">{selectedCar.modelName || 'ไม่พบข้อมูล'}</h1>
               <h2 className="text-xl text-gray-600 mb-4">{selectedCar.brandName || 'ไม่พบข้อมูล'}</h2>
-              <p className="text-2xl text-red-600 font-semibold mb-4">{selectedCar.price || 'ไม่พบข้อมูล'}</p>
+              <p className="text-2xl text-red-600 font-semibold mb-4">
+                {selectedCar.price ? `${selectedCar.price} ฿` : 'ไม่พบข้อมูล'}
+              </p>
+
               <p className="text-md text-gray-700 mb-2">ประเภท: {selectedCar.category || 'ไม่พบข้อมูล'}</p>
               <p className="text-md text-gray-700 mb-4">ระบบเกียร์: {selectedCar.gearType || 'ไม่พบข้อมูล'}</p>
               <div className="grid grid-cols-2 gap-4">
