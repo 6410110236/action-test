@@ -10,7 +10,7 @@ const conf = {
     publishableKey: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY,
     successUrl: `${window.location.origin}/payment/success`,
     cancelUrl: `${window.location.origin}/payment/cancel`,
-    currency: 'thb',
+    currency: "thb",
   },
 };
 
@@ -78,6 +78,49 @@ export const DELETE_BRAND = gql`
   mutation Mutation($documentId: ID!) {
     deleteBrand(documentId: $documentId) {
       documentId
+    }
+  }
+`;
+
+export const UPDATE_BRAND = gql`
+  mutation Mutation($documentId: ID!, $data: BrandInput!) {
+    updateBrand(documentId: $documentId, data: $data) {
+      BrandName
+    }
+  }
+`;
+
+export const GET_ALL_CATEGORIES_CAR = gql`
+  query Query {
+    categoryCars_connection(pagination: { limit: -1 }) {
+      nodes {
+        Category
+        documentId
+      }
+    }
+  }
+`;
+
+export const CREATE_NEW_CATEGORY_CAR = gql`
+  mutation Mutation($data: CategoryCarInput!) {
+    createCategoryCar(data: $data) {
+      Category
+    }
+  }
+`;
+
+export const DELETE_CATEGORY_CAR = gql`
+  mutation Mutation($documentId: ID!) {
+    deleteCategoryCar(documentId: $documentId) {
+      documentId
+    }
+  }
+`;
+
+export const UPDATE_CATEGORY_CAR = gql`
+  mutation Mutation($documentId: ID!, $data: CategoryCarInput!) {
+    updateCategoryCar(documentId: $documentId, data: $data) {
+      Category
     }
   }
 `;
