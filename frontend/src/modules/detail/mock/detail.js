@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
 import {
   LikeOutlined, LikeFilled, ShareAltOutlined, CalculatorOutlined, CarOutlined,
@@ -15,6 +15,7 @@ import { GET_GARAGES } from '../../../conf/main';
 
 const Detail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { cars, setCars } = useCarStore();
   const [selectedCar, setSelectedCar] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -24,6 +25,12 @@ const Detail = () => {
   const [likeCount, setLikeCount] = useState(120);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const carouselRef = React.useRef(null);
+  const [downPaymentPercentage, setDownPaymentPercentage] = useState(10);
+  const [calculationDetails, setCalculationDetails] = useState({
+    totalPrice: 0,
+    downPayment: 0,
+    monthlyPayment: 0
+  });
 
   const fetchCarData = async () => {
     try {
@@ -61,10 +68,7 @@ const Detail = () => {
   }, [id, cars]);
 
   const handleClick = (action) => {
-    console.log(`${action} button clicked`);
-    if (action === 'Interest') {
-      setIsModalVisible(true);
-    } else if (action === 'Calculate') {
+    if (action === 'Reserve') {
       calculateInstallment();
       setIsInstallmentModalVisible(true);
     } else if (action === 'Share') {
@@ -84,53 +88,65 @@ const Detail = () => {
   };
 
   const calculateInstallment = () => {
-    const priceNumber = selectedCar.price
+    const totalPrice = selectedCar.price
       ? parseInt(String(selectedCar.price).replace(/[^0-9]/g, ''), 10)
       : 0;
-    const installment = priceNumber > 0 ? Math.ceil(priceNumber / 12) : 0;
-    setInstallmentAmount(installment.toLocaleString());
+
+    if (totalPrice > 0) {
+      const downPayment = Math.ceil((totalPrice * downPaymentPercentage) / 100);
+      const remainingAmount = totalPrice - downPayment;
+      const monthlyPayment = Math.ceil(remainingAmount / 12);
+
+      setCalculationDetails({
+        totalPrice: totalPrice.toLocaleString(),
+        downPayment: downPayment.toLocaleString(),
+        monthlyPayment: monthlyPayment.toLocaleString()
+      });
+    }
+
+    setIsInstallmentModalVisible(true);
   };
 
   const tabItems = [
     {
       key: '1',
-      label: 'รายละเอียดรถยนต์',
+      label: 'Car Details',
       children: (
         <Table
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'fuel', label: 'ประเภทเชื้อเพลิง', value: selectedCar.details?.fuelType || 'None' },
-            { key: 'seat', label: 'จำนวนที่นั่ง', value: selectedCar.details?.seatCount || 'None' },
-            { key: 'regType', label: 'ประเภทการจดทะเบียน', value: selectedCar.details?.registrationType || 'None' },
-            { key: 'spareKey', label: 'กุญแจสำรอง', value: selectedCar.details?.spareKey || 'None' },
-            { key: 'insurance', label: 'การรับประกันหลัก', value: selectedCar.details?.insurance || 'None' },
-            { key: 'color', label: 'สี', value: selectedCar.details?.color || 'None' },
-            { key: 'regDate', label: 'วันจดทะเบียน', value: selectedCar.details?.registrationDate || 'None' },
-            { key: 'lastDist', label: 'ระยะทางล่าสุด', value: selectedCar.details?.lastDistance || 'None' },
+            { key: 'fuel', label: 'Fuel Type', value: selectedCar.details?.fuelType || 'None' },
+            { key: 'seat', label: 'Seats', value: selectedCar.details?.seatCount || 'None' },
+            { key: 'regType', label: 'Registration Type', value: selectedCar.details?.registrationType || 'None' },
+            { key: 'spareKey', label: 'Spare Key', value: selectedCar.details?.spareKey || 'None' },
+            { key: 'insurance', label: 'Primary Insurance', value: selectedCar.details?.insurance || 'None' },
+            { key: 'color', label: 'Color', value: selectedCar.details?.color || 'None' },
+            { key: 'regDate', label: 'Registration Date', value: selectedCar.details?.registrationDate || 'None' },
+            { key: 'lastDist', label: 'Latest Mileage', value: selectedCar.details?.lastDistance || 'None' },
           ]}
           columns={[
-            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'None' },
-            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'None' },
+            { title: 'Item', dataIndex: 'label', key: 'label' },
+            { title: 'Details', dataIndex: 'value', key: 'value' },
           ]}
         />
       ),
     },
     {
       key: '2',
-      label: 'การตรวจสภาพรถยนต์',
+      label: 'Vehicle Inspection',
       children: (
         <Table
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'lastInspection', label: 'ตรวจสภาพครั้งล่าสุด', value: selectedCar.inspection?.lastInspection || 'None' },
-            { key: 'nextInspection', label: 'กำหนดตรวจครั้งถัดไป', value: selectedCar.inspection?.nextInspection || 'None' },
-            { key: 'status', label: 'สถานะ', value: selectedCar.inspection?.status || 'None' },
+            { key: 'lastInspection', label: 'Last Inspection', value: selectedCar.inspection?.lastInspection || 'None' },
+            { key: 'nextInspection', label: 'Next Inspection', value: selectedCar.inspection?.nextInspection || 'None' },
+            { key: 'status', label: 'Status', value: selectedCar.inspection?.status || 'None' },
           ]}
           columns={[
-            { title: 'รายการ', dataIndex: 'label', key: 'label' || 'None' },
-            { title: 'ข้อมูล', dataIndex: 'value', key: 'value' || 'None' },
+            { title: 'Item', dataIndex: 'label', key: 'label' },
+            { title: 'Details', dataIndex: 'value', key: 'value' },
           ]}
         />
       ),
@@ -156,26 +172,20 @@ const Detail = () => {
           {/* Right Side */}
           <div className="w-full lg:w-1/3 p-4 flex flex-col justify-between">
             <Card className="flex-grow">
-              <h1 className="text-3xl font-bold mb-2">{selectedCar.modelName || 'ไม่พบข้อมูล'}</h1>
-              <h2 className="text-xl text-gray-600 mb-4">{selectedCar.brandName || 'ไม่พบข้อมูล'}</h2>
+              <h1 className="text-3xl font-bold mb-2">{selectedCar.modelName || 'No data'}</h1>
+              <h2 className="text-xl text-gray-600 mb-4">{selectedCar.brandName || 'No data'}</h2>
               <p className="text-2xl text-red-600 font-semibold mb-4">
-                {selectedCar.price ? `${selectedCar.price} ฿` : 'ไม่พบข้อมูล'}
+                {selectedCar.price ? `${selectedCar.price} ฿` : 'No price data'}
               </p>
 
-              <p className="text-md text-gray-700 mb-2">ประเภท: {selectedCar.category || 'ไม่พบข้อมูล'}</p>
-              <p className="text-md text-gray-700 mb-4">ระบบเกียร์: {selectedCar.gearType || 'ไม่พบข้อมูล'}</p>
+              <p className="text-md text-gray-700 mb-2">Type: {selectedCar.category || 'No data'}</p>
+              <p className="text-md text-gray-700 mb-4">Transmission: {selectedCar.gearType || 'No data'}</p>
               <div className="grid grid-cols-2 gap-4">
-                <Button type="primary" icon={<CarOutlined />} onClick={() => handleClick('Interest')} className="w-full">
-                  สนใจรถคันนี้
-                </Button>
-                <Button icon={<CalculatorOutlined />} onClick={() => handleClick('Calculate')} className="w-full">
-                  คำนวณงวด
-                </Button>
-                <Button icon={<SwapOutlined />} onClick={() => handleClick('Compare')} className="w-full">
-                  เปรียบเทียบรถ
+                <Button type="primary" icon={<CarOutlined />} onClick={() => handleClick('Reserve')} className="w-full">
+                  Pricing
                 </Button>
                 <Button icon={<ShareAltOutlined />} onClick={() => handleClick('Share')} className="w-full">
-                  แชร์
+                  Share
                 </Button>
                 {/* Like Button */}
                 <Button
@@ -184,7 +194,7 @@ const Detail = () => {
                   className={`w-full col-span-2 flex items-center justify-center ${isLiked ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
                     }`}
                 >
-                  ถูกใจ <span className="ml-2">{likeCount}</span>
+                  Like <span className="ml-2">{likeCount}</span>
                 </Button>
               </div>
             </Card>
@@ -198,22 +208,22 @@ const Detail = () => {
       </div>
 
       {/* Modal for Contact Info */}
-      <Modal open={isModalVisible} onCancel={handleCancel} footer={null} title="ติดต่อผู้ขาย">
+      <Modal open={isModalVisible} onCancel={handleCancel} footer={null} title="Contact Seller">
         <div className="flex flex-col items-center space-y-4">
           <Button type="link" icon={<PhoneOutlined style={{ fontSize: '24px' }} />} href="tel:0123456789">
-            โทรศัพท์: 012-345-6789
+            Phone: 012-345-6789
           </Button>
           <Button type="link" icon={<MailOutlined style={{ fontSize: '24px' }} />} href="mailto:seller@example.com">
-            อีเมล: seller@example.com
+            Email: seller@example.com
           </Button>
           <Button type="link" icon={<MessageOutlined style={{ fontSize: '24px' }} />} href="sms:0123456789">
-            ส่งข้อความ
+            Send Message
           </Button>
         </div>
       </Modal>
 
       {/* Modal for Sharing */}
-      <Modal open={isShareModalVisible} onCancel={handleCancel} footer={null} title="แชร์">
+      <Modal open={isShareModalVisible} onCancel={handleCancel} footer={null} title="Share">
         <div className="flex flex-col items-center space-y-4">
           <Button type="link" icon={<FacebookOutlined style={{ fontSize: '24px', color: '#1877F2' }} />} href="https://www.facebook.com/">
             Facebook
@@ -231,14 +241,79 @@ const Detail = () => {
       </Modal>
 
       {/* Modal for Installment Calculation */}
-      <Modal open={isInstallmentModalVisible} onCancel={handleCancel} footer={null} title="คำนวณค่างวด">
-        <div className="flex flex-col items-center space-y-4">
-          <p className="text-lg font-semibold text-gray-800">
-            ใน 1 ปี ผ่อนเพียงเดือนละ <span className="text-red-600">{installmentAmount}</span> บาท
-          </p>
-          <Button type="primary" icon={<CarOutlined />} className="w-full" onClick={handleCancel}>
-            ยืนยัน
-          </Button>
+      <Modal 
+        open={isInstallmentModalVisible} 
+        onCancel={handleCancel} 
+        footer={null} 
+        title="Payment Calculator"
+        width={400}
+      >
+        <div className="flex flex-col space-y-6 p-4">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Total Price: <span className="text-red-600">{calculationDetails.totalPrice} THB</span>
+            </h3>
+            
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">Select Down Payment Percentage:</p>
+              <div className="flex flex-wrap gap-2">
+                {[10, 20, 30, 40].map((percentage) => (
+                  <button
+                    key={percentage}
+                    onClick={() => {
+                      setDownPaymentPercentage(percentage);
+                      calculateInstallment();
+                    }}
+                    className={`px-3 py-1 rounded ${
+                      downPaymentPercentage === percentage
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {percentage}%
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Down Payment:</span>
+                <span className="font-semibold">{calculationDetails.downPayment} THB</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Monthly Payment (12 months):</span>
+                <span className="font-semibold">{calculationDetails.monthlyPayment} THB</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Button 
+              type="primary" 
+              icon={<CarOutlined />} 
+              onClick={() => {
+                handleCancel();
+                navigate('/payment', {
+                  state: {
+                    carId: id,
+                    modelName: selectedCar.modelName,
+                    price: selectedCar.price,
+                    image: selectedCar.image,
+                    downPayment: calculationDetails.downPayment,
+                    monthlyPayment: calculationDetails.monthlyPayment,
+                    downPaymentPercentage
+                  }
+                });
+              }}
+              className="w-full"
+            >
+              Proceed to Payment
+            </Button>
+            <Button onClick={handleCancel} className="w-full">
+              Cancel
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
