@@ -228,13 +228,12 @@ const Header = () => {
               {/* Search button and profile dropdown */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
-                  {/* Payment button */}
+                  {/* Test button (previously Payment button) */}
                   <Link
-                    to="/payment"
+                    to="/test"
                     className="relative rounded-full bg-green-600 text-white py-1.5 px-4 flex items-center mr-4 hover:bg-green-700 transition-colors"
                   >
-                    <CreditCardIcon className="h-5 w-5 mr-2" />
-                    <span>Payment</span>
+                    <span>Test</span>
                   </Link>
 
                   {/* Existing search button */}

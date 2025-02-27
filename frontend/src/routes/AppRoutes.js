@@ -16,49 +16,75 @@ import ConfigCategoryCar from "../modules/transaction/components/ConfigGarageCom
 import Payment from "../pages/Payment";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentCancel from "../pages/PaymentCancel";
+import Test from "../pages/Test";
 
-// Role constants with default role
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+  </div>
+);
+
+// Role constants
 const ROLES = {
   BUYER: "Buyer",
   SELLER: "Seller",
   DEFAULT: "Buyer",
 };
 
-// Protected Route Component with enhanced validation
+// Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [], isLoggedIn, userRole }) => {
   const location = useLocation();
   const [isValidating, setIsValidating] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const validateRole = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      setIsValidating(false);
-    };
-    validateRole();
+    const timeoutId = setTimeout(() => {
+      try {
+        setIsValidating(false);
+      } catch (err) {
+        setError(err.message);
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   if (isValidating) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <Navigate
+        to="/home"
+        state={{ error: "Authentication error. Please try again." }}
+        replace
+      />
+    );
   }
 
   if (!isLoggedIn) {
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles.length === 0 || allowedRoles.includes(userRole || ROLES.DEFAULT)) {
-    return children;
+  const hasRequiredRole = !allowedRoles.length || 
+    allowedRoles.includes(userRole || ROLES.DEFAULT);
+
+  if (!hasRequiredRole) {
+    return (
+      <Navigate
+        to="/home"
+        state={{
+          error: `Access denied. Required role: ${allowedRoles.join(" or ")}`,
+          from: location,
+        }}
+        replace
+      />
+    );
   }
 
-  return (
-    <Navigate
-      to="/home"
-      state={{
-        error: `Access denied. Required role: ${allowedRoles.join(" or ")}`,
-        from: location,
-      }}
-      replace
-    />
-  );
+  return children;
 };
 
 const AppRoutes = () => {
@@ -73,7 +99,17 @@ const AppRoutes = () => {
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
 
-      {/* Buyer Routes */}
+      {/* Protected Routes - All Users */}
+      <Route
+        path="/detail/:id"
+        element={
+          <ProtectedRoute isLoggedIn={isLoggedIn} userRole={role}>
+            <Detail />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected Routes - Buyers & Sellers */}
       <Route
         path="/buy"
         element={
@@ -87,74 +123,31 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Seller Routes */}
+      {/* Protected Routes - Sellers Only */}
       <Route
-        path="/seller"
+        path="/seller/*"
         element={
           <ProtectedRoute
             isLoggedIn={isLoggedIn}
             allowedRoles={[ROLES.SELLER]}
             userRole={role}
           >
-            <SellUser />
+            <Routes>
+              <Route path="/" element={<SellUser />} />
+              <Route path="users" element={<Users />} />
+              <Route path="order" element={<Order />} />
+              <Route path="config/*" element={<ConfigGarage />}>
+                <Route index element={<Navigate to="brand" replace />} />
+                <Route path="brand" element={<ConfigBrand />} />
+                <Route path="model" element={<ConfigModel />} />
+                <Route path="category" element={<ConfigCategoryCar />} />
+              </Route>
+            </Routes>
           </ProtectedRoute>
         }
       />
 
-      <Route
-        path="/cofigg"
-        element={
-          <ProtectedRoute
-            isLoggedIn={isLoggedIn}
-            allowedRoles={[ROLES.SELLER]}
-            userRole={role}
-          >
-            <ConfigGarage />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="brand" element={<ConfigBrand />} />
-        <Route path="model" element={<ConfigModel />} />
-        <Route path="categorycar" element={<ConfigCategoryCar />} />
-      </Route>
-
-      <Route
-        path="/users"
-        element={
-          <ProtectedRoute
-            isLoggedIn={isLoggedIn}
-            allowedRoles={[ROLES.SELLER]}
-            userRole={role}
-          >
-            <Users />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/order"
-        element={
-          <ProtectedRoute
-            isLoggedIn={isLoggedIn}
-            allowedRoles={[ROLES.SELLER]}
-            userRole={role}
-          >
-            <Order />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Protected Detail Route */}
-      <Route
-        path="/detail/:id"
-        element={
-          <ProtectedRoute isLoggedIn={isLoggedIn} userRole={role}>
-            <Detail />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Payment Routes */}
+      {/* Protected Routes - Payment */}
       <Route
         path="/payment/*"
         element={
@@ -168,7 +161,21 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Catch All Route */}
+      {/* Test Route */}
+      <Route
+        path="/test"
+        element={
+          <ProtectedRoute
+            isLoggedIn={isLoggedIn}
+            allowedRoles={[ROLES.SELLER]}
+            userRole={role}
+          >
+            <Test />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 404 Route */}
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
