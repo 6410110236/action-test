@@ -6,6 +6,12 @@ const conf = {
   jwtUserEndpoint: "/api/users/me?populate=*",
   jwtSessionStorageKey: "auth.jwt",
   roleSessionStorageKey: "auth.role",
+  stripe: {
+    publishableKey: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY,
+    successUrl: `${window.location.origin}/payment/success`,
+    cancelUrl: `${window.location.origin}/payment/cancel`,
+    currency: 'thb',
+  },
 };
 
 // GraphQL query สำหรับดึงข้อมูล garages
@@ -306,5 +312,14 @@ export async function uploadAtEntryCreationAction(
     };
   }
 }
+
+export const CREATE_PAYMENT_INTENT = gql`
+  mutation CreatePaymentIntent($amount: Int!, $carId: ID!) {
+    createPaymentIntent(amount: $amount, carId: $carId) {
+      clientSecret
+      paymentIntentId
+    }
+  }
+`;
 
 export default conf;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserIcon, MailIcon, LockClosedIcon, EyeIcon, EyeOffIcon } from "@heroicons/react/solid";
 import useAuthStore from "../../../store/useStore";
 
@@ -16,6 +16,9 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+
     if (!formData.username.trim()) {
       setError("Username is required");
       return false;
@@ -32,8 +35,12 @@ const SignUp = () => {
       setError("Username must be at least 3 characters");
       return false;
     }
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (!emailRegex.test(formData.email.trim())) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    if (!passwordRegex.test(formData.password)) {
+      setError("Password must be at least 6 characters and contain both letters and numbers");
       return false;
     }
     return true;
@@ -51,26 +58,36 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    setError(null);
-    const result = await register(
-      formData.username.trim(),
-      formData.email.trim(),
-      formData.password,
-      formData.rememberMe
-    );
-    if (result.success) {
-      navigate("/home");
-    } else {
-      setError(result.error?.message || "Registration failed");
+    
+    try {
+      setError(null);
+      const result = await register(
+        formData.username.trim(),
+        formData.email.trim(),
+        formData.password,
+        formData.rememberMe
+      );
+      
+      if (result.success) {
+        navigate("/home");
+      } else {
+        throw new Error(result.error?.message || "Registration failed");
+      }
+    } catch (err) {
+      setError(err.message);
       setFormData((prev) => ({ ...prev, password: "" }));
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Sign Up</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="relative">
             <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -82,6 +99,7 @@ const SignUp = () => {
               disabled={isLoginPending}
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="username"
+              aria-label="Username"
             />
           </div>
           <div className="relative">
@@ -95,6 +113,7 @@ const SignUp = () => {
               disabled={isLoginPending}
               className="w-full pl-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="email"
+              aria-label="Email"
             />
           </div>
           <div className="relative">
@@ -108,11 +127,13 @@ const SignUp = () => {
               disabled={isLoginPending}
               className="w-full pl-10 pr-10 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               autoComplete="new-password"
+              aria-label="Password"
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={togglePasswordVisibility}
               className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
                 <EyeOffIcon className="w-5 h-5 text-gray-400" />
@@ -122,7 +143,7 @@ const SignUp = () => {
             </button>
           </div>
           {(error || loginError) && (
-            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+            <div role="alert" className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
               {error || loginError?.message}
             </div>
           )}
@@ -138,9 +159,9 @@ const SignUp = () => {
         </form>
         <p className="text-center text-sm mt-4">
           Already have an account?{" "}
-          <a href="/signin" className="text-blue-500 hover:underline">
+          <Link to="/signin" className="text-blue-500 hover:underline">
             Sign in here
-          </a>
+          </Link>
         </p>
       </div>
     </div>

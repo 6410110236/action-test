@@ -3,6 +3,8 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import useAuthStore from './store/useStore';  // Zustand store สำหรับตรวจสอบการล็อกอินและบทบาท
 import AppRoutes from './routes/AppRoutes';   // ใช้ AppRoutes สำหรับจัดการเส้นทาง
 import Header from './layout/Header';         // ใช้ Header ที่คุณให้มา
+import { Elements } from '@stripe/react-stripe-js';
+import { stripePromise } from './conf/stripe';
 
 function App() {
   const { isLoggedIn, role } = useAuthStore();  // ตรวจสอบสถานะการล็อกอินและบทบาท
@@ -10,6 +12,14 @@ function App() {
 
   // ตรวจจับการเปลี่ยนแปลงของ isLoggedIn และ role
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const cancelStatus = urlParams.get('cancel');
+    
+    if (cancelStatus === 'true') {
+      // Handle payment cancellation if needed
+      console.log('Payment was cancelled');
+    }
+
     // กำหนด Layout ตาม role ของผู้ใช้
     if (isLoggedIn) {
       // ถ้า logged in ให้ใช้ layout ตาม role
@@ -20,10 +30,12 @@ function App() {
   }, [isLoggedIn, role]);  // เมื่อ isLoggedIn หรือ role เปลี่ยน
 
   return (
-    <div className="App">
-      <Header />  {/* แสดง Header ทุกหน้า */}
-      {currentLayout}  {/* ใช้ AppRoutes ที่จัดการเส้นทาง */}
-    </div>
+    <Elements stripe={stripePromise}>
+      <div className="App">
+        <Header />  {/* แสดง Header ทุกหน้า */}
+        {currentLayout}  {/* ใช้ AppRoutes ที่จัดการเส้นทาง */}
+      </div>
+    </Elements>
   );
 }
 
