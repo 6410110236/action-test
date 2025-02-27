@@ -17,6 +17,8 @@
     "carousel": "^0.0.3",
     "cra-template": "1.2.0",
     "graphql": "^16.10.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.0",
     "lucide-react": "^0.475.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

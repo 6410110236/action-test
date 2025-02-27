@@ -1,0 +1,19 @@
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #root > div > div {
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .ant-btn {
+    display: none !important;
+  }
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+}
