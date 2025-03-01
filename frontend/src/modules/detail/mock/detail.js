@@ -257,7 +257,7 @@ const Detail = () => {
             <div className="space-y-2">
               <p className="text-sm text-gray-600">Select Down Payment Percentage:</p>
               <div className="flex flex-wrap gap-2">
-                {[10, 20, 30, 40].map((percentage) => (
+                {[1, 10, 20, 30, 40].map((percentage) => (
                   <button
                     key={percentage}
                     onClick={() => {
@@ -275,6 +275,13 @@ const Detail = () => {
                 ))}
               </div>
             </div>
+
+            {/* Add warning message for 1% down payment */}
+            {downPaymentPercentage === 1 && (
+              <div className="text-yellow-600 text-sm bg-yellow-50 p-2 rounded">
+                ⚠️ 1% down payment is a special promotion. Terms and conditions apply.
+              </div>
+            )}
 
             <div className="space-y-2 border-t pt-4">
               <div className="flex justify-between">
