@@ -136,7 +136,7 @@ const AppRoutes = () => {
               <Route path="/" element={<SellUser />} />
               <Route path="users" element={<Users />} />
               <Route path="order" element={<Order />} />
-              <Route path="config/*" element={<ConfigGarage />}>
+              <Route path="config" element={<ConfigGarage />}>
                 <Route index element={<Navigate to="brand" replace />} />
                 <Route path="brand" element={<ConfigBrand />} />
                 <Route path="model" element={<ConfigModel />} />
