@@ -81,18 +81,18 @@ const Header = () => {
           },
           {
             name: "Config Garage",
-            href: "/cofigg",
-            current: location.pathname === "/configg",
+            href: "/seller/config",
+            current: location.pathname === "/seller/config",
           }
         ]
       : []),
-    { name: "About", href: "/about", current: location.pathname === "/about" },
+    // { name: "About", href: "/about", current: location.pathname === "/about" },
   ];
 
   const userNavigation = [
     {
       name: "Your Profile",
-      href: "/users",
+      href: "/seller/users",
       icon: (
         <path
           strokeLinecap="round"

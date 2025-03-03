@@ -33,7 +33,8 @@ function Users() {
       <div className="text-center mb-6">
         <div className="mb-4 relative w-24 h-24 mx-auto">
           <img
-            src={user.Picture?.url ? `${process.env.REACT_APP_BASE_URL}${user.Picture.url}` : "/placeholder.svg"}
+            src={"https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // รูปดีฟอลต์ในมือถือ
+              }
             alt="Profile picture"
             className="w-full h-full object-cover rounded-full"
           />

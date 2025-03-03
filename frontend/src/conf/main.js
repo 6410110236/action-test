@@ -266,6 +266,10 @@ export const GET_USER = gql`
     usersPermissionsUser(documentId: $documentId) {
       username
       email
+      Picture {
+      url
+      }
+
       role {
         name
       }
