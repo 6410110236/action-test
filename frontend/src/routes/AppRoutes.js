@@ -96,6 +96,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/home" element={<Home />} />
+      <Route path="users" element={<Users />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
 
@@ -134,7 +135,6 @@ const AppRoutes = () => {
           >
             <Routes>
               <Route path="/" element={<SellUser />} />
-              <Route path="users" element={<Users />} />
               <Route path="order" element={<Order />} />
               <Route path="config" element={<ConfigGarage />}>
                 <Route index element={<Navigate to="brand" replace />} />

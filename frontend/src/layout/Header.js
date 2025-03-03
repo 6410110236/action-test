@@ -81,8 +81,8 @@ const Header = () => {
           },
           {
             name: "Config Garage",
-            href: "/cofigg",
-            current: location.pathname === "/configg",
+            href: "/seller/config",
+            current: location.pathname === "/seller/config",
           }
         ]
       : []),
@@ -138,7 +138,7 @@ const Header = () => {
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-4 py-2 text-xs text-gray-500">
-              {currentUser?.role?.name || "User"} {/* เข้าถึง name จาก role */}
+              {currentUser?.role?.name || "User"}
             </div>
             {userNavigation.map((item) => (
               <Menu.Item key={item.name}>
