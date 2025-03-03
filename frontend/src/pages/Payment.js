@@ -235,10 +235,10 @@ const Payment = () => {
   const carDetails = location.state;
   const [activeTab, setActiveTab] = useState('1');
 
-  // Calculate 1% down payment
   const calculateDownPayment = (price) => {
     const numericPrice = parseFloat(price.toString().replace(/[^0-9.-]+/g, ''));
-    return Math.round(numericPrice * 0.01);
+    const feePercentage = numericPrice >= 1000000 ? 0.01 : 0.1;
+    return Math.round(numericPrice * feePercentage);
   };
 
   if (!carDetails) {
@@ -302,8 +302,11 @@ const Payment = () => {
             <div className="space-y-2 text-gray-600">
               <p>Model: {carDetails.modelName}</p>
               <p>Total Price: {carDetails.price.toLocaleString()} THB</p>
-              <p>Reservation Fee (1%): {downPaymentAmount.toLocaleString()} THB</p>
-              <p className="text-sm text-blue-600">* This is a refundable reservation fee</p>
+              <p>Reservation Fee ({carDetails.price >= 1000000 ? '1%' : '10%'}): {downPaymentAmount.toLocaleString()} THB</p>
+              <p className="text-sm text-blue-600">
+                * This is a refundable reservation fee
+                {carDetails.price < 1000000 && ' (10% for vehicles under 1,000,000 THB)'}
+              </p>
             </div>
           </div>
           <Tabs 

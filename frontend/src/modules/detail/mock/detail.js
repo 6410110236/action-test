@@ -89,14 +89,13 @@ const Detail = () => {
       ? parseInt(String(selectedCar.price).replace(/[^0-9]/g, ''), 10)
       : 0;
 
-    if (totalPrice > 0) {
-      const reservationFee = Math.ceil(totalPrice * 0.01); // 1% reservation fee
+    const feePercentage = totalPrice >= 1000000 ? 0.01 : 0.1;
+    const reservationFee = Math.round(totalPrice * feePercentage);
 
-      setCalculationDetails({
-        totalPrice: totalPrice.toLocaleString(),
-        reservationFee: reservationFee.toLocaleString()
-      });
-    }
+    setCalculationDetails({
+      totalPrice: totalPrice.toLocaleString(),
+      reservationFee: reservationFee.toLocaleString()
+    });
 
     setIsInstallmentModalVisible(true);
   };
@@ -171,7 +170,6 @@ const Detail = () => {
               <p className="text-2xl text-red-600 font-semibold mb-4">
                 {selectedCar.price ? `${selectedCar.price} ฿` : 'No price data'}
               </p>
-
               <p className="text-md text-gray-700 mb-2">Type: {selectedCar.category || 'No data'}</p>
               <p className="text-md text-gray-700 mb-4">Transmission: {selectedCar.gearType || 'No data'}</p>
               <div className="grid grid-cols-2 gap-4">
@@ -250,7 +248,9 @@ const Detail = () => {
             
             <div className="space-y-2 border-t pt-4">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Reservation Fee (1%):</span>
+                <span className="text-gray-600">
+                  Reservation Fee ({parseInt(selectedCar.price) >= 1000000 ? '1%' : '10%'}):
+                </span>
                 <span className="font-semibold text-blue-600">{calculationDetails.reservationFee} THB</span>
               </div>
             </div>
@@ -258,10 +258,15 @@ const Detail = () => {
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-700 mb-2">Reservation Benefits:</h4>
               <ul className="text-sm text-blue-600 space-y-1 list-disc pl-4">
-                <li>Secure your vehicle with just 1% reservation fee</li>
+                <li>
+                  Secure your vehicle with {parseInt(selectedCar.price) >= 1000000 ? '1%' : '10%'} reservation fee
+                </li>
                 <li>100% refundable within 7 days</li>
                 <li>Priority vehicle inspection appointment</li>
                 <li>24/7 customer support</li>
+                {parseInt(selectedCar.price) < 1000000 && (
+                  <li className="font-medium">10% reservation fee applies to vehicles under 1,000,000 THB</li>
+                )}
               </ul>
             </div>
           </div>
