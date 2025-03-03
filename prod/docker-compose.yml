@@ -3,7 +3,7 @@ services:
   strapi:
     container_name: strapi
     build: 
-      context: /backend
+      context: ../backend
       dockerfile: Dockerfile
     image: strapi:latest
     # restart: unless-stopped
@@ -20,11 +20,11 @@ services:
       APP_KEYS: ${APP_KEYS}
       NODE_ENV: ${NODE_ENV}
     volumes:
-      - ./backend/config:/opt/app/config
-      - ./backend/src:/opt/app/src
-      - ./backend/package.json:/opt/package.json
-      - ./backend/package-lock.json:/opt/package-lock.json
-      - ./backend/public/uploads:/opt/app/public/uploads
+      - ../backend/config:/opt/app/config
+      - ../backend/src:/opt/app/src
+      - ../backend/package.json:/opt/package.json
+      - ../backend/package-lock.json:/opt/package-lock.json
+      - ../backend/public/uploads:/opt/app/public/uploads
     ports:
       - "1337:1337"
     networks:
