@@ -91,7 +91,7 @@ const Header = () => {
   const userNavigation = [
     {
       name: "Your Profile",
-      href: "/seller/users",
+      href: "/user",
       icon: (
         <path
           strokeLinecap="round"

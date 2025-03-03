@@ -96,7 +96,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/home" element={<Home />} />
-      <Route path="users" element={<Users />} />
+      <Route path="/user" element={<Users />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
 
