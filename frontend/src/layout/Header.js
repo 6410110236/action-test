@@ -85,12 +85,7 @@ const Header = () => {
             current: location.pathname === "/seller/config",
           }
         ]
-<<<<<<< HEAD
-      : []),
-    // { name: "About", href: "/about", current: location.pathname === "/about" },
-=======
       : [])
->>>>>>> 1f444787cc122cbb20285d42d7951ce4b60c93fb
   ];
 
   const userNavigation = [
