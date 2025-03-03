@@ -140,7 +140,7 @@ const AppRoutes = () => {
                 <Route index element={<Navigate to="brand" replace />} />
                 <Route path="brand" element={<ConfigBrand />} />
                 <Route path="model" element={<ConfigModel />} />
-                <Route path="category" element={<ConfigCategoryCar />} />
+                <Route path="categorycar" element={<ConfigCategoryCar />} />
               </Route>
             </Routes>
           </ProtectedRoute>
