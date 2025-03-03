@@ -127,8 +127,8 @@ const PaymentSuccess = () => {
       <div className="max-w-3xl mx-auto">
         <Result
           status="success"
-          title="Purchase Successful!"
-          subTitle={`You have successfully purchased ${paymentDetails.modelName}`}
+          title="Reservation Successful!"
+          subTitle={`You have successfully reserved ${paymentDetails.modelName}`}
           icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
         />
         
@@ -136,7 +136,7 @@ const PaymentSuccess = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800">KODROD</h1>
             <p className="text-gray-600 mt-2">
-              Official Purchase Receipt
+              Official Reservation Receipt
             </p>
           </div>
           
@@ -181,24 +181,20 @@ const PaymentSuccess = () => {
               <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-500">Down Payment</p>
-                  <p className="font-medium">{formatCurrency(paymentDetails.downPayment)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Monthly Payment</p>
-                  <p className="font-medium">
-                    {formatCurrency(paymentDetails.monthlyPayment || 
-                      ((paymentDetails.totalPrice - paymentDetails.downPayment) / paymentDetails.installmentPeriod)
-                    )}
-                  </p>
+                  <p className="text-sm text-gray-500">Reservation Fee (1%)</p>
+                  <p className="font-medium">{formatCurrency(paymentDetails.reservationFee)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Payment Method</p>
                   <p className="font-medium">{paymentDetails.paymentMethod}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Payment Terms</p>
-                  <p className="font-medium">{paymentDetails.installmentPeriod} months</p>
+                  <p className="text-sm text-gray-500">Total Vehicle Price</p>
+                  <p className="font-medium text-green-600">{formatCurrency(paymentDetails.totalPrice)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Payment Status</p>
+                  <p className="font-medium text-green-600">Reservation Fee Paid</p>
                 </div>
               </div>
             </div>
@@ -210,6 +206,7 @@ const PaymentSuccess = () => {
                   <li>Keep this receipt for your records</li>
                   <li>Our team will contact you within 24 hours</li>
                   <li>Prepare your identification documents</li>
+                  <li>Reservation fee is fully refundable if canceled within 7 days</li>
                 </ul>
               }
               type="info"

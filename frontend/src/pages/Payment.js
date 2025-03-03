@@ -106,9 +106,7 @@ const ThaiQRPayment = ({ amount, carDetails }) => {
         category: carDetails.category,
         color: carDetails.color,
         totalPrice: carDetails.price,
-        downPayment: amount,
-        monthlyPayment: carDetails.monthlyPayment,
-        installmentPeriod: carDetails.installmentPeriod,
+        reservationFee: amount,
         paymentMethod: 'Thai QR Payment'
       };
 
@@ -138,7 +136,7 @@ const ThaiQRPayment = ({ amount, carDetails }) => {
           )}
         </div>
         <div className="text-lg font-semibold text-gray-700">
-          Test Payment Amount: {amount.toLocaleString()} THB
+          Reservation Fee: {amount.toLocaleString()} THB
         </div>
         <div className="text-sm text-gray-500 text-center max-w-md">
           This is a test QR code. For development purposes only.
@@ -197,9 +195,7 @@ const CheckoutForm = ({ amount, carDetails }) => {
         category: carDetails.category,
         color: carDetails.color,
         totalPrice: carDetails.price,
-        downPayment: amount,
-        monthlyPayment: carDetails.monthlyPayment,
-        installmentPeriod: carDetails.installmentPeriod,
+        reservationFee: amount,
         paymentMethod: 'Credit Card'
       };
 
@@ -218,7 +214,7 @@ const CheckoutForm = ({ amount, carDetails }) => {
         <CardElement options={cardStyle} />
       </div>
       <div className="text-lg font-semibold text-gray-700 text-center">
-        Down Payment Amount: {amount.toLocaleString()} THB
+        Reservation Fee: {amount.toLocaleString()} THB
       </div>
       <Button
         type="primary"
@@ -239,6 +235,12 @@ const Payment = () => {
   const carDetails = location.state;
   const [activeTab, setActiveTab] = useState('1');
 
+  // Calculate 1% down payment
+  const calculateDownPayment = (price) => {
+    const numericPrice = parseFloat(price.toString().replace(/[^0-9.-]+/g, ''));
+    return Math.round(numericPrice * 0.01);
+  };
+
   if (!carDetails) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -246,6 +248,8 @@ const Payment = () => {
       </div>
     );
   }
+
+  const downPaymentAmount = calculateDownPayment(carDetails.price);
 
   const tabItems = [
     {
@@ -258,8 +262,11 @@ const Payment = () => {
       ),
       children: (
         <StripeCheckoutForm 
-          amount={carDetails.downPayment} 
-          carDetails={carDetails}
+          amount={downPaymentAmount} 
+          carDetails={{
+            ...carDetails,
+            downPayment: downPaymentAmount
+          }}
         />
       ),
     },
@@ -273,8 +280,11 @@ const Payment = () => {
       ),
       children: (
         <ThaiQRPayment 
-          amount={carDetails.downPayment.toString().replace(/[^0-9.-]+/g, '')}
-          carDetails={carDetails}
+          amount={downPaymentAmount.toString()}
+          carDetails={{
+            ...carDetails,
+            downPayment: downPaymentAmount
+          }}
         />
       ),
     },
@@ -285,15 +295,15 @@ const Payment = () => {
       <div className="max-w-3xl mx-auto">
         <Card className="shadow-lg rounded-lg">
           <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Payment Details
+            Reservation Receipt
           </h1>
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">Car Details</h2>
             <div className="space-y-2 text-gray-600">
               <p>Model: {carDetails.modelName}</p>
-              <p>Total Price: {carDetails.price} THB</p>
-              <p>Down Payment: {carDetails.downPayment} THB</p>
-              <p>Monthly Payment: {carDetails.monthlyPayment} THB</p>
+              <p>Total Price: {carDetails.price.toLocaleString()} THB</p>
+              <p>Reservation Fee (1%): {downPaymentAmount.toLocaleString()} THB</p>
+              <p className="text-sm text-blue-600">* This is a refundable reservation fee</p>
             </div>
           </div>
           <Tabs 

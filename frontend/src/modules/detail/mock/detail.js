@@ -20,16 +20,13 @@ const Detail = () => {
   const [selectedCar, setSelectedCar] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isInstallmentModalVisible, setIsInstallmentModalVisible] = useState(false);
-  const [installmentAmount, setInstallmentAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(120);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const carouselRef = React.useRef(null);
-  const [downPaymentPercentage, setDownPaymentPercentage] = useState(10);
   const [calculationDetails, setCalculationDetails] = useState({
     totalPrice: 0,
-    downPayment: 0,
-    monthlyPayment: 0
+    reservationFee: 0
   });
 
   const fetchCarData = async () => {
@@ -69,7 +66,7 @@ const Detail = () => {
 
   const handleClick = (action) => {
     if (action === 'Reserve') {
-      calculateInstallment();
+      calculateReservationFee();
       setIsInstallmentModalVisible(true);
     } else if (action === 'Share') {
       setIsShareModalVisible(true);
@@ -87,20 +84,17 @@ const Detail = () => {
     setIsShareModalVisible(false);
   };
 
-  const calculateInstallment = () => {
+  const calculateReservationFee = () => {
     const totalPrice = selectedCar.price
       ? parseInt(String(selectedCar.price).replace(/[^0-9]/g, ''), 10)
       : 0;
 
     if (totalPrice > 0) {
-      const downPayment = Math.ceil((totalPrice * downPaymentPercentage) / 100);
-      const remainingAmount = totalPrice - downPayment;
-      const monthlyPayment = Math.ceil(remainingAmount / 12);
+      const reservationFee = Math.ceil(totalPrice * 0.01); // 1% reservation fee
 
       setCalculationDetails({
         totalPrice: totalPrice.toLocaleString(),
-        downPayment: downPayment.toLocaleString(),
-        monthlyPayment: monthlyPayment.toLocaleString()
+        reservationFee: reservationFee.toLocaleString()
       });
     }
 
@@ -182,7 +176,7 @@ const Detail = () => {
               <p className="text-md text-gray-700 mb-4">Transmission: {selectedCar.gearType || 'No data'}</p>
               <div className="grid grid-cols-2 gap-4">
                 <Button type="primary" icon={<CarOutlined />} onClick={() => handleClick('Reserve')} className="w-full">
-                  Pricing
+                  Reserve
                 </Button>
                 <Button icon={<ShareAltOutlined />} onClick={() => handleClick('Share')} className="w-full">
                   Share
@@ -245,53 +239,30 @@ const Detail = () => {
         open={isInstallmentModalVisible} 
         onCancel={handleCancel} 
         footer={null} 
-        title="Payment Calculator"
+        title="Reservation Calculator"
         width={400}
       >
         <div className="flex flex-col space-y-6 p-4">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-800">
-              Total Price: <span className="text-red-600">{calculationDetails.totalPrice} THB</span>
+              Total Vehicle Price: <span className="text-red-600">{calculationDetails.totalPrice} THB</span>
             </h3>
             
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600">Select Down Payment Percentage:</p>
-              <div className="flex flex-wrap gap-2">
-                {[1, 10, 20, 30, 40].map((percentage) => (
-                  <button
-                    key={percentage}
-                    onClick={() => {
-                      setDownPaymentPercentage(percentage);
-                      calculateInstallment();
-                    }}
-                    className={`px-3 py-1 rounded ${
-                      downPaymentPercentage === percentage
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {percentage}%
-                  </button>
-                ))}
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Reservation Fee (1%):</span>
+                <span className="font-semibold text-blue-600">{calculationDetails.reservationFee} THB</span>
               </div>
             </div>
 
-            {/* Add warning message for 1% down payment */}
-            {downPaymentPercentage === 1 && (
-              <div className="text-yellow-600 text-sm bg-yellow-50 p-2 rounded">
-                ⚠️ 1% down payment is a special promotion. Terms and conditions apply.
-              </div>
-            )}
-
-            <div className="space-y-2 border-t pt-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Down Payment:</span>
-                <span className="font-semibold">{calculationDetails.downPayment} THB</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Monthly Payment (12 months):</span>
-                <span className="font-semibold">{calculationDetails.monthlyPayment} THB</span>
-              </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-700 mb-2">Reservation Benefits:</h4>
+              <ul className="text-sm text-blue-600 space-y-1 list-disc pl-4">
+                <li>Secure your vehicle with just 1% reservation fee</li>
+                <li>100% refundable within 7 days</li>
+                <li>Priority vehicle inspection appointment</li>
+                <li>24/7 customer support</li>
+              </ul>
             </div>
           </div>
 
@@ -305,17 +276,18 @@ const Detail = () => {
                   state: {
                     carId: id,
                     modelName: selectedCar.modelName,
+                    brandName: selectedCar.brandName,
+                    category: selectedCar.category,
+                    color: selectedCar.color,
                     price: selectedCar.price,
                     image: selectedCar.image,
-                    downPayment: calculationDetails.downPayment,
-                    monthlyPayment: calculationDetails.monthlyPayment,
-                    downPaymentPercentage
+                    reservationFee: calculationDetails.reservationFee
                   }
                 });
               }}
               className="w-full"
             >
-              Proceed to Payment
+              Proceed to Reservation
             </Button>
             <Button onClick={handleCancel} className="w-full">
               Cancel
