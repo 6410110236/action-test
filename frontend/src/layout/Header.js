@@ -85,8 +85,12 @@ const Header = () => {
             current: location.pathname === "/seller/config",
           }
         ]
+<<<<<<< HEAD
       : []),
     // { name: "About", href: "/about", current: location.pathname === "/about" },
+=======
+      : [])
+>>>>>>> 1f444787cc122cbb20285d42d7951ce4b60c93fb
   ];
 
   const userNavigation = [
@@ -138,7 +142,7 @@ const Header = () => {
         >
           <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-4 py-2 text-xs text-gray-500">
-              {currentUser?.role?.name || "User"} {/* เข้าถึง name จาก role */}
+              {currentUser?.role?.name || "User"}
             </div>
             {userNavigation.map((item) => (
               <Menu.Item key={item.name}>
@@ -225,18 +229,8 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Search button and profile dropdown */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
-                  {/* Test button (previously Payment button) */}
-                  <Link
-                    to="/test"
-                    className="relative rounded-full bg-green-600 text-white py-1.5 px-4 flex items-center mr-4 hover:bg-green-700 transition-colors"
-                  >
-                    <span>Test</span>
-                  </Link>
-
-                  {/* Existing search button */}
                   <button
                     type="button"
                     className="relative rounded-full bg-gray-800 text-white py-1.5 px-4 flex items-center mr-4"
@@ -246,8 +240,6 @@ const Header = () => {
                     <SearchIcon className="h-6 w-6 mr-2" />
                     Search
                   </button>
-
-                  {/* คอนเทนเนอร์ของช่องค้นหาที่จะมีการแสดง/ซ่อน */}
                   <Transition
                     show={searchState.isOpen}
                     enter="transition-all duration-500 ease-out"
@@ -262,12 +254,12 @@ const Header = () => {
                         type="text"
                         placeholder="Search..."
                         value={searchState.query}
-                        onChange={handleSearchChange} // เปลี่ยนแปลงการค้นหาตาม input
-                        onKeyDown={handleKeyDown} // เพิ่มการรองรับ Enter
+                        onChange={handleSearchChange}
+                        onKeyDown={handleKeyDown}
                         className="rounded-lg bg-gray-600 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                       />
                       <button
-                        onClick={() => debouncedSearch(searchState.query)} // เมื่อกดปุ่มค้นหา
+                        onClick={() => debouncedSearch(searchState.query)}
                         className="ml-2 rounded-full bg-gray-700 text-white px-4 py-2"
                       >
                         Search
@@ -278,8 +270,6 @@ const Header = () => {
                   {renderUserMenu()}
                 </div>
               </div>
-
-              {/* Mobile menu button */}
               <div className="-mr-2 flex md:hidden">
                 <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                   <span className="sr-only">Open main menu</span>
@@ -307,8 +297,6 @@ const Header = () => {
                 </Link>
               ))}
             </div>
-
-            {/* Mobile user profile */}
             <div className="border-t border-gray-700 pt-4 pb-3">
               {currentUser ? (
                 <div className="flex items-center px-5">
@@ -317,7 +305,7 @@ const Header = () => {
                       className="h-10 w-10 rounded-full"
                       src={
                         currentUser.imageUrl ||
-                        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // รูปดีฟอลต์ในมือถือ
+                        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
                       }
                       alt={currentUser.name}
                     />
