@@ -8,11 +8,18 @@ import conf from "../../api/main";
 
 function SellUser() {
   const [cars, setCars] = useState([]);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [carToDelete, setCarToDelete] = useState(null);
 
-  const jwtSell = useAuthStore((state) => state.user.documentId);
+  const jwtSell = useAuthStore((state) => state.jwt);
+  const idSeller = useAuthStore((state) => state.user.documentId);
   console.log("Sell : ", jwtSell);
 
   useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchCars = () => {
     client
       .query({
         query: GET_CARS,
@@ -20,11 +27,12 @@ function SellUser() {
           filters: {
             users_permissions_user: {
               documentId: {
-                eq: jwtSell,
+                eq: idSeller,
               },
             },
           },
         },
+        fetchPolicy: "network-only",
       })
       .then((response) => {
         console.log("🚀 Data from API:", response.data);
@@ -33,22 +41,48 @@ function SellUser() {
         setCars(response.data.garages);
       })
       .catch((error) => console.error("❌ Error fetching data:", error));
-  }, []);
+  };
 
   const handleDelete = (documentId) => {
+    // แสดง popup confirmation
+    setCarToDelete(documentId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = () => {
     // ใช้ Apollo Client โดยตรงเพื่อเรียก mutation
     client
       .mutate({
         mutation: DELETE_CAR,
-        variables: { documentId },
+        variables: { documentId: carToDelete },
+        context: {
+          headers: {
+            Authorization: `Bearer ${jwtSell}`, // ✅ ส่ง JWT ไปกับ Header
+          },
+        },
       })
       .then((response) => {
         console.log("✅ Car deleted:", response.data.deleteGarage.documentId);
-        setCars(cars.filter((car) => car.documentId !== documentId)); // อัปเดตสถานะหลังจากลบ
+        setCars(cars.filter((car) => car.documentId !== carToDelete)); // อัปเดตสถานะหลังจากลบ
+        setShowDeleteConfirmation(false); // ปิด popup
+        setCarToDelete(null);
       })
-      .catch((error) => console.error("❌ Error deleting car:", error));
+      .catch((error) => {
+        console.error("❌ Error deleting car:", error);
+        setShowDeleteConfirmation(false);
+        setCarToDelete(null);
+      });
   };
-  
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setCarToDelete(null);
+  };
+
+  const handleGaragesUpdated = (garages) => {
+    // Update the garages state with the new data
+    setCars(garages);
+  };
 
   return (
     <div className="min-h-screen bg-blue-50 p-6 flex justify-center items-center">
@@ -69,9 +103,8 @@ function SellUser() {
                 <div
                   key={car.documentId}
                   className="bg-white rounded-lg shadow p-4 mb-4 flex justify-between items-center hover:shadow-lg hover:bg-gray-100"
-                >         
+                >
                   <div className="flex items-center gap-4">
-
                     <div className="h-16 w-16 relative overflow-hidden rounded-md">
                       <img
                         src={
@@ -95,7 +128,10 @@ function SellUser() {
                       ${car.Price.toLocaleString()}
                     </span>
 
-                    <EditCarForm item={car} />
+                    <EditCarForm
+                      item={car}
+                      onGaragesUpdated={handleGaragesUpdated}
+                    />
 
                     <button
                       onClick={() => handleDelete(car.documentId)} // เรียกใช้ handleDelete เมื่อคลิก
@@ -119,16 +155,37 @@ function SellUser() {
               <p className="text-gray-500">No cars available.</p>
             )}
 
-            <AddCarForm item={cars} />
+            <AddCarForm onGaragesUpdated={handleGaragesUpdated} item={cars} />
           </div>
 
           {/* Profile Card */}
         </div>
       </div>
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
+            <p className="mb-4">Are you sure you want to delete this car?</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
 
 export default SellUser;
