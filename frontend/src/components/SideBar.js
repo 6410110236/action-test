@@ -155,14 +155,14 @@ const SideBar = () => {
         ...new Set(carData.map((car) => car.brandName || '')),
     ];
 
-    // ส่วนของฟิลเตอร์
+    // Filters component
     const Filters = (
         <div>
-            <h3 className="text-xl font-semibold mb-4">ค้นหาและจัดเรียง</h3>
+            <h3 className="text-xl font-semibold mb-4">Search and Sort</h3>
 
             <div className="mb-4">
                 <Input.Search
-                    placeholder="ค้นหาตามรุ่นหรือยี่ห้อ"
+                    placeholder="Search by model or brand"
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
@@ -173,7 +173,7 @@ const SideBar = () => {
             </div>
 
             <div className="mb-4">
-                <h4 className="font-medium mb-2">หมวดหมู่</h4>
+                <h4 className="font-medium mb-2">Categories</h4>
                 <Checkbox.Group
                     options={categoryOptions}
                     value={selectedCategories}
@@ -183,7 +183,7 @@ const SideBar = () => {
             </div>
 
             <div className="mb-4">
-                <h4 className="font-medium mb-2">ยี่ห้อ</h4>
+                <h4 className="font-medium mb-2">Brands</h4>
                 <Checkbox.Group
                     options={brandOptions}
                     value={selectedBrands}
@@ -193,9 +193,9 @@ const SideBar = () => {
             </div>
 
             <div className="mb-4">
-                <h4 className="font-medium mb-2">กรองตามราคา</h4>
+                <h4 className="font-medium mb-2">Price Range</h4>
                 <Input
-                    placeholder="ราคาขั้นต่ำ"
+                    placeholder="Min Price"
                     type="number"
                     value={minPrice}
                     onChange={(e) => {
@@ -211,7 +211,7 @@ const SideBar = () => {
                     style={{ marginBottom: '8px' }}
                 />
                 <Input
-                    placeholder="ราคาขั้นสูง"
+                    placeholder="Max Price"
                     type="number"
                     value={maxPrice}
                     onChange={(e) => {
@@ -228,7 +228,7 @@ const SideBar = () => {
             </div>
 
             <div className="mb-4">
-                <h4 className="font-medium mb-2">ตัวกรองที่เลือก:</h4>
+                <h4 className="font-medium mb-2">Selected Filters:</h4>
                 <div className="flex flex-wrap gap-2">
                     {selectedBrands.map((brand) => (
                         <Tag key={brand} color="geekblue">
@@ -241,27 +241,27 @@ const SideBar = () => {
                         </Tag>
                     ))}
                     {minPrice && (
-                        <Tag color="green">ราคาขั้นต่ำ: ฿{minPrice}</Tag>
+                        <Tag color="green">Min: ${minPrice}</Tag>
                     )}
                     {maxPrice && (
-                        <Tag color="red">ราคาขั้นสูง: ฿{maxPrice}</Tag>
+                        <Tag color="red">Max: ${maxPrice}</Tag>
                     )}
                 </div>
             </div>
 
             <div className="mb-4">
-                <h4 className="font-medium mb-2">จัดเรียงโดย</h4>
+                <h4 className="font-medium mb-2">Sort By</h4>
                 <Select
                     value={sortOption}
                     onChange={handleSort}
                     style={{ width: '100%' }}
-                    placeholder="เลือกตัวเลือก"
+                    placeholder="Select option"
                 >
-                    <Option value="price-asc">ราคา: ต่ำไปสูง</Option>
-                    <Option value="price-desc">ราคา: สูงไปต่ำ</Option>
-                    <Option value="brand">ยี่ห้อ</Option>
-                    <Option value="category">หมวดหมู่</Option>
-                    <Option value="model">รุ่น</Option>
+                    <Option value="price-asc">Price: Low to High</Option>
+                    <Option value="price-desc">Price: High to Low</Option>
+                    <Option value="brand">Brand</Option>
+                    <Option value="category">Category</Option>
+                    <Option value="model">Model</Option>
                 </Select>
             </div>
 
@@ -277,7 +277,7 @@ const SideBar = () => {
                 }}
                 style={{ width: '100%' }}
             >
-                รีเซ็ตตัวกรอง
+                Reset Filters
             </Button>
         </div>
     );
@@ -290,7 +290,7 @@ const SideBar = () => {
                     onClick={showDrawer}
                     icon={<MenuOutlined />}
                 >
-                    กรอง & จัดเรียง
+                    Filter & Sort
                 </Button>
             </div>
 
@@ -299,7 +299,7 @@ const SideBar = () => {
             </div>
 
             <Drawer
-                title="กรอง & จัดเรียง"
+                title="Filter & Sort"
                 placement="left"
                 onClose={onClose}
                 visible={visible}
@@ -312,7 +312,7 @@ const SideBar = () => {
                     className="mt-4"
                     style={{ width: '100%' }}
                 >
-                    ปิดเมนู
+                    Close Menu
                 </Button>
             </Drawer>
         </>

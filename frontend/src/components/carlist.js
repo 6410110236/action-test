@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Clock } from 'lucide-react';
 import useCarStore from '../logic/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
 import { client } from '../api/apolloClient'; // นำเข้า client
@@ -7,6 +8,7 @@ import { GET_GARAGES } from '../api/main'; // นำเข้า query จาก
 const LatestCarsSection = () => {
     const [latestCars, setLatestCars] = useState([]); // สำหรับเก็บข้อมูลรถที่ดึงมาจาก store
     const { cars, setCars } = useCarStore(); // ดึงข้อมูล cars จาก Zustand store
+    const navigate = useNavigate();
 
     useEffect(() => {
         // เรียก API ทุกครั้งที่รีเฟรชหน้า
@@ -40,7 +42,29 @@ const LatestCarsSection = () => {
             .catch(error => console.error('❌ Error fetching data:', error));
     }, [setCars]); // เรียกใช้ useEffect ทุกครั้งที่คอมโพเนนต์ถูก mount
     
-    
+    const handleCarClick = (car) => {
+        // Format price to match CarCart format
+        const priceString = car.price.toString();
+        const formattedPrice = priceString.includes('฿') 
+            ? parseInt(priceString.replace(/[^\d]/g, ''))
+            : car.price;
+
+        navigate(`/detail/${car.id}`, {
+            state: {
+                carDetails: {
+                    id: car.id,
+                    modelName: car.modelName,
+                    brandName: car.brandName,
+                    price: formattedPrice,
+                    image: car.image,
+                    category: car.category,
+                    color: car.color,
+                    gearType: car.gearType
+                }
+            }
+        });
+    };
+
     return (
         <section className="max-w-screen-xl mx-auto px-4 mb-12">
             <div className="flex items-center justify-between mb-6">
@@ -52,7 +76,11 @@ const LatestCarsSection = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {latestCars.map((car) => (
-                    <div key={car.id} className="group">
+                    <div 
+                        key={car.id} 
+                        className="group cursor-pointer hover:shadow-lg transition-shadow duration-300 rounded-lg p-4"
+                        onClick={() => handleCarClick(car)}
+                    >
                         <div className="relative overflow-hidden rounded-lg mb-3">
                             {car.image ? (
                                 <img
@@ -70,11 +98,11 @@ const LatestCarsSection = () => {
                         <h3 className="font-medium mb-1">{car.modelName}</h3>
                         <div className="flex justify-between items-center">
                             <span className="text-primary font-semibold">{car.brandName}</span>
-                            <span className="text-sm text-gray-500">{car.price} ฿</span>
+                            <span className="text-sm text-gray-500">{car.price.toLocaleString()} ฿</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">{car.category}</span>
-                            <span className="text-sm text-gray-500">{car.Color}</span>
+                            <span className="text-sm text-gray-500">{car.color}</span>
                         </div>
                     </div>
                 ))}

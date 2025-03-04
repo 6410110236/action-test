@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
 import {
   LikeOutlined, LikeFilled, ShareAltOutlined, CalculatorOutlined, CarOutlined,
@@ -16,6 +16,7 @@ import { GET_GARAGES } from '../../../api/main';
 const Detail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { cars, setCars } = useCarStore();
   const [selectedCar, setSelectedCar] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -29,40 +30,47 @@ const Detail = () => {
     reservationFee: 0
   });
 
-  const fetchCarData = async () => {
-    try {
-      const response = await client.query({ query: GET_GARAGES });
-      console.log('🚀 API Response:', response.data);
-
-      const formattedCars = response.data.garages.map((garage) => ({
-        id: garage.documentId,
-        modelName: garage.model?.ModelName || 'Unknown',
-        brandName: garage.model?.brand_car?.BrandName || 'Unknown',
-        price: garage.Price,
-        image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
-        category: garage.VehicleRegistrationTypes || 'Unknown',
-        color: garage.Color || 'Unknown',
-        gearType: garage.model?.GearType || 'Unknown',
-        details: garage.details || {},  // รายละเอียดเพิ่มเติม
-        inspection: garage.inspection || {},  // การตรวจสภาพรถ
-      }));
-
-      setCars(formattedCars);
-      const car = formattedCars.find(car => car.id === id);
-      setSelectedCar(car || {});
-    } catch (error) {
-      console.error('❌ Error fetching car data:', error);
-    }
-  };
-
   useEffect(() => {
-    if (!cars.length) {
-      fetchCarData();
-    } else {
-      const car = cars.find(car => car.id === id);
-      setSelectedCar(car || {});
-    }
-  }, [id, cars]);
+    const loadCarData = async () => {
+      // First check if we have state from navigation
+      if (location.state?.carDetails) {
+        setSelectedCar(location.state.carDetails);
+        return;
+      }
+
+      // If no state, fetch data using ID from URL
+      if (id) {
+        try {
+          const response = await client.query({ query: GET_GARAGES });
+          const formattedCars = response.data.garages.map((garage) => ({
+            id: garage.documentId,
+            modelName: garage.model?.ModelName || 'Unknown',
+            brandName: garage.model?.brand_car?.BrandName || 'Unknown',
+            price: garage.Price,
+            image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
+            category: garage.VehicleRegistrationTypes || 'Unknown',
+            color: garage.Color || 'Unknown',
+            gearType: garage.model?.GearType || 'Unknown',
+            details: garage.details || {},
+            inspection: garage.inspection || {},
+          }));
+
+          const car = formattedCars.find(car => car.id === id);
+          if (car) {
+            setSelectedCar(car);
+            setCars(formattedCars);
+          } else {
+            console.error('Car not found');
+            navigate('/buy'); // Redirect to buy page if car not found
+          }
+        } catch (error) {
+          console.error('Error fetching car data:', error);
+        }
+      }
+    };
+
+    loadCarData();
+  }, [id, location.state]);
 
   const handleClick = (action) => {
     if (action === 'Reserve') {
