@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Route, Routes, Navigate, Link, useLocation } from "react-router-dom";
+<<<<<<< HEAD
 import Home from "../modules/landing/pages/Home";
 import SignIn from "../modules/auth/pages/signIn";
 import SignUp from "../modules/auth/pages/signUp";
@@ -17,6 +18,25 @@ import Payment from "../pages/Payment";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentCancel from "../pages/PaymentCancel";
 import Test from "../pages/Test";
+=======
+import Home from "../pages/home/Home";
+import Order from "../pages/home/order";
+import SignIn from "../pages/signIn";
+import SignUp from "../pages/signUp";
+import SellUser from "../pages/seller/SellUser";
+import CarCart from "../pages/buy/CarCart";
+import Users from "../components/Users";
+import Detail from "../pages/buy/buycar/detail";
+import useAuthStore from "../logic/authStore";
+import ConfigGarage from "../pages/seller/ConfigGarage";
+import ConfigBrand from "../pages/seller/ConfigGarageComponents/ConfigBrand";
+import ConfigModel from "../pages/seller/ConfigGarageComponents/ConfigModel";
+import ConfigCategoryCar from "../pages/seller/ConfigGarageComponents/ConfigCategoryCar";
+import Payment from "../pages/buy/buycar/Payment";
+import PaymentSuccess from "../pages/buy/buycar/PaymentSuccess";
+import PaymentCancel from "../pages/buy/buycar/PaymentCancel";
+import Test from "../pages/seller/Test";
+>>>>>>> origin/develop
 
 // Loading component
 const LoadingSpinner = () => (
@@ -96,7 +116,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/home" element={<Home />} />
-      <Route path="users" element={<Users />} />
+      <Route path="/user" element={<Users />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import useAuthStore from './store/useStore';  // Zustand store สำหรับตรวจสอบการล็อกอินและบทบาท
-import AppRoutes from './routes/AppRoutes';   // ใช้ AppRoutes สำหรับจัดการเส้นทาง
-import Header from './layout/Header';         // ใช้ Header ที่คุณให้มา
 import { Elements } from '@stripe/react-stripe-js';
-import { stripePromise } from './conf/stripe';
+import { stripePromise } from './api/stripe';
+import useAuthStore from './logic/useStore';  // Zustand store สำหรับตรวจสอบการล็อกอินและบทบาท
+import AppRoutes from './routes/AppRoutes';   // ใช้ AppRoutes สำหรับจัดการเส้นทาง
+import Header from './components/Header';         // ใช้ Header ที่คุณให้มา
 
 function App() {
   const { isLoggedIn, role } = useAuthStore();  // ตรวจสอบสถานะการล็อกอินและบทบาท
