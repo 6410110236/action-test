@@ -1,110 +1,100 @@
-
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Carousel, Card, Modal, Tabs, Table } from 'antd';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Button, Card, Modal, Tabs, Table } from 'antd';
 import {
-  LikeOutlined, LikeFilled, ShareAltOutlined, CalculatorOutlined, CarOutlined,
-  SwapOutlined, PhoneOutlined, MailOutlined, MessageOutlined,
+  LikeOutlined, LikeFilled, ShareAltOutlined, CarOutlined,
+  PhoneOutlined, MailOutlined, MessageOutlined,
   FacebookOutlined, TwitterOutlined, WhatsAppOutlined, InstagramOutlined
 } from '@ant-design/icons';
 import 'tailwindcss/tailwind.css';
 import 'antd/dist/reset.css';
-import conf from "../../../api/main";
 
 import { client } from '../../../api/apolloClient';
 import useCarStore from '../../../logic/carStore';
-import { GET_GARAGES, GET_SPECIFIC_CAR  } from '../../../api/main';
+import { GET_GARAGES } from '../../../api/main';
 
 const Detail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { cars, setCars } = useCarStore();
+  const location = useLocation();
+  const { setCars } = useCarStore();
   const [selectedCar, setSelectedCar] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isInstallmentModalVisible, setIsInstallmentModalVisible] = useState(false);
-  const [installmentAmount, setInstallmentAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(120);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
-  const carouselRef = React.useRef(null);
-  const [downPaymentPercentage, setDownPaymentPercentage] = useState(10);
   const [calculationDetails, setCalculationDetails] = useState({
     totalPrice: 0,
-    downPayment: 0,
-    monthlyPayment: 0
+    reservationFee: 0
   });
 
-  const fetchCarData = async () => {
-    try {
-      const response = await client.query({ query: GET_GARAGES });
-      console.log('🚀 API Response:', response.data);
-
-      const formattedCars = response.data.garages.map((garage) => ({
-        id: garage.documentId,
-        modelName: garage.model?.ModelName || 'Unknown',
-        brandName: garage.model?.brand_car?.BrandName || 'Unknown',
-        price: garage.Price,
-        image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
-        category: garage.VehicleRegistrationTypes || 'Unknown',
-        color: garage.Color || 'Unknown',
-        gearType: garage.model?.GearType || 'Unknown',
-        details: garage.details || {},  // รายละเอียดเพิ่มเติม
-        inspection: garage.inspection || {},  // การตรวจสภาพรถ
-      }));
-
-      setCars(formattedCars);
-      const car = formattedCars.find(car => car.id === id);
-      if (car) {
-        setSelectedCar(car);
-      } else {
-        fetchSpecificCar();
-      }
-    } catch (error) {
-      console.error('❌ Error fetching car data:', error);
-    }
-  };
-
-  const fetchSpecificCar = async (carId) => {
-    try {
-      const response = await client.query({ query: GET_SPECIFIC_CAR, variables: { documentId: carId } });
-      console.log('🚀 Specific Car API Response:', response.data);
-  
-      const garage = response.data.garage;
-      const car = {
-        id: garage.documentId,
-        modelName: garage.model?.ModelName || 'Unknown',
-        brandName: garage.model?.brand_car?.BrandName || 'Unknown',
-        price: garage.Price,
-        image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
-        category: garage.VehicleRegistrationTypes || 'Unknown',
-        color: garage.Color || 'Unknown',
-        gearType: garage.model?.GearType || 'Unknown',
-        details: garage.details || {},
-        inspection: garage.inspection || {},
-      };
-  
-      setSelectedCar(car);
-    } catch (error) {
-      console.error('❌ Error fetching specific car data:', error);
-    }
-  };
-
   useEffect(() => {
-    if (!cars.length) {
-      fetchCarData();
-    } else {
-      const car = cars.find(car => car.id === id);
-      if (car) {
-        setSelectedCar(car);
-      } else {
-        fetchSpecificCar();
+    const loadCarData = async () => {
+      // First check if we have state from navigation
+      if (location.state?.carDetails) {
+        setSelectedCar(location.state.carDetails);
+        return;
       }
-    }
-  }, [id, cars]);
+
+      // If no state, fetch data using ID from URL
+      if (id) {
+        try {
+          const response = await client.query({ query: GET_GARAGES });
+          const formattedCars = response.data.garages.map((garage) => ({
+            id: garage.documentId,
+            modelName: garage.model?.ModelName || 'Unknown',
+            brandName: garage.model?.brand_car?.BrandName || 'Unknown',
+            price: garage.Price || 'No price data',
+            image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
+            category: garage.VehicleRegistrationTypes || 'Unknown',
+            color: garage.Color || 'Unknown',
+            gearType: garage.model?.GearType || 'Unknown',
+            secondaryKey: garage.SecondaryKey || 'N/A',
+            warranty: garage.Warranty || 'N/A',
+            registrationDate: garage.RegisterDate || 'Unknown',
+            lastDistance: garage.Distance ? garage.Distance.toLocaleString() : 'Unknown',
+            vehicleTaxExpirationDate: garage.VehicleTaxExpirationDate || 'Unknown',
+            description: garage.Description || 'N/A',
+            manual: garage.Manual || 'N/A',
+            seats: garage.model?.Seats || 'Unknown', 
+            details: {
+              fuelType: garage.details?.fuelType || 'Unknown',
+              seatCount: garage.model?.Seats || 'Unknown',
+              registrationType: garage.VehicleRegistrationTypes || 'Unknown',
+              spareKey: garage.SecondaryKey || 'N/A',
+              insurance: garage.details?.insurance || 'Unknown',
+              color: garage.Color || 'Unknown',
+              registrationDate: garage.RegisterDate || 'Unknown',
+              lastDistance: garage.Distance ? garage.Distance.toLocaleString() : 'Unknown',
+            },
+            inspection: {
+              lastInspection: garage.inspection?.lastInspection || 'Unknown',
+              nextInspection: garage.inspection?.nextInspection || 'Unknown',
+              status: garage.inspection?.status || 'Unknown',
+              taxExpiration: garage.VehicleTaxExpirationDate || 'Unknown',
+            }
+          }));
+          const car = formattedCars.find(car => car.id === id);
+          if (car) {
+            setSelectedCar(car);
+            setCars(formattedCars);
+          } else {
+            console.error('Car not found');
+            navigate('/buy'); // Redirect to buy page if car not found
+          }
+        } catch (error) {
+          console.error('Error fetching car data:', error);
+        }
+      }
+    };
+
+    loadCarData();
+  }, [id, location.state]);
 
   const handleClick = (action) => {
     if (action === 'Reserve') {
-      calculateInstallment();
+      calculateReservationFee();
       setIsInstallmentModalVisible(true);
     } else if (action === 'Share') {
       setIsShareModalVisible(true);
@@ -122,22 +112,18 @@ const Detail = () => {
     setIsShareModalVisible(false);
   };
 
-  const calculateInstallment = () => {
+  const calculateReservationFee = () => {
     const totalPrice = selectedCar.price
       ? parseInt(String(selectedCar.price).replace(/[^0-9]/g, ''), 10)
       : 0;
 
-    if (totalPrice > 0) {
-      const downPayment = Math.ceil((totalPrice * downPaymentPercentage) / 100);
-      const remainingAmount = totalPrice - downPayment;
-      const monthlyPayment = Math.ceil(remainingAmount / 12);
+    const feePercentage = totalPrice >= 1000000 ? 0.01 : 0.1;
+    const reservationFee = Math.round(totalPrice * feePercentage);
 
-      setCalculationDetails({
-        totalPrice: totalPrice.toLocaleString(),
-        downPayment: downPayment.toLocaleString(),
-        monthlyPayment: monthlyPayment.toLocaleString()
-      });
-    }
+    setCalculationDetails({
+      totalPrice: totalPrice.toLocaleString(),
+      reservationFee: reservationFee.toLocaleString()
+    });
 
     setIsInstallmentModalVisible(true);
   };
@@ -158,7 +144,12 @@ const Detail = () => {
             { key: 'insurance', label: 'Primary Insurance', value: selectedCar.details?.insurance || 'None' },
             { key: 'color', label: 'Color', value: selectedCar.details?.color || 'None' },
             { key: 'regDate', label: 'Registration Date', value: selectedCar.details?.registrationDate || 'None' },
+            { key: 'taxExpiration', label: 'Vehicle Tax Expiration', value: selectedCar.inspection?.taxExpiration || 'None' },
             { key: 'lastDist', label: 'Latest Mileage', value: selectedCar.details?.lastDistance || 'None' },
+            { key: 'warranty', label: 'Warranty', value: selectedCar.warranty || 'N/A' },
+            { key: 'manual', label: 'Manual', value: selectedCar.manual || 'N/A' },
+            { key: 'description', label: 'Description', value: selectedCar.description || 'N/A' },
+            { key: 'secondaryKey', label: 'Secondary Key', value: selectedCar.secondaryKey || 'N/A' },
           ]}
           columns={[
             { title: 'Item', dataIndex: 'label', key: 'label' },
@@ -195,7 +186,7 @@ const Detail = () => {
           {/* Left Side */}
           {selectedCar.image ? (
             <img
-              src={`${conf.apiUrlPrefix}${selectedCar.image}`}
+              src={`${process.env.REACT_APP_BASE_URL}${selectedCar.image}`}
               alt={selectedCar.modelName}
               className="w-full max-w-[700px] h-64 max-h-64 object-cover transition-transform duration-300 group-hover:scale-120"
             />
@@ -212,12 +203,11 @@ const Detail = () => {
               <p className="text-2xl text-red-600 font-semibold mb-4">
                 {selectedCar.price ? `${selectedCar.price} ฿` : 'No price data'}
               </p>
-
               <p className="text-md text-gray-700 mb-2">Type: {selectedCar.category || 'No data'}</p>
               <p className="text-md text-gray-700 mb-4">Transmission: {selectedCar.gearType || 'No data'}</p>
               <div className="grid grid-cols-2 gap-4">
                 <Button type="primary" icon={<CarOutlined />} onClick={() => handleClick('Reserve')} className="w-full">
-                  Pricing
+                  Reserve
                 </Button>
                 <Button icon={<ShareAltOutlined />} onClick={() => handleClick('Share')} className="w-full">
                   Share
@@ -276,81 +266,66 @@ const Detail = () => {
       </Modal>
 
       {/* Modal for Installment Calculation */}
-      <Modal 
-        open={isInstallmentModalVisible} 
-        onCancel={handleCancel} 
-        footer={null} 
-        title="Payment Calculator"
+      <Modal
+        open={isInstallmentModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+        title="Reservation Calculator"
         width={400}
       >
         <div className="flex flex-col space-y-6 p-4">
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-800">
-              Total Price: <span className="text-red-600">{calculationDetails.totalPrice} THB</span>
+              Total Vehicle Price: <span className="text-red-600">{calculationDetails.totalPrice} THB</span>
             </h3>
-            
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600">Select Down Payment Percentage:</p>
-              <div className="flex flex-wrap gap-2">
-                {[1, 10, 20, 30, 40].map((percentage) => (
-                  <button
-                    key={percentage}
-                    onClick={() => {
-                      setDownPaymentPercentage(percentage);
-                      calculateInstallment();
-                    }}
-                    className={`px-3 py-1 rounded ${
-                      downPaymentPercentage === percentage
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {percentage}%
-                  </button>
-                ))}
+
+            <div className="space-y-2 border-t pt-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">
+                  Reservation Fee ({parseInt(selectedCar.price) >= 1000000 ? '1%' : '10%'}):
+                </span>
+                <span className="font-semibold text-blue-600">{calculationDetails.reservationFee} THB</span>
               </div>
             </div>
 
-            {/* Add warning message for 1% down payment */}
-            {downPaymentPercentage === 1 && (
-              <div className="text-yellow-600 text-sm bg-yellow-50 p-2 rounded">
-                ⚠️ 1% down payment is a special promotion. Terms and conditions apply.
-              </div>
-            )}
-
-            <div className="space-y-2 border-t pt-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Down Payment:</span>
-                <span className="font-semibold">{calculationDetails.downPayment} THB</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Monthly Payment (12 months):</span>
-                <span className="font-semibold">{calculationDetails.monthlyPayment} THB</span>
-              </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-700 mb-2">Reservation Benefits:</h4>
+              <ul className="text-sm text-blue-600 space-y-1 list-disc pl-4">
+                <li>
+                  Secure your vehicle with {parseInt(selectedCar.price) >= 1000000 ? '1%' : '10%'} reservation fee
+                </li>
+                <li>100% refundable within 7 days</li>
+                <li>Priority vehicle inspection appointment</li>
+                <li>24/7 customer support</li>
+                {parseInt(selectedCar.price) < 1000000 && (
+                  <li className="font-medium">10% reservation fee applies to vehicles under 1,000,000 THB</li>
+                )}
+              </ul>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <Button 
-              type="primary" 
-              icon={<CarOutlined />} 
+            <Button
+              type="primary"
+              icon={<CarOutlined />}
               onClick={() => {
                 handleCancel();
                 navigate('/payment', {
                   state: {
                     carId: id,
                     modelName: selectedCar.modelName,
+                    brandName: selectedCar.brandName,
+                    category: selectedCar.category,
+                    color: selectedCar.color,
                     price: selectedCar.price,
                     image: selectedCar.image,
-                    downPayment: calculationDetails.downPayment,
-                    monthlyPayment: calculationDetails.monthlyPayment,
-                    downPaymentPercentage
+                    reservationFee: calculationDetails.reservationFee
                   }
                 });
               }}
               className="w-full"
             >
-              Proceed to Payment
+              Proceed to Reservation
             </Button>
             <Button onClick={handleCancel} className="w-full">
               Cancel
