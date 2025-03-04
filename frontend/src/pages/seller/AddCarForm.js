@@ -6,7 +6,6 @@ import {
 } from "../../api/main";
 import { uploadAtEntryCreationAction } from "../../api/uploadimage";
 import useAuthStore from "../../logic/authStore";
-import { Import, ImportIcon } from "lucide-react";
 
 const object_cars = {
   brand: "",
