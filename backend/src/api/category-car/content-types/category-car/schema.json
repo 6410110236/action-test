@@ -4,7 +4,8 @@
   "info": {
     "singularName": "category-car",
     "pluralName": "category-cars",
-    "displayName": "CategoryCar"
+    "displayName": "CategoryCar",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -21,6 +22,14 @@
       "relation": "oneToMany",
       "target": "api::model.model",
       "mappedBy": "category_car"
+    },
+    "Icon": {
+      "allowedTypes": [
+        "images",
+        "files"
+      ],
+      "type": "media",
+      "multiple": false
     }
   }
 }

@@ -401,6 +401,7 @@ export interface ApiBrandBrand extends Struct.CollectionTypeSchema {
 export interface ApiCategoryCarCategoryCar extends Struct.CollectionTypeSchema {
   collectionName: 'category_cars';
   info: {
+    description: '';
     displayName: 'CategoryCar';
     pluralName: 'category-cars';
     singularName: 'category-car';
@@ -415,6 +416,7 @@ export interface ApiCategoryCarCategoryCar extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    Icon: Schema.Attribute.Media<'images' | 'files'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
