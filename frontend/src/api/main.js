@@ -7,7 +7,7 @@ const conf = {
   jwtSessionStorageKey: "auth.jwt",
   roleSessionStorageKey: "auth.role",
   stripe: {
-    publishableKey: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY,
+    publishableKey: config.STRIPE_PUBLISHABLE_KEY,
     successUrl: `${window.location.origin}/payment/success`,
     cancelUrl: `${window.location.origin}/payment/cancel`,
     currency: "thb",

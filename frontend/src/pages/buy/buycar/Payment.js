@@ -6,6 +6,7 @@ import { CreditCardOutlined, QrcodeOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react'; // Update import
+import config from '../../../config';
 
 // Initialize Stripe with test publishable key
 const stripePromise = loadStripe('pk_test_51QwipMFz2GA96RWuC7iLXVAtSICJBSdaKsHbx3Go3xtr2ZkCZjsk0ChA3UkjBTRbYvGmXP3FtsQlTrd4uivfAycC00zDf4dolp');
