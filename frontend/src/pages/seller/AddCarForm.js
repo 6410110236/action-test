@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { client } from "../../api/apolloClient";
-import {
-  GET_BRANDS,
-  GET_MODELS_FROM_BRAND,
-} from "../../api/main";
+import { GET_BRANDS, GET_MODELS_FROM_BRAND } from "../../api/main";
 import { uploadAtEntryCreationAction } from "../../api/uploadimage";
 import useAuthStore from "../../logic/authStore";
 
@@ -29,7 +26,8 @@ function AddCarForm() {
   const [brands, setBrands] = useState([]);
   const [models, setModels] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState("");
-  const jwtSell = useAuthStore((state) => state.user.documentId);
+  const jwtSell = useAuthStore((state) => state.jwt);
+  const idSeller = useAuthStore((state) => state.user.documentId);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -123,7 +121,8 @@ function AddCarForm() {
       formData,
       image,
       selectedModel.documentId,
-      jwtSell
+      jwtSell,
+      idSeller
     );
 
     if (error) {

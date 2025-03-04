@@ -3,9 +3,12 @@ import { client } from "../../api/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
+  GET_GARAGES, // Import GET_GARAGES
 } from "../../api/main";
 
-import { updateAtEntryCreationAction } from "../../api/uploadimage"
+import { updateAtEntryCreationAction } from "../../api/uploadimage";
+import useAuthStore from "../../logic/authStore";
+import conf from "../../api/main";
 
 const object_cars = {
   brand: "",
@@ -30,11 +33,22 @@ function EditCarForm(props) {
   const [models, setModels] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState("");
   const [image, setImage] = useState(null);
-  
+  const [imagePreview, setImagePreview] = useState(null); // เพิ่ม state สำหรับแสดงภาพ
+  const jwtSell = useAuthStore((state) => state.jwt);
+  // Store original values
+  const [originalBrand, setOriginalBrand] = useState("");
+  const [originalModel, setOriginalModel] = useState("");
+  const [originalModelId, setOriginalModelId] = useState("");
+  const [originalImageId, setOriginalImageId] = useState(null);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImage(file);
+      setImagePreview(URL.createObjectURL(file)); // อัพเดท state แสดงภาพ
+    } else {
+      setImage(null);
+      setImagePreview(null);
     }
     console.log("handleImageChange :", file);
   };
@@ -42,6 +56,8 @@ function EditCarForm(props) {
   const resetForm = () => {
     setFormData(object_cars);
     setShowWarning(false);
+    setImage(null);
+    setImagePreview(null);
   };
 
   useEffect(() => {
@@ -54,21 +70,31 @@ function EditCarForm(props) {
         console.error("Error fetching brands:", error);
       });
 
+    // Initialize form data and original values from props
     setFormData({
-        brand : props.item.model.brand_car.BrandName,
-        model : props.item.model.ModelName,
-        price : props.item.Price,
-        color : props.item.Color,
-        description : props.item.Description,
-        distance : props.item.Distance,
-        vehicleRegistrationType : props.item.VehicleRegistrationTypes,
-        manual : props.item.Manual,
-        warranty : props.item.Warranty,
-        registerDate : props.item.RegisterDate,
-        secondaryKey : props.item.SecondaryKey,
-        vehicleTaxExpirationDate : props.item.VehicleTaxExpirationDate,
-    })
-    
+      brand: props.item.model.brand_car.BrandName,
+      model: props.item.model.ModelName,
+      price: props.item.Price,
+      color: props.item.Color,
+      description: props.item.Description,
+      distance: props.item.Distance,
+      vehicleRegistrationType: props.item.VehicleRegistrationTypes,
+      manual: props.item.Manual,
+      warranty: props.item.Warranty,
+      registerDate: props.item.RegisterDate,
+      secondaryKey: props.item.SecondaryKey,
+      vehicleTaxExpirationDate: props.item.VehicleTaxExpirationDate,
+    });
+    setOriginalBrand(props.item.model.brand_car.BrandName);
+    setOriginalModel(props.item.model.ModelName);
+    setOriginalModelId(props.item.model.documentId);
+    if (props.item.Picture && props.item.Picture.length > 0) {
+      setOriginalImageId(props.item.Picture[0].url);
+      setImagePreview(`${conf.apiUrlPrefix}${props.item.Picture[0].url}`);
+    } else {
+      setOriginalImageId(null);
+      setImagePreview(null);
+    }
   }, []);
 
   useEffect(() => {
@@ -97,7 +123,8 @@ function EditCarForm(props) {
   };
 
   const handleBrandChange = (e) => {
-    console.log("props : ",props.item)
+    console.log("props : ", props.item);
+    console.log("url :", originalImageId);
     const selectedBrandName = e.target.value;
     const selectedBrand = brands.find(
       (brand) => brand.BrandName === selectedBrandName
@@ -116,30 +143,50 @@ function EditCarForm(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
-    const requiredFields = ["brand", "model", "price"];
-    const isFormEmpty = requiredFields.some((field) => !formData[field]);
+    // Validation process with condition.
+    const requiredFields = ["price"];
+    let isFormEmpty = requiredFields.some((field) => !formData[field]);
+
+    if (formData.brand !== originalBrand || formData.model !== originalModel) {
+      const requiredFieldsForNew = ["brand", "model"];
+      isFormEmpty =
+        isFormEmpty || requiredFieldsForNew.some((field) => !formData[field]);
+    }
 
     if (isFormEmpty) {
       setShowWarning(true);
       return;
     }
 
-    const selectedModel = models.find(
-      (model) => model.ModelName === formData.model
-    );
-    if (!selectedModel) {
-      setShowWarning(true);
-      return;
+    let modelIdToUse = originalModelId; // Use original modelId by default
+    if (formData.model !== originalModel) {
+      const selectedModel = models.find(
+        (model) => model.ModelName === formData.model
+      );
+      if (!selectedModel) {
+        setShowWarning(true);
+        return;
+      }
+      modelIdToUse = selectedModel.documentId; // Update modelId if model changed
     }
 
-    console.log("Form Data : ", formData);
+    // Prepare data object for request
+    const dataToUpdate = { ...formData };
+    if (formData.brand === originalBrand) {
+      delete dataToUpdate.brand;
+    }
+    if (formData.model === originalModel) {
+      delete dataToUpdate.model;
+    }
+
+    console.log("Form Data : ", dataToUpdate);
 
     const { success, error } = await updateAtEntryCreationAction(
-      formData,
+      dataToUpdate,
       image,
-      selectedModel.documentId,
-      props.item.documentId
+      modelIdToUse,
+      props.item.documentId,
+      jwtSell
     );
 
     if (error) {
@@ -149,14 +196,33 @@ function EditCarForm(props) {
       console.log(success);
       setIsPopupVisible(false);
       resetForm();
+      // Refetch garages data
+      refetchGarages();
     }
+  };
+
+  //New function
+  const refetchGarages = () => {
+    client
+      .query({ query: GET_GARAGES, fetchPolicy: "network-only" })
+      .then((response) => {
+        // Update the state or perform any actions with the refetched data
+        console.log("Refetched garages:", response.data.garages);
+        if (props.onGaragesUpdated) {
+          props.onGaragesUpdated(response.data.garages);
+        }
+      })
+      .catch((error) => {
+        console.error("Error refetching garages:", error);
+      });
   };
 
   return (
     <div>
       <button
-        onClick={() => {setIsPopupVisible(true)
-            console.log("formData :",formData)
+        onClick={() => {
+          setIsPopupVisible(true);
+          console.log("formData :", formData);
         }}
         className="p-2 hover:bg-gray-100 rounded-full"
       >
@@ -190,8 +256,8 @@ function EditCarForm(props) {
 
             {showWarning && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                ⚠️ กรุณากรอกข้อมูลให้ครบถ้วนก่อนเพิ่มรถยนต์ (Brand, Model,
-                Price)
+                ⚠️ กรุณากรอกข้อมูลให้ครบถ้วนก่อนเพิ่มรถยนต์ (Price)
+                หรือต้องการเปลี่ยน Brand ,Model กรุณาระบุ Brand ,Model ด้วย
               </div>
             )}
 
@@ -207,6 +273,24 @@ function EditCarForm(props) {
                     onChange={handleImageChange}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                   />
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-40 h-40 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  )}
+                  {!imagePreview && originalImageId && (
+                    <div className="mt-2">
+                      <img
+                        src={`${conf.apiUrlPrefix}${originalImageId}`}
+                        alt="Original"
+                        className="w-40 h-40 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
