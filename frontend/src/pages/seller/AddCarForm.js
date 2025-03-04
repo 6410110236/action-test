@@ -3,16 +3,10 @@ import { client } from "../../api/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
-<<<<<<< HEAD:frontend/src/modules/transaction/components/AddCarForm.js
-} from "../../../conf/main";
-import { uploadAtEntryCreationAction } from "../../../conf/uploadimage";
-import useAuthStore from "../../../store/authStore";
-import { Import, ImportIcon } from "lucide-react";
-=======
-  uploadAtEntryCreationAction,
 } from "../../api/main";
+import { uploadAtEntryCreationAction } from "../../api/uploadimage";
 import useAuthStore from "../../logic/authStore";
->>>>>>> origin/develop:frontend/src/pages/seller/AddCarForm.js
+import { Import, ImportIcon } from "lucide-react";
 
 const object_cars = {
   brand: "",

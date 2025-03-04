@@ -3,14 +3,9 @@ import { client } from "../../api/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
-<<<<<<< HEAD:frontend/src/modules/transaction/components/EditCarForm.js
-} from "../../../conf/main";
-=======
-  updateAtEntryCreationAction,
 } from "../../api/main";
->>>>>>> origin/develop:frontend/src/pages/seller/EditCarForm.js
 
-import { updateAtEntryCreationAction } from "../../../conf/uploadimage"
+import { updateAtEntryCreationAction } from "../../api/uploadimage"
 
 const object_cars = {
   brand: "",
@@ -35,7 +30,7 @@ function EditCarForm(props) {
   const [models, setModels] = useState([]);
   const [selectedBrandId, setSelectedBrandId] = useState("");
   const [image, setImage] = useState(null);
-
+  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {

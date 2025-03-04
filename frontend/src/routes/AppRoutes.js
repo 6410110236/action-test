@@ -1,24 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes, Navigate, Link, useLocation } from "react-router-dom";
-<<<<<<< HEAD
-import Home from "../modules/landing/pages/Home";
-import SignIn from "../modules/auth/pages/signIn";
-import SignUp from "../modules/auth/pages/signUp";
-import SellUser from "../modules/transaction/components/SellUser";
-import Order from "../modules/transaction/order";
-import CarCart from "../modules/search/pages/CarCart";
-import Users from "../modules/transaction/components/Users";
-import Detail from "../modules/detail/detail";
-import useAuthStore from "../store/authStore";
-import ConfigGarage from "../modules/transaction/components/ConfigGarage";
-import ConfigBrand from "../modules/transaction/components/ConfigGarageComponents/ConfigBrand";
-import ConfigModel from "../modules/transaction/components/ConfigGarageComponents/ConfigModel";
-import ConfigCategoryCar from "../modules/transaction/components/ConfigGarageComponents/ConfigCategoryCar";
-import Payment from "../pages/Payment";
-import PaymentSuccess from "../pages/PaymentSuccess";
-import PaymentCancel from "../pages/PaymentCancel";
-import Test from "../pages/Test";
-=======
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import Home from "../pages/home/Home";
 import Order from "../pages/home/order";
 import SignIn from "../pages/signIn";
@@ -36,7 +17,6 @@ import Payment from "../pages/buy/buycar/Payment";
 import PaymentSuccess from "../pages/buy/buycar/PaymentSuccess";
 import PaymentCancel from "../pages/buy/buycar/PaymentCancel";
 import Test from "../pages/seller/Test";
->>>>>>> origin/develop
 
 // Loading component
 const LoadingSpinner = () => (

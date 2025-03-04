@@ -1,5 +1,5 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
-import conf from "../conf/main"
+import conf from "../api/main"
 
 const client = new ApolloClient({
   uri: conf.apiUrlPrefix+'/graphql', // URL ของ Strapi GraphQL

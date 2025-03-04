@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from 'react';
-<<<<<<< HEAD:frontend/src/modules/landing/components/carlist.js
-import { Link } from 'react-router-dom';
-import { Clock } from 'lucide-react';
-import useCarStore from '../../../store/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
-import { client } from '../../../utils/apolloClient'; // นำเข้า client
-import conf , { GET_GARAGES } from '../../../conf/main'; // นำเข้า query จากไฟล์ main
-=======
-import { useNavigate } from 'react-router-dom';
-import { Clock } from 'lucide-react';
 import useCarStore from '../logic/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
 import { client } from '../api/apolloClient'; // นำเข้า client
-import { GET_GARAGES } from '../api/main'; // นำเข้า query จากไฟล์ main
->>>>>>> origin/develop:frontend/src/components/carlist.js
+import conf , { GET_GARAGES } from '../api/main'; // นำเข้า query จากไฟล์ main
+import { useNavigate } from 'react-router-dom';
 
 const LatestCarsSection = () => {
     const [latestCars, setLatestCars] = useState([]); // สำหรับเก็บข้อมูลรถที่ดึงมาจาก store
@@ -55,35 +46,10 @@ const LatestCarsSection = () => {
             })
             .catch(error => console.error('❌ Error fetching data:', error));
     }, [setCars]); // เรียกใช้ useEffect ทุกครั้งที่คอมโพเนนต์ถูก mount
-<<<<<<< HEAD:frontend/src/modules/landing/components/carlist.js
 
     // เพิ่มรถอีก 3 คันเมื่อกดปุ่ม
     const showMoreCars = () => {
         setVisibleCars(prev => prev + 3);
-=======
-    
-    const handleCarClick = (car) => {
-        // Format price to match CarCart format
-        const priceString = car.price.toString();
-        const formattedPrice = priceString.includes('฿') 
-            ? parseInt(priceString.replace(/[^\d]/g, ''))
-            : car.price;
-
-        navigate(`/detail/${car.id}`, {
-            state: {
-                carDetails: {
-                    id: car.id,
-                    modelName: car.modelName,
-                    brandName: car.brandName,
-                    price: formattedPrice,
-                    image: car.image,
-                    category: car.category,
-                    color: car.color,
-                    gearType: car.gearType
-                }
-            }
-        });
->>>>>>> origin/develop:frontend/src/components/carlist.js
     };
 
     return (
@@ -95,17 +61,8 @@ const LatestCarsSection = () => {
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<<<<<<< HEAD:frontend/src/modules/landing/components/carlist.js
                 {latestCars.slice(0, visibleCars).map((car) => (
                     <div key={car.id} className="group transition-opacity duration-500 opacity-100">
-=======
-                {latestCars.map((car) => (
-                    <div 
-                        key={car.id} 
-                        className="group cursor-pointer hover:shadow-lg transition-shadow duration-300 rounded-lg p-4"
-                        onClick={() => handleCarClick(car)}
-                    >
->>>>>>> origin/develop:frontend/src/components/carlist.js
                         <div className="relative overflow-hidden rounded-lg mb-3">
                             {car.image ? (
                                 <img

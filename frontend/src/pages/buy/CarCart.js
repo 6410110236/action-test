@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Pagination } from 'antd';
-<<<<<<< HEAD:frontend/src/modules/search/pages/CarCart.js
-import { client } from '../../../utils/apolloClient';
-import useCarStore from '../../../store/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
-import conf , { GET_GARAGES } from '../../../conf/main'; // นำเข้า query จากไฟล์ main
-=======
-import { Link } from 'react-router-dom';
-import { GET_GARAGES } from '../../api/main'; // นำเข้า query จากไฟล์ main
 import { client } from '../../api/apolloClient';
 import useCarStore from '../../logic/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
+import conf , { GET_GARAGES } from '../../api/main'; // นำเข้า query จากไฟล์ main
 import SideBar from '../../components/SideBar';
->>>>>>> origin/develop:frontend/src/pages/buy/CarCart.js
+import { Link } from 'react-router-dom';
+
 
 const CarCart = () => {
     const { cars, setCars } = useCarStore(); // ดึงข้อมูล cars จาก Zustand store

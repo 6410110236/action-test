@@ -1,11 +1,7 @@
 import React from 'react';
 import { Card, Typography, Divider, Button } from 'antd';
-<<<<<<< HEAD:frontend/src/pages/Test.js
-import useAuthStore from '../store/authStore';
-import  conf from '../conf/main';
-=======
 import useAuthStore from '../../logic/authStore';
->>>>>>> origin/develop:frontend/src/pages/seller/Test.js
+import  conf from '../../api/main';
 
 const { Title, Text } = Typography;
 

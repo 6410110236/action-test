@@ -4,7 +4,7 @@ import AddCarForm from "./AddCarForm";
 import { GET_CARS, DELETE_CAR } from "../../api/main";
 import useAuthStore from "../../logic/authStore";
 import EditCarForm from "./EditCarForm";
-import conf from "../../../conf/main";
+import conf from "../../api/main";
 
 function SellUser() {
   const [cars, setCars] = useState([]);
