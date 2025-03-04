@@ -1,10 +1,10 @@
 import { loadStripe } from '@stripe/stripe-js';
-
-export const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
+import conf from './main';
+export const stripePromise = loadStripe(conf.apiUrlPrefix);
 
 export const createCheckoutSession = async (items) => {
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/create-checkout-session`, {
+    const response = await fetch(`${conf.apiUrlPrefix}/api/create-checkout-session`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

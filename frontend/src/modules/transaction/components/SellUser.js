@@ -4,6 +4,7 @@ import AddCarForm from "./AddCarForm";
 import { GET_CARS, DELETE_CAR } from "../../../conf/main";
 import useAuthStore from "../../../store/authStore";
 import EditCarForm from "./EditCarForm";
+import conf from "../../../conf/main";
 
 function SellUser() {
   const [cars, setCars] = useState([]);
@@ -27,7 +28,7 @@ function SellUser() {
       })
       .then((response) => {
         console.log("🚀 Data from API:", response.data);
-        console.log("Base URL:", process.env.REACT_APP_BASE_URL);
+        console.log("Base URL:", conf.apiUrlPrefix);
         console.log("Image URL:", cars.Picture?.[0]?.url);
         setCars(response.data.garages);
       })
@@ -75,7 +76,7 @@ function SellUser() {
                       <img
                         src={
                           car.Picture?.[0]?.url
-                            ? `${process.env.REACT_APP_BASE_URL}${car.Picture[0].url}`
+                            ? `${conf.apiUrlPrefix}${car.Picture[0].url}`
                             : "/placeholder.svg"
                         }
                         alt={car.model.ModelName}

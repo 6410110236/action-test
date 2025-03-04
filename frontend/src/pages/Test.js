@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Typography, Divider, Button } from 'antd';
 import useAuthStore from '../store/authStore';
+import  conf from '../conf/main';
 
 const { Title, Text } = Typography;
 
@@ -74,7 +75,7 @@ const Test = () => {
               <Title level={4}>Environment Information</Title>
               <Card className="bg-gray-50">
                 <Text type="secondary">API URL: </Text>
-                <Text strong>{process.env.REACT_APP_API_URL || 'Not set'}</Text>
+                <Text strong>{conf.apiUrlPrefix || 'Not set'}</Text>
                 <br />
                 <Text type="secondary">Environment: </Text>
                 <Text strong>{process.env.NODE_ENV}</Text>

@@ -3,9 +3,10 @@ import { client } from "../../../utils/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
-  uploadAtEntryCreationAction,
 } from "../../../conf/main";
+import { uploadAtEntryCreationAction } from "../../../conf/uploadimage";
 import useAuthStore from "../../../store/authStore";
+import { Import, ImportIcon } from "lucide-react";
 
 const object_cars = {
   brand: "",

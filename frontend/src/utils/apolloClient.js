@@ -1,7 +1,8 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
+import conf from "../conf/main"
 
 const client = new ApolloClient({
-  uri: process.env.REACT_APP_BASE_URL+'/graphql', // URL ของ Strapi GraphQL
+  uri: conf.apiUrlPrefix+'/graphql', // URL ของ Strapi GraphQL
   cache: new InMemoryCache(),
 });
 

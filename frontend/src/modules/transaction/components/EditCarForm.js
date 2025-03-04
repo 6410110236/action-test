@@ -3,8 +3,9 @@ import { client } from "../../../utils/apolloClient";
 import {
   GET_BRANDS,
   GET_MODELS_FROM_BRAND,
-  updateAtEntryCreationAction,
 } from "../../../conf/main";
+
+import { updateAtEntryCreationAction } from "../../../conf/uploadimage"
 
 const object_cars = {
   brand: "",

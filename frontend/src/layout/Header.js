@@ -70,7 +70,7 @@ const Header = () => {
   };
 
   const navigation = [
-    { name: "Home", href: "/", current: location.pathname === "/" },
+    { name: "Home", href: "/", current: location.pathname === "/home" },
     { name: "Buy", href: "/buy", current: location.pathname === "/buy" },
     ...(isLoggedIn && role === "Seller"
       ? [
@@ -85,7 +85,8 @@ const Header = () => {
             current: location.pathname === "/seller/config",
           }
         ]
-      : [])
+      : []),
+    // { name: "About", href: "/about", current: location.pathname === "/about" },
   ];
 
   const userNavigation = [

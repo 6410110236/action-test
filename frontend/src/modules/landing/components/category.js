@@ -74,7 +74,7 @@ const CarCategoryScroll = () => {
     };
 
     return (
-        <div className="relative w-full py-8 bg-background">
+        <div className="relative w-full py-8 bg-background" style={{ marginTop: '100px', marginBottom: '10px' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-2xl font-bold text-foreground mb-6">Car Categories</h2>
                 <div className="relative group">
@@ -110,6 +110,7 @@ const CarCategoryScroll = () => {
                                         : "bg-card hover:bg-primary/10"}
                                 `}
                                 role="listitem"
+                                style={{ marginBottom: '20px' }} // เพิ่มระยะห่างจากความสูง
                             >
                                 <div className="flex flex-col items-center space-y-3">
                                     <div className={`

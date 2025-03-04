@@ -4,7 +4,7 @@ import SideBar from '../components/SideBar';
 import { Pagination } from 'antd';
 import { client } from '../../../utils/apolloClient';
 import useCarStore from '../../../store/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
-import { GET_GARAGES } from '../../../conf/main'; // นำเข้า query จากไฟล์ main
+import conf , { GET_GARAGES } from '../../../conf/main'; // นำเข้า query จากไฟล์ main
 
 const CarCart = () => {
     const { cars, setCars } = useCarStore(); // ดึงข้อมูล cars จาก Zustand store
@@ -82,7 +82,7 @@ const CarCart = () => {
                             <div className="relative overflow-hidden rounded-lg mb-3">
                                 {car.image ? (
                                     <img
-                                        src={`${process.env.REACT_APP_BASE_URL}${car.image}`}
+                                        src={`${conf.apiUrlPrefix}${car.image}`}
                                         alt={car.modelName}
                                         className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
                                     />

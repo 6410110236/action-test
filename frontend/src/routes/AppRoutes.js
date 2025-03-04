@@ -7,7 +7,7 @@ import SellUser from "../modules/transaction/components/SellUser";
 import Order from "../modules/transaction/order";
 import CarCart from "../modules/search/pages/CarCart";
 import Users from "../modules/transaction/components/Users";
-import Detail from "../modules/detail/mock/detail";
+import Detail from "../modules/detail/detail";
 import useAuthStore from "../store/authStore";
 import ConfigGarage from "../modules/transaction/components/ConfigGarage";
 import ConfigBrand from "../modules/transaction/components/ConfigGarageComponents/ConfigBrand";

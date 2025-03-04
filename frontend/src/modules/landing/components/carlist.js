@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Clock } from 'lucide-react';
 import useCarStore from '../../../store/carStore'; // นำเข้า useCarStore จาก store ที่เราสร้างไว้
 import { client } from '../../../utils/apolloClient'; // นำเข้า client
-import { GET_GARAGES } from '../../../conf/main'; // นำเข้า query จากไฟล์ main
+import conf , { GET_GARAGES } from '../../../conf/main'; // นำเข้า query จากไฟล์ main
 
 const LatestCarsSection = () => {
     const [latestCars, setLatestCars] = useState([]); // สำหรับเก็บข้อมูลรถที่ดึงมาจาก store
+    const [visibleCars, setVisibleCars] = useState(6); // เริ่มที่ 6 คันแรก
     const { cars, setCars } = useCarStore(); // ดึงข้อมูล cars จาก Zustand store
 
     useEffect(() => {
@@ -29,34 +31,42 @@ const LatestCarsSection = () => {
                         image: garage.Picture && garage.Picture.length > 0 ? garage.Picture[0].url : '', // รูปภาพ
                         category: garage.VehicleRegistrationTypes || 'Unknown', // หมวดหมู่
                         color: garage.Color || 'Unknown', // สี
-                        gearType: model.GearType || 'Unknown' // ประเภทเกียร์
+                        gearType: model.GearType || 'Unknown', // ประเภทเกียร์
+                        createdAt: garage.createdAt || '' // วันที่เพิ่มรถ
                     };
                 });
 
+                // เรียงข้อมูลจากใหม่ไปเก่าโดยใช้ createdAt
+                const latestSortedCars = carsMapped
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // เรียงจากใหม่ไปเก่า
+
                 // อัพเดต state latestCars
-                setLatestCars(carsMapped);
-                console.log('🚀 Mapped cars:', carsMapped);
+                setLatestCars(latestSortedCars);
+                console.log('🚀 Sorted cars:', latestSortedCars);
             })
             .catch(error => console.error('❌ Error fetching data:', error));
     }, [setCars]); // เรียกใช้ useEffect ทุกครั้งที่คอมโพเนนต์ถูก mount
-    
-    
+
+    // เพิ่มรถอีก 3 คันเมื่อกดปุ่ม
+    const showMoreCars = () => {
+        setVisibleCars(prev => prev + 3);
+    };
+
     return (
         <section className="max-w-screen-xl mx-auto px-4 mb-12">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold">Latest Cars</h2>
                 <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" />
                     <span className="text-sm text-gray-500">Recently Added</span>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {latestCars.map((car) => (
-                    <div key={car.id} className="group">
+                {latestCars.slice(0, visibleCars).map((car) => (
+                    <div key={car.id} className="group transition-opacity duration-500 opacity-100">
                         <div className="relative overflow-hidden rounded-lg mb-3">
                             {car.image ? (
                                 <img
-                                src={`${process.env.REACT_APP_BASE_URL}${car.image}`}
+                                    src={`${conf.apiUrlPrefix}${car.image}`}
                                     alt={car.modelName}
                                     className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
@@ -74,11 +84,21 @@ const LatestCarsSection = () => {
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">{car.category}</span>
-                            <span className="text-sm text-gray-500">{car.Color}</span>
+                            <span className="text-sm text-gray-500">{car.color}</span>
                         </div>
                     </div>
                 ))}
             </div>
+            {visibleCars < latestCars.length && (
+                <div className="flex justify-center mt-6">
+                    <button 
+                        onClick={showMoreCars} 
+                        className="px-4 py-2 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-700 transition"
+                    >
+                        Show More
+                    </button>
+                </div>
+            )}
         </section>
     );
 };
