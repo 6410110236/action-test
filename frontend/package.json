@@ -16,6 +16,7 @@
     "axios": "^1.8.1",
     "carousel": "^0.0.3",
     "cra-template": "1.2.0",
+    "fs": "^0.0.1-security",
     "graphql": "^16.10.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.0",
@@ -57,6 +58,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "path-browserify": "^1.0.1"
   }
 }

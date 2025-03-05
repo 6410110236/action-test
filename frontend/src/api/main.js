@@ -17,7 +17,7 @@ const conf = {
 // GraphQL query สำหรับดึงข้อมูล garages
 export const GET_GARAGES = gql`
   query Query {
-    garages {
+    garages (pagination: { limit: 100 }){
       Color
       Distance
       Description
@@ -88,7 +88,7 @@ export const GET_SPECIFIC_CAR = gql`
 
 export const GET_BRANDS = gql`
   query Query {
-    brands {
+    brands(pagination: { limit: 200 }) {
       BrandName
       documentId
     }
