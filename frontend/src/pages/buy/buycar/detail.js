@@ -13,6 +13,7 @@ import conf from '../../../api/main'
 import { client } from '../../../api/apolloClient';
 import useCarStore from '../../../logic/carStore';
 import { GET_GARAGES } from '../../../api/main';
+import conf from '../../../api/main'
 
 const Detail = () => {
   const { id } = useParams();

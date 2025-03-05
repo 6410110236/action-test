@@ -37,15 +37,16 @@ const PaymentSuccess = () => {
 
   const formatDate = (date) => {
     try {
-      return new Date(date || Date.now()).toLocaleString('th-TH', {
+      return new Date(date || Date.now()).toLocaleString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        hour12: true
       });
     } catch (error) {
-      return new Date().toLocaleString('th-TH');
+      return new Date().toLocaleString('en-US');
     }
   };
 
