@@ -8,10 +8,12 @@ import {
 } from '@ant-design/icons';
 import 'tailwindcss/tailwind.css';
 import 'antd/dist/reset.css';
+import conf from '../../../api/main'
 
 import { client } from '../../../api/apolloClient';
 import useCarStore from '../../../logic/carStore';
 import { GET_GARAGES } from '../../../api/main';
+import conf from '../../../api/main'
 
 const Detail = () => {
   const { id } = useParams();
@@ -186,7 +188,7 @@ const Detail = () => {
           {/* Left Side */}
           {selectedCar.image ? (
             <img
-              src={`${process.env.REACT_APP_BASE_URL}${selectedCar.image}`}
+              src={`${conf.apiUrlPrefix}${selectedCar.image}`}
               alt={selectedCar.modelName}
               className="w-full max-w-[700px] h-64 max-h-64 object-cover transition-transform duration-300 group-hover:scale-120"
             />

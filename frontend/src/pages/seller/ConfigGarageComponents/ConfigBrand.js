@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  GET_ALL_BRANDS,
-  CREATE_NEW_BRAND,
-  DELETE_BRAND,
-  UPDATE_BRAND,
-} from "../../../api/main";
+import { GET_ALL_BRANDS, DELETE_BRAND, UPDATE_BRAND } from "../../../api/main";
 import { client } from "../../../api/apolloClient";
-import { v4 as uuidv4 } from "uuid"; // Import uuid
+import { uploadBrandAtEntryCreationAction, updateฺฺBrandAtEntryCreationAction } from "../../../api/uploadimage";
+import useAuthStore from "../../../logic/authStore";
 
 function ConfigBrand() {
   const [brands, setBrands] = useState([]);
@@ -16,6 +12,21 @@ function ConfigBrand() {
   const [showWarning, setShowWarning] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState(null); // State to hold the brand being edited
   const [editedBrandName, setEditedBrandName] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  // New state for delete confirmation
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [brandToDelete, setBrandToDelete] = useState(null);
+  const jwtSell = useAuthStore((state) => state.jwt);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+    console.log("handleChange :", file);
+  };
 
   useEffect(() => {
     fetchBrands();
@@ -23,7 +34,7 @@ function ConfigBrand() {
 
   const fetchBrands = () => {
     client
-      .query({ query: GET_ALL_BRANDS })
+      .query({ query: GET_ALL_BRANDS, fetchPolicy: "network-only" })
       .then((response) => {
         setBrands(response.data.brands_connection.nodes);
         console.log("response :", response);
@@ -34,49 +45,67 @@ function ConfigBrand() {
       });
   };
 
-  const handleCreateBrand = async () => {
+  const handleCreateBrand = async (e) => {
+    e.preventDefault();
+
     if (!newBrandName.trim()) {
       setShowWarning(true);
       return;
     }
+
     setShowWarning(false);
+
     try {
-      const response = await client.mutate({
-        mutation: CREATE_NEW_BRAND,
-        variables: { data: { BrandName: newBrandName } },
-      });
+      const response = await uploadBrandAtEntryCreationAction(
+        newBrandName,
+        image,
+        jwtSell
+      );
       console.log("response :", response);
-      if (response.data.createBrand) {
-        console.log("Brand created:", response.data.createBrand);
-        // Refresh the brand list
-        setBrands((prevBrands) => [
-          ...prevBrands,
-          {
-            BrandName: response.data.createBrand.BrandName,
-            documentId: response.data.createBrand.documentId || uuidv4(), // Assign documentId or a new unique uuid if does not exist.
-          },
-        ]);
-        // Reset form and close popup
-        setNewBrandName("");
-        setIsCreatePopupVisible(false);
-      } else {
-        console.error("Failed to create brand.");
-      }
+      fetchBrands();
+      setIsCreatePopupVisible(false);
+      setNewBrandName("");
+      setImage(null);
+      setImagePreview(null);
     } catch (error) {
       console.error("Error creating brand:", error);
     }
   };
 
-  const handleRemoveBrand = (documentId) => {
+  const handleDelete = (documentId) => {
+    // Show delete confirmation popup
+    setBrandToDelete(documentId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = () => {
+    // Use Apollo Client to call the mutation
     client
       .mutate({
         mutation: DELETE_BRAND,
-        variables: { documentId },
+        variables: { documentId: brandToDelete },
+        context: {
+          headers: {
+            Authorization: `Bearer ${jwtSell}`, // ✅ Send JWT in the Header
+          },
+        },
       })
       .then((response) => {
         console.log("✅ Brand deleted:", response.data.deleteBrand.documentId);
-        setBrands(brands.filter((brand) => brand.documentId !== documentId));
+        setBrands(brands.filter((brand) => brand.documentId !== brandToDelete)); // Update state after deletion
+        setShowDeleteConfirmation(false); // Close popup
+        setBrandToDelete(null);
+      })
+      .catch((error) => {
+        console.error("❌ Error deleting brand:", error);
+        setShowDeleteConfirmation(false);
+        setBrandToDelete(null);
       });
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setBrandToDelete(null);
   };
 
   const handleOpenEditPopup = (brand) => {
@@ -85,40 +114,29 @@ function ConfigBrand() {
     setIsEditPopupVisible(true);
   };
 
-  const handleUpdateBrand = async () => {
+  const handleUpdateBrand = async (e) => {
+    e.preventDefault();
+
     if (!editedBrandName.trim()) {
       setShowWarning(true);
       return;
     }
+
     setShowWarning(false);
-    try {
-      const response = await client.mutate({
-        mutation: UPDATE_BRAND,
-        variables: {
-          documentId: selectedBrand.documentId,
-          data: { BrandName: editedBrandName },
-        },
-      });
-      if (response.data.updateBrand) {
-        console.log("Brand updated:", response.data.updateBrand);
-        // Update the brand list
-        setBrands((prevBrands) =>
-          prevBrands.map((brand) =>
-            brand.documentId === selectedBrand.documentId
-              ? { ...brand, BrandName: editedBrandName }
-              : brand
-          )
+    const { success, error } = await updateฺฺBrandAtEntryCreationAction(
+          editedBrandName,
+          image,
+          selectedBrand.documentId,
+          jwtSell
         );
-        // Reset form and close popup
-        setIsEditPopupVisible(false);
-        setSelectedBrand(null);
-        setEditedBrandName("");
-      } else {
-        console.error("Failed to update brand.");
-      }
-    } catch (error) {
-      console.error("Error updating brand:", error);
-    }
+        fetchBrands();
+    
+        if (error) {
+          console.error("Error:", error);
+        } else {
+          console.log(success);
+          setIsEditPopupVisible(false);
+        }
   };
 
   return (
@@ -141,55 +159,82 @@ function ConfigBrand() {
         brands.map((brand) => (
           <div
             key={brand.documentId}
-            className="p-2 mb-2 items-center justify-center shadow-md rounded-md bg-blue-100 hover:bg-blue-200 transition-colors"
+            className="p-2 mb-2 items-center shadow-md rounded-md bg-blue-100 hover:bg-blue-200 transition-colors flex justify-between" // Changed: flex and justify-between
           >
-            <div className="gap-6 md:grid-cols-3">
-              <div className="md:col-span-2 space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{brand.BrandName}</span>
+            {/* Brand Name */}
+            <div className="flex-1">
+              {" "}
+              {/* Changed: Add flex-1 */}
+              <span className="font-medium">{brand.BrandName}</span>
+            </div>
 
-                  <button
-                    className="p-1 hover:bg-gray-200 rounded-full"
-                    onClick={() => {
-                      handleRemoveBrand(brand.documentId);
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-gray-500"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                    </svg>
-                  </button>
-                  <button
-                    className="p-1 hover:bg-gray-200 rounded-full"
-                    onClick={() => handleOpenEditPopup(brand)}
-                  >
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M12 20h9" fill="black" />
-                      <path
-                        d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"
-                        fill="black"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              {" "}
+              {/* Changed: flex and gap-2 */}
+              <button
+                className="p-2 hover:bg-gray-100 rounded-full"
+                onClick={() => handleOpenEditPopup(brand)}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M12 20h9" fill="black" />
+                  <path
+                    d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"
+                    fill="black"
+                  />
+                </svg>
+              </button>
+              <button
+                className="p-2 hover:bg-gray-100 rounded-full"
+                onClick={() => {
+                  handleDelete(brand.documentId);
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                </svg>
+              </button>
             </div>
           </div>
         ))
       ) : (
         <p>No brands available.</p>
+      )}
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
+            <p className="mb-4">Are you sure you want to delete this brand?</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Create Popup */}
@@ -213,6 +258,24 @@ function ConfigBrand() {
             )}
 
             <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-40 h-40 object-cover rounded-lg border border-gray-300"
+                  />
+                </div>
+              )}
               <label
                 htmlFor="brandName"
                 className="block text-sm font-medium text-gray-700"
@@ -256,15 +319,31 @@ function ConfigBrand() {
             >
               &times;
             </button>
-            <h2 className="text-xl text-blue-600 font-bold mb-4">
-              Edit Brand
-            </h2>
+            <h2 className="text-xl text-blue-600 font-bold mb-4">Edit Brand</h2>
             {showWarning && (
               <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                 ⚠️ Please enter a brand name.
               </div>
             )}
             <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              />
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-40 h-40 object-cover rounded-lg border border-gray-300"
+                  />
+                </div>
+              )}
               <label
                 htmlFor="editBrandName"
                 className="block text-sm font-medium text-gray-700"
