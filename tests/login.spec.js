@@ -15,7 +15,9 @@ test("login with incorrect credentials", async ({ page }) => {
   await page.fill('input[name="username"]', 'buyer1');
   await page.fill('input[name="password"]', 'wrongpassword');
   await page.click('button[type="submit"]');
-  await page.waitForSelector('.alert-danger');
-  const errorMsg = page.locator('.alert-danger');
-  await expect(errorMsg).toHaveText('Login failed');
+
+  const errorMsg = page.locator('div[role="alert"]');
+
+  await expect(errorMsg).toBeVisible();
+  await expect(errorMsg).toHaveText('Login failed: Request failed with status code 500');
 });
