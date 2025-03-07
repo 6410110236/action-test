@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 import 'tailwindcss/tailwind.css';
 import 'antd/dist/reset.css';
-import conf from '../../../api/main'
+// import conf from '../../../api/main'
 
 import { client } from '../../../api/apolloClient';
 import useCarStore from '../../../logic/carStore';
