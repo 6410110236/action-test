@@ -16,5 +16,6 @@ test("login with incorrect credentials", async ({ page }) => {
   await page.fill('input[name="password"]', 'wrongpassword');
   await page.click('button[type="submit"]');
   await page.waitForSelector('.alert-danger');
-  await expect(page).toHaveText('.alert-danger', 'Invalid credentials');
+  const errorMsg = page.locator('.alert-danger');
+  await expect(errorMsg).toHaveText('Login failed');
 });
