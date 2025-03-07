@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "garages",
+  "info": {
+    "singularName": "garage",
+    "pluralName": "garages",
+    "displayName": "Garage",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Price": {
+      "type": "biginteger"
+    },
+    "VehicleRegistrationTypes": {
+      "type": "text"
+    },
+    "SecondaryKey": {
+      "type": "integer"
+    },
+    "Warranty": {
+      "type": "text"
+    },
+    "Color": {
+      "type": "text"
+    },
+    "RegisterDate": {
+      "type": "date"
+    },
+    "Distance": {
+      "type": "decimal"
+    },
+    "Picture": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    },
+    "model": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::model.model",
+      "inversedBy": "garages"
+    },
+    "VehicleTaxExpirationDate": {
+      "type": "date"
+    },
+    "StatusBuying": {
+      "type": "boolean",
+      "default": true
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "garages"
+    },
+    "Description": {
+      "type": "text",
+      "default": "None"
+    },
+    "Manual": {
+      "type": "text",
+      "default": "Nope"
+    }
+  }
+}

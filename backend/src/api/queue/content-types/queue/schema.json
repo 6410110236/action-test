@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "queues",
+  "info": {
+    "singularName": "queue",
+    "pluralName": "queues",
+    "displayName": "Queue",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Day": {
+      "type": "datetime",
+      "required": true
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "queue"
+    }
+  }
+}
+
