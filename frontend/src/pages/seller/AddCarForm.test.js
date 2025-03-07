@@ -2,13 +2,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AddCarForm from './AddCarForm';
 
 // Mock Apollo Client
-jest.mock('../../../utils/apolloClient', () => ({
+jest.mock('../../api/apolloClient', () => ({
   client: {
     query: jest.fn(() => Promise.resolve({ data: { brands: [{ documentId: '1', BrandName: 'Toyota' }] } }))
   }
 }));
 
-jest.mock('../../../store/authStore', () => jest.fn(() => ({ user: { documentId: 'test-jwt' } })));
+jest.mock('../../logic/authStore', () => jest.fn(() => ({ user: { documentId: 'test-jwt' } })));
 
 describe('AddCarForm Component', () => {
   test('renders form with initial fields', () => {
