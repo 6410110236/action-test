@@ -59,7 +59,3 @@ Feel free to check out the [Strapi GitHub repository](https://github.com/strapi/
 ---
 
 <sub>🤫 Psst! [Strapi is hiring](https://strapi.io/careers).</sub>
-
-
--------------------------------------------------------------------------------------
-http://localhost:1337/api/models?populate=* เรียกดูข้อมูลทั้งหมด
