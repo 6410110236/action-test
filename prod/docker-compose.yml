@@ -6,9 +6,11 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     image: strapi:latest
-    # restart: unless-stopped
+    restart: unless-stopped
     env_file: .env
     environment:
+      HOST: ${HOST}
+      PORT: ${PORT}
       DATABASE_CLIENT: ${DATABASE_CLIENT}
       DATABASE_HOST: strapiDB
       DATABASE_PORT: ${DATABASE_PORT}
@@ -26,7 +28,7 @@ services:
       - ../backend/package-lock.json:/opt/package-lock.json
       - ../backend/public/uploads:/opt/app/public/uploads
     ports:
-      - "1337:1337"
+      - "127.0.0.1:1337:1337"
     networks:
       - strapi
     depends_on:
@@ -35,7 +37,7 @@ services:
   strapiDB:
     container_name: strapiDB
     platform: linux/amd64 #for platform error on Apple M1 chips
-    # restart: unless-stopped
+    restart: unless-stopped
     env_file: .env
     image: mysql/mysql-server
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
