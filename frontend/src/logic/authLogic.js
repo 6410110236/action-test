@@ -3,9 +3,7 @@ import conf from '../api/main';
 
 export const loginAPI = async (username, password) => {
   try {
-    console.log(`🔹 loginAPI: Trying to login with ${username}`);
     const response = await ax.post(conf.loginEndpoint, { identifier: username, password });
-    console.log("✅ loginAPI Response:", response.data);
     if (response.data?.jwt && response.data?.user?.id > 0) {
       return response.data; // คืนค่า { jwt, user, ... }
     } else {
@@ -46,7 +44,6 @@ export const fetchUserData = async (jwt) => {
     const response = await ax.get(conf.jwtUserEndpoint, {
       headers: { Authorization: `Bearer ${jwt}` },
     });
-    console.log("✅ loginAPI Response:", response.data);
     if (response.data && response.data.id) {
       return response.data;
     } else {

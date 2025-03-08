@@ -3,6 +3,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { FaCar, FaTruck, FaBus, FaCarSide } from "react-icons/fa";
 import { IoCarSportSharp, IoCarSharp } from "react-icons/io5";
 import { BsFillLightningChargeFill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
 const CarCategoryScroll = () => {
     const scrollContainerRef = useRef(null);
@@ -10,6 +11,7 @@ const CarCategoryScroll = () => {
     const [isPressed, setIsPressed] = useState(false);
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
+    const navigate = useNavigate();
 
     const categories = [
         { id: 1, name: "Sedan", icon: <FaCarSide />, description: "Classic four-door family car" },
@@ -39,6 +41,7 @@ const CarCategoryScroll = () => {
     const handleCategoryClick = (category) => {
         setActiveCategory(category.id === activeCategory ? null : category.id);
         setIsPressed(true);
+        navigate(`/buy?category=${category.name}`);
     };
 
     const handleMouseUp = () => {
@@ -74,9 +77,9 @@ const CarCategoryScroll = () => {
     };
 
     return (
-        <div className="relative w-full py-8 bg-background" style={{ marginTop: '100px', marginBottom: '10px' }}>
+        <div className="relative w-full py-4 bg-background" style={{ marginTop: '100px', marginBottom: '5px' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-2xl font-bold text-foreground mb-6">Car Categories</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-4">Car Categories</h2>
                 <div className="relative group">
                     {!isAtStart && (
                         <button
@@ -101,7 +104,7 @@ const CarCategoryScroll = () => {
                                 onMouseUp={handleMouseUp}
                                 onMouseLeave={handleMouseUp}
                                 className={`
-                                    flex-shrink-0 w-64 p-4 rounded-lg 
+                                    flex-shrink-0 w-24 sm:w-32 md:w-48 p-4 rounded-lg 
                                     transition-all duration-300 transform 
                                     hover:scale-105 cursor-pointer
                                     hover:shadow-lg hover:shadow-primary/20
@@ -110,11 +113,11 @@ const CarCategoryScroll = () => {
                                         : "bg-card hover:bg-primary/10"}
                                 `}
                                 role="listitem"
-                                style={{ marginBottom: '20px' }} // เพิ่มระยะห่างจากความสูง
+                                style={{ marginBottom: '10px' }} // ลดระยะห่างจากความสูง
                             >
                                 <div className="flex flex-col items-center space-y-3">
                                     <div className={`
-                                        text-4xl transition-colors duration-300
+                                        text-2xl sm:text-3xl md:text-4xl transition-colors duration-300
                                         ${isPressed && activeCategory === category.id 
                                             ? "text-white" 
                                             : "text-primary group-hover:text-primary"}
@@ -124,14 +127,6 @@ const CarCategoryScroll = () => {
                                     <h3 className="font-semibold text-lg transition-colors duration-300">
                                         {category.name}
                                     </h3>
-                                    <p className={`
-                                        text-sm text-center transition-colors duration-300
-                                        ${isPressed && activeCategory === category.id 
-                                            ? "opacity-90" 
-                                            : "opacity-80"}
-                                    `}>
-                                        {category.description}
-                                    </p>
                                 </div>
                             </div>
                         ))}

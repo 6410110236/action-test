@@ -44,8 +44,6 @@ function ConfigCategoryCar() {
       .query({ query: GET_ALL_CATEGORIES_CAR, fetchPolicy: "network-only" })
       .then((response) => {
         setCategories(response.data.categoryCars_connection.nodes);
-        console.log("response :", response);
-        console.log("categories :", categories);
       })
       .catch((error) => {
         console.log(error);

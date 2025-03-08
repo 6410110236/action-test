@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button, Card, Modal, Tabs, Table } from 'antd';
 import {
-  LikeOutlined, LikeFilled, ShareAltOutlined, CarOutlined,
+  ShareAltOutlined, CarOutlined,
   PhoneOutlined, MailOutlined, MessageOutlined,
   FacebookOutlined, TwitterOutlined, WhatsAppOutlined, InstagramOutlined
 } from '@ant-design/icons';
@@ -12,8 +12,7 @@ import conf from '../../../api/main'
 
 import { client } from '../../../api/apolloClient';
 import useCarStore from '../../../logic/carStore';
-import { GET_GARAGES } from '../../../api/main';
-import conf from '../../../api/main'
+import { GET_SPECIFIC_CAR } from '../../../api/main';
 
 const Detail = () => {
   const { id } = useParams();
@@ -23,8 +22,6 @@ const Detail = () => {
   const [selectedCar, setSelectedCar] = useState({});
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isInstallmentModalVisible, setIsInstallmentModalVisible] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(120);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const [calculationDetails, setCalculationDetails] = useState({
     totalPrice: 0,
@@ -42,51 +39,42 @@ const Detail = () => {
       // If no state, fetch data using ID from URL
       if (id) {
         try {
-          const response = await client.query({ query: GET_GARAGES });
-          const formattedCars = response.data.garages.map((garage) => ({
+          const response = await client.query({
+            query: GET_SPECIFIC_CAR,
+            variables: { documentId: id }
+          });
+          const garage = response.data.garage;
+          const car = {
             id: garage.documentId,
-            modelName: garage.model?.ModelName || 'Unknown',
-            brandName: garage.model?.brand_car?.BrandName || 'Unknown',
-            price: garage.Price || 'No price data',
+            modelName: garage.model?.ModelName || '',
+            brandName: garage.model?.brand_car?.BrandName || '',
+            price: garage.Price ? garage.Price.toLocaleString() : '',
             image: garage.Picture?.length > 0 ? garage.Picture[0].url : '',
-            category: garage.VehicleRegistrationTypes || 'Unknown',
-            color: garage.Color || 'Unknown',
-            gearType: garage.model?.GearType || 'Unknown',
-            secondaryKey: garage.SecondaryKey || 'N/A',
-            warranty: garage.Warranty || 'N/A',
-            registrationDate: garage.RegisterDate || 'Unknown',
-            lastDistance: garage.Distance ? garage.Distance.toLocaleString() : 'Unknown',
-            vehicleTaxExpirationDate: garage.VehicleTaxExpirationDate || 'Unknown',
-            description: garage.Description || 'N/A',
-            manual: garage.Manual || 'N/A',
-            seats: garage.model?.Seats || 'Unknown', 
+            category: garage.model?.category_car?.Category || '',
+            color: garage.Color || '',
+            gearType: garage.model?.GearType || '',
+            secondaryKey: garage.SecondaryKey || '',
+            warranty: garage.Warranty || '',
+            registrationDate: garage.RegisterDate || '',
+            lastDistance: garage.Distance ? garage.Distance.toLocaleString() : '',
+            vehicleTaxExpirationDate: garage.VehicleTaxExpirationDate || '',
+            description: garage.Description || '',
+            manual: garage.Manual || '',
+            seats: garage.model?.Seats || '',
+            status: garage.StatusBuying ? 'Available' : 'Reserved',
             details: {
-              fuelType: garage.details?.fuelType || 'Unknown',
-              seatCount: garage.model?.Seats || 'Unknown',
-              registrationType: garage.VehicleRegistrationTypes || 'Unknown',
-              spareKey: garage.SecondaryKey || 'N/A',
-              insurance: garage.details?.insurance || 'Unknown',
-              color: garage.Color || 'Unknown',
-              registrationDate: garage.RegisterDate || 'Unknown',
-              lastDistance: garage.Distance ? garage.Distance.toLocaleString() : 'Unknown',
-            },
-            inspection: {
-              lastInspection: garage.inspection?.lastInspection || 'Unknown',
-              nextInspection: garage.inspection?.nextInspection || 'Unknown',
-              status: garage.inspection?.status || 'Unknown',
-              taxExpiration: garage.VehicleTaxExpirationDate || 'Unknown',
+              fuelType: garage.model?.EnergySource || '',
+              seatCount: garage.model?.Seats || '',
+              registrationType: garage.VehicleRegistrationTypes || '',
+              color: garage.Color || '',
+              registrationDate: garage.RegisterDate || '',
+              lastDistance: garage.Distance ? garage.Distance.toLocaleString() : '',
             }
-          }));
-          const car = formattedCars.find(car => car.id === id);
-          if (car) {
-            setSelectedCar(car);
-            setCars(formattedCars);
-          } else {
-            console.error('Car not found');
-            navigate('/buy'); // Redirect to buy page if car not found
-          }
+          };
+          setSelectedCar(car);
         } catch (error) {
           console.error('Error fetching car data:', error);
+          navigate('/buy'); // Redirect to buy page if car not found
         }
       }
     };
@@ -101,11 +89,6 @@ const Detail = () => {
     } else if (action === 'Share') {
       setIsShareModalVisible(true);
     }
-  };
-
-  const handleLikeClick = () => {
-    setIsLiked(!isLiked);
-    setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
   };
 
   const handleCancel = () => {
@@ -139,20 +122,19 @@ const Detail = () => {
           pagination={false}
           showHeader={false}
           dataSource={[
-            { key: 'fuel', label: 'Fuel Type', value: selectedCar.details?.fuelType || 'None' },
-            { key: 'seat', label: 'Seats', value: selectedCar.details?.seatCount || 'None' },
-            { key: 'regType', label: 'Registration Type', value: selectedCar.details?.registrationType || 'None' },
-            { key: 'spareKey', label: 'Spare Key', value: selectedCar.details?.spareKey || 'None' },
-            { key: 'insurance', label: 'Primary Insurance', value: selectedCar.details?.insurance || 'None' },
-            { key: 'color', label: 'Color', value: selectedCar.details?.color || 'None' },
-            { key: 'regDate', label: 'Registration Date', value: selectedCar.details?.registrationDate || 'None' },
-            { key: 'taxExpiration', label: 'Vehicle Tax Expiration', value: selectedCar.inspection?.taxExpiration || 'None' },
-            { key: 'lastDist', label: 'Latest Mileage', value: selectedCar.details?.lastDistance || 'None' },
-            { key: 'warranty', label: 'Warranty', value: selectedCar.warranty || 'N/A' },
-            { key: 'manual', label: 'Manual', value: selectedCar.manual || 'N/A' },
-            { key: 'description', label: 'Description', value: selectedCar.description || 'N/A' },
-            { key: 'secondaryKey', label: 'Secondary Key', value: selectedCar.secondaryKey || 'N/A' },
-          ]}
+            { key: 'fuel', label: 'Fuel Type', value: selectedCar.details?.fuelType },
+            { key: 'seat', label: 'Seats', value: selectedCar.details?.seatCount },
+            { key: 'regType', label: 'Registration Type', value: selectedCar.details?.registrationType },
+            { key: 'color', label: 'Color', value: selectedCar.details?.color },
+            { key: 'regDate', label: 'Registration Date', value: selectedCar.details?.registrationDate },
+            { key: 'taxExpiration', label: 'Vehicle Tax Expiration', value: selectedCar.vehicleTaxExpirationDate },
+            { key: 'lastDist', label: 'Latest Mileage', value: selectedCar.details?.lastDistance },
+            { key: 'warranty', label: 'Warranty', value: selectedCar.warranty },
+            { key: 'manual', label: 'Manual', value: selectedCar.manual },
+            { key: 'description', label: 'Description', value: selectedCar.description },
+            { key: 'secondaryKey', label: 'Secondary Key', value: selectedCar.secondaryKey },
+            { key: 'status', label: 'Status', value: selectedCar.status },
+          ].filter(item => item.value)}
           columns={[
             { title: 'Item', dataIndex: 'label', key: 'label' },
             { title: 'Details', dataIndex: 'value', key: 'value' },
@@ -162,21 +144,11 @@ const Detail = () => {
     },
     {
       key: '2',
-      label: 'Vehicle Inspection',
+      label: 'Installment Calculation',
       children: (
-        <Table
-          pagination={false}
-          showHeader={false}
-          dataSource={[
-            { key: 'lastInspection', label: 'Last Inspection', value: selectedCar.inspection?.lastInspection || 'None' },
-            { key: 'nextInspection', label: 'Next Inspection', value: selectedCar.inspection?.nextInspection || 'None' },
-            { key: 'status', label: 'Status', value: selectedCar.inspection?.status || 'None' },
-          ]}
-          columns={[
-            { title: 'Item', dataIndex: 'label', key: 'label' },
-            { title: 'Details', dataIndex: 'value', key: 'value' },
-          ]}
-        />
+        <div>
+          {/* Add installment calculation content here */}
+        </div>
       ),
     },
   ];
@@ -214,21 +186,12 @@ const Detail = () => {
                 <Button icon={<ShareAltOutlined />} onClick={() => handleClick('Share')} className="w-full">
                   Share
                 </Button>
-                {/* Like Button */}
-                <Button
-                  icon={isLiked ? <LikeFilled /> : <LikeOutlined />}
-                  onClick={handleLikeClick}
-                  className={`w-full col-span-2 flex items-center justify-center ${isLiked ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
-                    }`}
-                >
-                  Like <span className="ml-2">{likeCount}</span>
-                </Button>
               </div>
             </Card>
           </div>
         </div>
 
-        {/* Tabs (car details and inspection) */}
+        {/* Tabs (car details and installment calculation) */}
         <div className="mt-6">
           <Tabs defaultActiveKey="1" items={tabItems} />
         </div>

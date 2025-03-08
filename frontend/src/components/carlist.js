@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useCarStore from '../logic/carStore';
 import { client } from '../api/apolloClient';
 import conf, { GET_GARAGES } from '../api/main';
@@ -19,6 +19,7 @@ const LatestCarsSection = () => {
                 const carsMapped = response.data.garages.map((garage) => {
                     const model = garage.model || {};
                     const brand = model.brand_car || {};
+                    const category = model.category_car || {};
 
                     // Parse the date when mapping the data
                     const createdDate = garage.createdAt ? new Date(garage.createdAt) : new Date();
@@ -29,7 +30,7 @@ const LatestCarsSection = () => {
                         brandName: brand.BrandName || 'Unknown',
                         price: garage.Price,
                         image: garage.Picture?.[0]?.url || '',
-                        category: garage.VehicleRegistrationTypes || 'Unknown',
+                        category: category.Category || 'Unknown',
                         color: garage.Color || 'Unknown',
                         gearType: model.GearType || 'Unknown',
                         createdAt: createdDate.toISOString(), // Store as ISO string
@@ -49,18 +50,6 @@ const LatestCarsSection = () => {
             .catch(error => console.error('Error fetching cars:', error));
     }, []);
 
-    const handleCarClick = (car) => {
-        navigate(`/detail/${car.id}`, {
-            state: {
-                carDetails: {
-                    ...car,
-                    // No need to convert createdAt again since it's already an ISO string
-                    createdAt: car.createdAt
-                }
-            }
-        });
-    };
-
     return (
         <section className="max-w-screen-xl mx-auto px-4 mb-12">
             <div className="flex items-center justify-between mb-6">
@@ -69,11 +58,11 @@ const LatestCarsSection = () => {
                     <span className="text-sm text-gray-500">Recently Added</span>
                 </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {latestCars.slice(0, visibleCars).map((car) => (
-                    <div 
-                        key={car.id} 
-                        onClick={() => handleCarClick(car)}
+                    <Link
+                        to={`/detail/${car.id}`} // ใช้ documentId จาก API
+                        key={car.id} // ใช้ id จาก API
                         className="group cursor-pointer transition-all duration-300 hover:shadow-lg rounded-lg overflow-hidden"
                     >
                         <div className="relative overflow-hidden rounded-lg mb-3">
@@ -81,10 +70,10 @@ const LatestCarsSection = () => {
                                 <img
                                     src={`${conf.apiUrlPrefix}${car.image}`}
                                     alt={car.modelName}
-                                    className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                                    className="w-full h-48 sm:h-64 object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
-                                <div className="w-full h-64 flex items-center justify-center bg-gray-200 text-gray-500">
+                                <div className="w-full h-48 sm:h-64 flex items-center justify-center bg-gray-200 text-gray-500">
                                     No Image
                                 </div>
                             )}
@@ -101,7 +90,7 @@ const LatestCarsSection = () => {
                                 <span className="text-sm text-gray-500">{car.color}</span>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
             {visibleCars < latestCars.length && (

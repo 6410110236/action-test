@@ -19,7 +19,6 @@ ax.interceptors.request.use(
             if (jwt && config.url !== conf.loginEndpoint) {
                 config.headers.Authorization = `Bearer ${jwt}`;
             }
-            console.log("🔹 Request URL:", `${config.baseURL}${config.url}`);
         } catch (error) {
             console.error("❌ Axios Interceptor Error (Request):", error);
         }
@@ -33,7 +32,6 @@ ax.interceptors.request.use(
 // เพิ่ม response interceptor
 ax.interceptors.response.use(
     (response) => {
-        console.log("✅ Received response:", response);
         return response;
     },
     (error) => {

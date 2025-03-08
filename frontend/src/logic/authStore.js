@@ -13,15 +13,11 @@ const useAuthStore = create(
       isLoginPending: false,
 
       login: async (username, password, rememberMe) => {
-        console.log("🔹 login function is being called!"); // ตรวจสอบว่าถูกเรียก
         set({ isLoginPending: true, loginError: null });
         try {
             const data = await loginAPI(username, password);
             const fullUserData = await fetchUserData(data.jwt);
             updateJwt(data.jwt, fullUserData.role?.name, rememberMe);  // เก็บ role ตาม API ที่ส่งมา
-            console.log("🔹 fullUserData:", fullUserData);  // Debug ข้อมูลผู้ใช้ที่ได้รับ
-            console.log("🔹 JWT:", data.jwt);  // Debug JWT ที่ได้รับ
-  
           set({
             isLoggedIn: true,
             user: fullUserData,
@@ -29,7 +25,6 @@ const useAuthStore = create(
             role: fullUserData.role?.name,  // ต้องเป็นชื่อ Role ตาม API
             isLoginPending: false,
           });
-          console.log("🔹 Store state after login:", get());  // Debug สถานะของ store หลังจาก login
 
           return { success: true };
         } catch (error) {
@@ -56,8 +51,5 @@ const useAuthStore = create(
     }
   )
 );
-
-// ตรวจสอบว่า store มีฟังก์ชัน login จริงไหม
-console.log("📌 useAuthStore:", useAuthStore.getState());
 
 export default useAuthStore;

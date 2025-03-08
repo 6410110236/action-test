@@ -37,8 +37,7 @@ function ConfigBrand() {
       .query({ query: GET_ALL_BRANDS, fetchPolicy: "network-only" })
       .then((response) => {
         setBrands(response.data.brands_connection.nodes);
-        console.log("response :", response);
-        console.log("brands :", brands);
+
       })
       .catch((error) => {
         console.log(error);

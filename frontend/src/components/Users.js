@@ -6,7 +6,6 @@ import useAuthStore from "../logic/authStore";
 function Users() {
   const [user, setUser] = useState(null);
   const jwtSell = useAuthStore((state) => state.user.documentId);
-  console.log("Sell : ", jwtSell);
 
   useEffect(() => {
     // Ensure jwtSell is available before making the request
@@ -20,7 +19,6 @@ function Users() {
         },
       })
       .then(response => {
-        console.log('🚀 Data from API:', response.data);
         setUser(response.data.usersPermissionsUser);
       })
       .catch(error => console.error('❌ Error fetching data:', error));

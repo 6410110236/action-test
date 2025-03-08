@@ -27,6 +27,7 @@ const LoadingSpinner = () => (
 
 // Role constants
 const ROLES = {
+  PUBLIC: "Public",
   BUYER: "Buyer",
   SELLER: "Seller",
   DEFAULT: "Buyer",
@@ -64,12 +65,13 @@ const ProtectedRoute = ({ children, allowedRoles = [], isLoggedIn, userRole }) =
     );
   }
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn && !allowedRoles.includes(ROLES.PUBLIC)) {
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
   const hasRequiredRole = !allowedRoles.length || 
-    allowedRoles.includes(userRole || ROLES.DEFAULT);
+    allowedRoles.includes(userRole || ROLES.DEFAULT) || 
+    allowedRoles.includes(ROLES.PUBLIC);
 
   if (!hasRequiredRole) {
     return (
@@ -100,7 +102,7 @@ const AppRoutes = () => {
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
 
-      {/* Protected Routes - All Users */}
+      {/* Public and Protected Routes - All Users */}
       <Route
         path="/detail/:id"
         element={
@@ -110,13 +112,13 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Protected Routes - Buyers & Sellers */}
+      {/* Public and Protected Routes - Buyers & Sellers */}
       <Route
         path="/buy"
         element={
           <ProtectedRoute
             isLoggedIn={isLoggedIn}
-            allowedRoles={[ROLES.BUYER, ROLES.SELLER]}
+            allowedRoles={[ROLES.PUBLIC, ROLES.BUYER, ROLES.SELLER]}
             userRole={role}
           >
             <CarCart />

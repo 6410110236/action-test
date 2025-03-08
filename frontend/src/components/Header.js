@@ -58,7 +58,29 @@ const Header = () => {
   const handleSearchChange = (e) => {
     const newQuery = e.target.value;
     setSearchState(prev => ({ ...prev, query: newQuery }));
-    debouncedSearch(newQuery);
+  };
+
+  const search = async (searchTerm) => {
+    if (!searchTerm.trim()) return;
+
+    setSearchState(prev => ({ ...prev, isLoading: true, error: null }));
+
+    try {
+      navigate(`/buy?search=${searchTerm.trim()}`);
+      setSearchState(prev => ({
+        ...prev,
+        isOpen: false,
+        query: "",
+        isLoading: false
+      }));
+    } catch (error) {
+      setSearchState(prev => ({
+        ...prev,
+        error: 'Failed to fetch results',
+        isLoading: false
+      }));
+      console.error('Search error:', error);
+    }
   };
 
   const toggleSearch = () => {
@@ -251,11 +273,15 @@ const Header = () => {
                         placeholder="Search..."
                         value={searchState.query}
                         onChange={handleSearchChange}
-                        onKeyDown={handleKeyDown}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            search(searchState.query);
+                          }
+                        }}
                         className="rounded-lg bg-gray-600 text-white px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                       />
                       <button
-                        onClick={() => debouncedSearch(searchState.query)}
+                        onClick={() => search(searchState.query)}
                         className="ml-2 rounded-full bg-gray-700 text-white px-4 py-2"
                       >
                         Search

@@ -13,7 +13,6 @@ function SellUser() {
 
   const jwtSell = useAuthStore((state) => state.jwt);
   const idSeller = useAuthStore((state) => state.user.documentId);
-  console.log("Sell : ", jwtSell);
 
   useEffect(() => {
     fetchCars();
@@ -35,9 +34,6 @@ function SellUser() {
         fetchPolicy: "network-only",
       })
       .then((response) => {
-        console.log("🚀 Data from API:", response.data);
-        console.log("Base URL:", conf.apiUrlPrefix);
-        console.log("Image URL:", cars.Picture?.[0]?.url);
         setCars(response.data.garages);
       })
       .catch((error) => console.error("❌ Error fetching data:", error));

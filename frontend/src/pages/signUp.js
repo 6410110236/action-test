@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserIcon, MailIcon, LockClosedIcon, EyeIcon, EyeOffIcon } from "@heroicons/react/solid";
 import useAuthStore from "../logic/useStore";
+import { client } from "../api/apolloClient";
+import { REGISTER_MUTATION } from "../api/main";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +14,7 @@ const SignUp = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
-  const { register, isLoginPending, loginError } = useAuthStore();
+  const { isLoginPending, loginError } = useAuthStore();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -40,7 +42,7 @@ const SignUp = () => {
       return false;
     }
     if (!passwordRegex.test(formData.password)) {
-      setError("Password must be at least 6 characters and contain both letters and numbers");
+      setError("Password must be at least 6 characters and contain both letters and numbers. Example: Password123");
       return false;
     }
     return true;
@@ -58,20 +60,24 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     try {
       setError(null);
-      const result = await register(
-        formData.username.trim(),
-        formData.email.trim(),
-        formData.password,
-        formData.rememberMe
-      );
-      
-      if (result.success) {
+      const result = await client.mutate({
+        mutation: REGISTER_MUTATION,
+        variables: {
+          input: {
+            username: formData.username.trim(),
+            email: formData.email.trim(),
+            password: formData.password,
+          }
+        }
+      });
+
+      if (result.data.register.jwt) {
         navigate("/home");
       } else {
-        throw new Error(result.error?.message || "Registration failed");
+        throw new Error(result.errors?.[0]?.message || "Registration failed");
       }
     } catch (err) {
       setError(err.message);

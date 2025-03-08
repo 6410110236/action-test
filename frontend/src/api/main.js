@@ -17,33 +17,42 @@ const conf = {
 // GraphQL query สำหรับดึงข้อมูล garages
 export const GET_GARAGES = gql`
   query Query {
-    garages (pagination: { limit: 100 }){
+    garages (pagination: { limit: -1 }){
       Color
-      Distance
-      Description
-      Manual
-      Picture {
-        url
-      }
-      Price
-      RegisterDate
-      SecondaryKey
-      StatusBuying
-      VehicleRegistrationTypes
-      VehicleTaxExpirationDate
-      Warranty
-      model {
-        ModelName
-        GearType
-        EnergySource
-        Seats
-        brand_car {
-          BrandName
-        }
-      }
+    Description
+    Distance
+    Manual
+    Picture {
+      url
       documentId
     }
+    Price
+    RegisterDate
+    SecondaryKey
+    StatusBuying
+    VehicleRegistrationTypes
+    VehicleTaxExpirationDate
+    Warranty
+    createdAt
+    documentId
+    model {
+      Seats
+      ModelName
+      GearType
+      EnergySource
+      brand_car {
+        BrandName
+      }
+      category_car {
+        Category
+      }
+      createdAt
+      documentId
+      updatedAt
+    }
+    updatedAt
   }
+}
 `;
 
 export const GET_SPECIFIC_CAR = gql`
@@ -88,7 +97,7 @@ export const GET_SPECIFIC_CAR = gql`
 
 export const GET_BRANDS = gql`
   query Query {
-    brands(pagination: { limit: 200 }) {
+    brands(pagination: { limit: -1 }) {
       BrandName
       documentId
     }
@@ -181,7 +190,7 @@ export const GET_MODELS_FROM_BRAND = gql`
 
 export const GET_CARS = gql`
   query Query($filters: GarageFiltersInput) {
-    garages(filters: $filters) {
+    garages(filters: $filters, pagination: { limit: -1 }) {
       Color
       Distance
       Description
@@ -241,6 +250,20 @@ export const CREATE_PAYMENT_INTENT = gql`
     createPaymentIntent(amount: $amount, carId: $carId) {
       clientSecret
       paymentIntentId
+    }
+  }
+`;
+
+export const REGISTER_MUTATION = gql`
+  mutation Register($input: UsersPermissionsRegisterInput!) {
+    register(input: $input) {
+      jwt
+      user {
+        username
+        role {
+          name
+        }
+      }
     }
   }
 `;
