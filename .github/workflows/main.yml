@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build Backend #step's name
+    - name: Build Backend... #step's name
       run: | #script
         cd prod 
         docker compose up -d 
