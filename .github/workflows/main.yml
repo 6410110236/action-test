@@ -1,1 +1,18 @@
+name: Docker Image CI #Pipeline's name
 
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build: #stage's name
+
+    runs-on: self-hosted #os base
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image #step's name
+      run: | #script
+        cd prod 
+        docker compose up -d 
