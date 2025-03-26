@@ -11,29 +11,34 @@ jobs:
     runs-on: self-hosted #os base
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build Backend... #step's name
-      # env:
-      #   HOST: ${{ secrets.HOST }}
-      #   PORT: ${{ secrets.PORT }}
-      #   NODE_ENV: ${{ secrets.NODE_ENV }}
-      #   APP_KEYS: ${{ secrets.APP_KEYS }}
-      #   API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
-      #   ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
-      #   TRANSFER_TOKEN_SALT: ${{ secrets.TRANSFER_TOKEN_SALT }}
-      #   DATABASE_CLIENT: ${{ secrets.DATABASE_CLIENT }}
-      #   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-      #   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-      #   DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-      #   DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-      #   DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-      #   DATABASE_SSL: ${{ secrets.DATABASE_SSL }}
-      #   DATABASE_FILENAME: ${{ secrets.DATABASE_FILENAME }}
-      #   JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
+    - name: Create .env
+      run: |
+        cd prod
+        touch .env
+        echo -e "HOST=${{ secrets.HOST }}" >> .env
+        echo -e "PORT=${{ secrets.PORT }}" >> .env
+
+        echo -e "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+
+        echo -e "APP_KEYS=${{ secrets.APP_KEYS }}" >> .env
+        echo -e "API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}" >> .env
+        echo -e "ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}" >> .env
+        echo -e "TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}" >> .env
+
+        echo -e "DATABASE_CLIENT=${{ secrets.DATABASE_CLIENT }}" >> .env
+        echo -e "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env
+        echo -e "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env
+        echo -e "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
+        echo -e "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env
+        echo -e "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+        echo -e "DATABASE_SSL=${{ secrets.DATABASE_SSL }}" >> .env
+        echo -e "DATABASE_FILENAME=${{ secrets.DATABASE_FILENAME }}" >> .env
+        echo -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+
+    - name: Build Backend... #step's name 
       run: | #script
         cd prod 
-        chmod +x ./setup_env.sh
-        touch .env
-        ./setup_env.sh
         docker compose up -d 
