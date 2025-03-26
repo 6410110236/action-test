@@ -15,4 +15,4 @@ jobs:
     - name: Build the Docker image #step's name
       run: | #script
         cd prod 
-        docker compose up -d 
+        ifconfig
