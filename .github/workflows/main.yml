@@ -15,4 +15,7 @@ jobs:
     - name: Build Backend... #step's name
       run: | #script
         cd prod 
+        chmod +x ./setup_env.sh
+        touch .env
+        ./setup_env.sh
         docker compose up -d 
